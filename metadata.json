@@ -1,0 +1,6 @@
+{
+  "name": "TAKONO",
+  "description": "Tourism Experience & Ecosystem Platform connecting Travelers, Destination Managers, UMKM, and Government",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
