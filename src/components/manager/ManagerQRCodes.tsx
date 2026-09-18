@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTakonoStore } from '../../services/store';
 import { QRCodeView } from '../common/QRCodeView';
-import { QrCode, ArrowLeft, Printer, Download, Sparkles, Filter } from 'lucide-react';
+import { QrCode, ArrowLeft, Printer, Download, Filter } from 'lucide-react';
 
 export const ManagerQRCodes: React.FC = () => {
   const { destinations, qrCodes, navigateTo, simulateScanCode } = useTakonoStore();

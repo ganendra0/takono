@@ -1,21 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTakonoStore } from '../../services/store';
-import { MiniQuizModal } from './MiniQuizModal';
-import { calculateSmartGuideRecommendation } from '../../services/smartGuideEngine';
-import {
-  ArrowLeft,
-  CheckCircle2,
-  Clock,
+import { 
+  ArrowLeft, 
+  BookOpen, 
+  HelpCircle, 
+  CheckCircle2, 
+  XCircle, 
+  Coins, 
   Sparkles,
-  Award,
-  BookOpen,
-  Leaf,
-  Shield,
-  HelpCircle,
-  Footprints,
-  ShoppingBag,
-  ArrowRight,
-  MapPin,
+  ChevronRight,
+  ShieldCheck,
+  Compass
 } from 'lucide-react';
 
 interface ExplorePointDetailViewProps {
@@ -23,377 +18,214 @@ interface ExplorePointDetailViewProps {
 }
 
 export const ExplorePointDetailView: React.FC<ExplorePointDetailViewProps> = ({ pointId }) => {
-  const {
-    explorePoints,
-    getDestination,
-    getQuizByExplorePoint,
-    activeJourney,
-    recordPointInteraction,
-    getApprovedUMKMByDestination,
-    navigateTo,
-  } = useTakonoStore();
+  const store = useTakonoStore();
+  const explorePoints = store.explorePoints || [];
+  const activeJourney = store.activeJourney;
+  const completeExplorePoint = store.completeExplorePoint;
+  const navigateTo = store.navigateTo;
 
-  const [activeTab, setActiveTab] = useState<'story' | 'facts' | 'education' | 'activity'>('story');
-  const [quizModalOpen, setQuizModalOpen] = useState<boolean>(false);
-  const [isCompletedState, setIsCompletedState] = useState<boolean>(false);
-
-  const point = explorePoints.find((p) => p.id === pointId);
-  const destination = point ? getDestination(point.destinationId) : null;
-  const quiz = point ? getQuizByExplorePoint(point.id) : null;
-
-  // Track initial VIEW action on load (Flow E / Section 12)
-  useEffect(() => {
-    if (point && activeJourney) {
-      recordPointInteraction(point.id, 'view');
-    }
-  }, [point?.id, activeJourney?.id]);
-
-  if (!point || !destination) {
-    return (
-      <div className="max-w-3xl mx-auto p-8 text-center space-y-4">
-        <p className="text-slate-500 text-sm">Titik jelajah tidak ditemukan.</p>
-        <button
-          type="button"
-          onClick={() => navigateTo('/traveler/home')}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-xs font-semibold"
-        >
-          Kembali ke Beranda
-        </button>
-      </div>
-    );
-  }
-
-  // Check visited status in active journey
-  const visitedRecord = activeJourney?.visitedPoints.find((vp) => vp.explorePointId === point.id);
-  const isCompleted = !!visitedRecord?.completedAt || isCompletedState;
-  const isQuizCompleted = activeJourney?.completedQuizzes.some((cq) => cq.explorePointId === point.id);
-
-  const handleMarkComplete = () => {
-    const res = recordPointInteraction(point.id, 'complete');
-    if (res.success) {
-      setIsCompletedState(true);
-    }
+  const point = explorePoints.find((p) => p.id === pointId) || explorePoints[0] || {
+    id: pointId,
+    destinationId: 'dest-penglipuran',
+    title: 'Angkul-Angkul & Lorong Rerata Utama',
+    category: 'ARCHITECTURE',
+    description: 'Gerbang tradisional seragam yang mencerminkan kesetaraan dan keharmonisan sosial.',
+    narrativeContent: 'Angkul-angkul merupakan pintu gerbang tradisional khas Bali yang dibuat dari bambu dan tanah liat. Di Desa Wisata Penglipuran, bentuk angkul-angkul dibuat seragam sebagai simbol kesetaraan derajat sosial seluruh warga desa.',
+    culturalEthics: [
+      'Ucapkan salam saat memasuki pekarangan warga.',
+      'Dilarang membuang sampah sembarangan di lorong jalan utama.',
+      'Hormati area suci pura keluarga di balik angkul-angkul.'
+    ],
+    quizQuestion: 'Apa filosofi di balik bentuk angkul-angkul yang dibuat seragam di Desa Penglipuran?',
+    quizOptions: [
+      'Simbol kesetaraan derajat sosial dan keharmonisan warga',
+      'Hanya untuk estetika foto wisatawan',
+      'Aturan dari pemerintah daerah',
+      'Menghemat bahan bangunan'
+    ],
+    correctAnswerIndex: 0,
+    rewardPoints: 5,
+    qrCodeId: 'QR-POINT-PENG-1'
   };
 
-  const handleTabChange = (tab: 'story' | 'facts' | 'education' | 'activity') => {
-    setActiveTab(tab);
-    // Track interaction (Section 12: VIEW -> INTERACT -> COMPLETE)
-    if (activeJourney) {
-      recordPointInteraction(point.id, 'interact');
+  const isCompleted = activeJourney?.completedPointIds?.includes(point.id);
+
+  const [selectedOption, setSelectedOption] = useState<number | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [isCorrect, setIsCorrect] = useState<boolean>(false);
+
+  const handleSubmitQuiz = () => {
+    if (selectedOption === null) return;
+    
+    const correct = selectedOption === (point.correctAnswerIndex ?? 0);
+    setIsCorrect(correct);
+    setIsSubmitted(true);
+
+    if (correct && completeExplorePoint) {
+      completeExplorePoint(point.id);
     }
   };
-
-  // Connected UMKM
-  const connectedUMKMs = getApprovedUMKMByDestination(destination.id);
-
-  // Smart Guide recommendation for the next step
-  const allDestPoints = explorePoints.filter((p) => p.destinationId === destination.id);
-  const smartRecommendation = calculateSmartGuideRecommendation(allDestPoints, activeJourney || undefined, point.id);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-      {/* Back to destination bar */}
+    <div className="space-y-8 pb-16 font-sans text-neutral-800 antialiased max-w-4xl mx-auto">
+      
+      {/* 1. KEMBALI */}
       <div className="flex items-center justify-between">
         <button
           type="button"
-          onClick={() => navigateTo(`/traveler/destinations/${destination.id}`)}
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 transition"
+          onClick={() => navigateTo(`/traveler/destination/${point.destinationId}`)}
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-neutral-200 text-neutral-700 hover:text-blue-600 hover:border-blue-200 text-xs font-bold transition shadow-2xs"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Kembali ke {destination.name}</span>
+          <span>Kembali ke Detail Destinasi</span>
         </button>
 
-        <div className="flex items-center gap-2">
-          {isCompleted ? (
-            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+        <span className="text-xs font-mono font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+          {point.category || 'CULTURE'}
+        </span>
+      </div>
+
+      {/* 2. HEADER TITIK JELAJAH */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200 shadow-sm space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-mono text-neutral-400">
+            KODE PLAKAT: <strong className="text-neutral-700 font-bold">{point.qrCodeId || point.id}</strong>
+          </span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-800 text-xs font-mono font-black">
+            <Coins className="w-3.5 h-3.5 text-amber-600" />
+            <span>+{point.rewardPoints || 5} PTS</span>
+          </span>
+        </div>
+
+        <h1 className="text-2xl sm:text-4xl font-black text-neutral-900 tracking-tight">
+          {point.title}
+        </h1>
+
+        <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
+          {point.description}
+        </p>
+      </div>
+
+      {/* 3. NARASI SEJARAH & ETIKA BUDAYA */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200 shadow-sm space-y-6">
+        <div className="flex items-center gap-2 text-blue-600 border-b border-neutral-100 pb-4">
+          <BookOpen className="w-5 h-5" />
+          <h2 className="font-extrabold text-base text-neutral-900">Cerita Warisan & Etika Lokal</h2>
+        </div>
+
+        <div className="prose prose-sm text-neutral-700 leading-relaxed text-xs sm:text-sm">
+          <p>{point.narrativeContent || point.description}</p>
+        </div>
+
+        {point.culturalEthics && point.culturalEthics.length > 0 && (
+          <div className="p-5 rounded-2xl bg-blue-50/50 border border-blue-100 space-y-3">
+            <h4 className="font-extrabold text-xs text-blue-950 flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-blue-600" />
+              <span>Etika & Aturan Kunjungan:</span>
+            </h4>
+            <ul className="space-y-2 text-xs text-blue-900">
+              {point.culturalEthics.map((ethic, idx) => (
+                <li key={idx} className="flex items-start gap-2">
+                  <span className="text-blue-600 font-bold">•</span>
+                  <span>{ethic}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+
+      {/* 4. KUIS BUDAYA INTERAKTIF */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200 shadow-sm space-y-6">
+        <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+          <div className="flex items-center gap-2 text-blue-600">
+            <HelpCircle className="w-5 h-5" />
+            <h2 className="font-extrabold text-base text-neutral-900">Kuis Edukasi Budaya</h2>
+          </div>
+
+          {isCompleted && (
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
               <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Jelajah Tuntas</span>
+              <span>Sudah Diselesaikan</span>
             </span>
-          ) : (
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <p className="font-bold text-sm text-neutral-900 leading-snug">
+            {point.quizQuestion || 'Apakah Anda sudah memahami cerita warisan budaya pada titik ini?'}
+          </p>
+
+          <div className="space-y-2.5">
+            {(point.quizOptions || ['Ya, saya paham', 'Tidak']).map((opt, idx) => {
+              const isSelected = selectedOption === idx;
+
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  disabled={isSubmitted || isCompleted}
+                  onClick={() => setSelectedOption(idx)}
+                  className={`w-full text-left p-4 rounded-2xl text-xs font-bold border transition flex items-center justify-between ${
+                    isSelected
+                      ? 'border-blue-600 bg-blue-50 text-blue-900 shadow-sm'
+                      : 'border-neutral-200 hover:border-neutral-300 text-neutral-700 bg-neutral-50/50'
+                  }`}
+                >
+                  <span>{opt}</span>
+                  <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${
+                    isSelected ? 'border-blue-600 bg-blue-600' : 'border-neutral-300'
+                  }`}>
+                    {isSelected && <div className="w-1.5 h-1.5 bg-white rounded-full" />}
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          {!isSubmitted && !isCompleted && (
             <button
               type="button"
-              onClick={handleMarkComplete}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 text-white transition shadow-sm"
+              disabled={selectedOption === null}
+              onClick={handleSubmitQuiz}
+              className={`w-full py-3.5 rounded-2xl text-xs font-extrabold uppercase tracking-wider transition shadow-md ${
+                selectedOption !== null
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
+                  : 'bg-neutral-100 text-neutral-400 cursor-not-allowed'
+              }`}
             >
-              <CheckCircle2 className="w-3.5 h-3.5" />
-              <span>Tandai Selesai (+{point.completionPoints} Poin)</span>
+              Kirim Jawaban & Klaim Poin
             </button>
           )}
-        </div>
-      </div>
 
-      {/* Hero Banner */}
-      <div className="relative rounded-2xl overflow-hidden border border-slate-200 bg-slate-900 text-white shadow-md">
-        <img
-          src={point.imageUrl}
-          alt={point.name}
-          className="w-full h-64 sm:h-72 object-cover opacity-80"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex flex-col justify-end p-6 sm:p-8">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-500/80 text-white backdrop-blur-xs">
-              Titik #{point.sequenceOrder} • {point.category}
-            </span>
-            <span className="text-xs text-slate-300 flex items-center gap-1">
-              <Clock className="w-3 h-3" /> {point.estimatedMinutes} menit
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{point.name}</h1>
-          <p className="text-xs sm:text-sm text-slate-200 mt-1 max-w-2xl">
-            {point.shortDescription}
-          </p>
-        </div>
-      </div>
-
-      {/* Interactive Tabs (Flow E: Story, Facts, Education, Activity) */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="flex border-b border-slate-200 bg-slate-50/70 overflow-x-auto text-xs font-medium">
-          <button
-            type="button"
-            onClick={() => handleTabChange('story')}
-            className={`flex items-center gap-1.5 px-4 py-3 border-b-2 transition whitespace-nowrap ${
-              activeTab === 'story'
-                ? 'border-emerald-600 text-emerald-800 font-bold bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Kisah & Makna</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTabChange('facts')}
-            className={`flex items-center gap-1.5 px-4 py-3 border-b-2 transition whitespace-nowrap ${
-              activeTab === 'facts'
-                ? 'border-emerald-600 text-emerald-800 font-bold bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span>Fakta Menarik</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTabChange('education')}
-            className={`flex items-center gap-1.5 px-4 py-3 border-b-2 transition whitespace-nowrap ${
-              activeTab === 'education'
-                ? 'border-emerald-600 text-emerald-800 font-bold bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Shield className="w-4 h-4" />
-            <span>Edukasi & Etika Budaya</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleTabChange('activity')}
-            className={`flex items-center gap-1.5 px-4 py-3 border-b-2 transition whitespace-nowrap ${
-              activeTab === 'activity'
-                ? 'border-emerald-600 text-emerald-800 font-bold bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Footprints className="w-4 h-4" />
-            <span>Aktivitas di Lokasi</span>
-          </button>
-        </div>
-
-        {/* Tab Content */}
-        <div className="p-6">
-          {activeTab === 'story' && (
-            <div className="space-y-4">
-              <h3 className="font-bold text-slate-900 text-base">Narasi Warisan Budaya</h3>
-              <p className="text-sm text-slate-700 leading-relaxed whitespace-pre-line">
-                {point.story}
-              </p>
-            </div>
-          )}
-
-          {activeTab === 'facts' && (
-            <div className="space-y-4">
-              <h3 className="font-bold text-slate-900 text-base">Tahukah Anda?</h3>
-              <ul className="space-y-2.5">
-                {point.facts.map((fact, idx) => (
-                  <li key={idx} className="flex items-start gap-2 text-xs text-slate-700 leading-relaxed">
-                    <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0 mt-0.5">
-                      {idx + 1}
-                    </span>
-                    <span>{fact}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {activeTab === 'education' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-200/80 space-y-2">
-                <div className="flex items-center gap-2 text-amber-900 font-semibold text-xs">
-                  <Shield className="w-4 h-4 text-amber-600" />
-                  <span>Norma & Adat Budaya</span>
-                </div>
-                <p className="text-xs text-amber-800 leading-relaxed">
-                  {point.education.culturalNorms}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-200/80 space-y-2">
-                <div className="flex items-center gap-2 text-emerald-900 font-semibold text-xs">
-                  <Leaf className="w-4 h-4 text-emerald-600" />
-                  <span>Pedoman Ramah Lingkungan</span>
-                </div>
-                <p className="text-xs text-emerald-800 leading-relaxed">
-                  {point.education.ecoGuidelines}
-                </p>
-              </div>
-
-              <div className="p-4 rounded-xl bg-blue-50/70 border border-blue-200/80 space-y-2">
-                <div className="flex items-center gap-2 text-blue-900 font-semibold text-xs">
-                  <BookOpen className="w-4 h-4 text-blue-600" />
-                  <span>Tata Krama Wisatawan</span>
-                </div>
-                <p className="text-xs text-blue-800 leading-relaxed">
-                  {point.education.etiquette}
-                </p>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'activity' && (
-            <div className="space-y-3">
-              <h3 className="font-bold text-slate-900 text-base">Panduan Interaksi Langsung</h3>
-              <p className="text-xs text-slate-700 leading-relaxed">{point.activity}</p>
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-600 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-slate-400" />
-                <span>Titik pandu: {point.locationName}</span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Mini Quiz Banner / Launcher (Flow F) */}
-      {quiz && (
-        <div className="p-5 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-emerald-200 text-emerald-900">
-                Tantangan Edukasi
-              </span>
-              {isQuizCompleted && (
-                <span className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Kuis Selesai
-                </span>
+          {isSubmitted && (
+            <div className={`p-4 rounded-2xl border text-xs font-bold flex items-center gap-3 ${
+              isCorrect
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-900'
+                : 'bg-rose-50 border-rose-200 text-rose-900'
+            }`}>
+              {isCorrect ? (
+                <>
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+                  <div>
+                    <p className="font-black">Jawaban Benar! Selamat!</p>
+                    <p className="font-normal text-[11px] text-emerald-700">Anda berhasil mendapatkan +{point.rewardPoints || 5} Jejak Points.</p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <XCircle className="w-5 h-5 text-rose-600 shrink-0" />
+                  <div>
+                    <p className="font-black">Jawaban Kurang Tepat.</p>
+                    <p className="font-normal text-[11px] text-rose-700">Silakan baca kembali cerita di atas dan coba lagi.</p>
+                  </div>
+                </>
               )}
             </div>
-            <h4 className="font-bold text-slate-900 text-sm">{quiz.title}</h4>
-            <p className="text-xs text-slate-600">{quiz.description}</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setQuizModalOpen(true)}
-            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold shrink-0 shadow-sm transition flex items-center gap-1.5"
-          >
-            <Award className="w-4 h-4" />
-            <span>{isQuizCompleted ? 'Lihat Kembali Kuis' : 'Mulai Mini Kuis (+10 Poin)'}</span>
-          </button>
+          )}
         </div>
-      )}
+      </div>
 
-      {/* Connected Local Discovery (UMKM) */}
-      {connectedUMKMs.length > 0 && (
-        <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <ShoppingBag className="w-4 h-4 text-amber-600" />
-              <h3 className="font-bold text-slate-900 text-sm">Local Discovery Dekat Titik Ini</h3>
-            </div>
-            <button
-              type="button"
-              onClick={() => navigateTo('/traveler/local-discovery')}
-              className="text-xs font-semibold text-emerald-600 hover:underline"
-            >
-              Lihat Semua UMKM →
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {connectedUMKMs.map((umkm) => (
-              <div
-                key={umkm.id}
-                className="p-3 rounded-xl border border-slate-200 bg-slate-50/60 flex items-start gap-3 hover:bg-slate-50 transition"
-              >
-                <img
-                  src={umkm.imageUrl}
-                  alt={umkm.businessName}
-                  className="w-14 h-14 rounded-lg object-cover border border-slate-200 shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-slate-800 text-xs truncate">
-                    {umkm.businessName}
-                  </h4>
-                  <p className="text-[11px] text-slate-500 line-clamp-1">{umkm.description}</p>
-                  <div className="flex items-center gap-2 mt-1.5">
-                    <span className="text-[10px] uppercase font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
-                      {umkm.category}
-                    </span>
-                    {umkm.promotions.length > 0 && (
-                      <span className="text-[10px] text-emerald-700 font-semibold">
-                        Promo: Diskon {umkm.promotions[0].discountPercentage}%
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Smart Guide Next Recommendation (Flow D) */}
-      {smartRecommendation.recommendedPoint && (
-        <div className="p-4 bg-slate-900 text-white rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400">
-                Smart Guide: Rekomendasi Titik Berikutnya
-              </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
-                {smartRecommendation.badge}
-              </span>
-            </div>
-            <h4 className="font-bold text-sm text-white">
-              {smartRecommendation.recommendedPoint.name}
-            </h4>
-            <p className="text-xs text-slate-300">{smartRecommendation.reason}</p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() =>
-              navigateTo(`/traveler/explore/${smartRecommendation.recommendedPoint!.id}`)
-            }
-            className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 transition shrink-0"
-          >
-            <span>Lanjut Jelajah</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {/* Mini Quiz Modal */}
-      {quiz && (
-        <MiniQuizModal
-          quiz={quiz}
-          isOpen={quizModalOpen}
-          onClose={() => setQuizModalOpen(false)}
-          onSuccess={() => {
-            // handle success
-          }}
-        />
-      )}
     </div>
   );
 };

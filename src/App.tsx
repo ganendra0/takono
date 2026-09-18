@@ -34,7 +34,7 @@ import { GovernmentDashboard } from './components/government/GovernmentDashboard
 import { AdminDashboard } from './components/admin/AdminDashboard';
 
 const AppContent: React.FC = () => {
-  const { activeRoute, currentUser } = useTakonoStore();
+  const { activeRoute, currentUser, navigateTo } = useTakonoStore();
 
   const renderActiveView = () => {
     // Route matching
@@ -101,7 +101,6 @@ const AppContent: React.FC = () => {
       case '/admin/umkm-approval':
       case '/admin/destinations':
       case '/admin/users':
-      case '/admin/settings':
         return <AdminDashboard />;
 
       default:
@@ -114,27 +113,86 @@ const AppContent: React.FC = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-slate-100/70 text-slate-800 flex flex-col selection:bg-emerald-500 selection:text-white font-sans">
-      <AppHeader />
-      <main className="flex-1 pb-16">{renderActiveView()}</main>
+  // Tautan pintasan footer kontekstual berdasarkan role
+  const getFooterLinks = () => {
+    switch (currentUser.role) {
+      case 'manager':
+        return [
+          { label: 'Dashboard', path: '/manager/dashboard' },
+          { label: 'Destinasi', path: '/manager/destinations' },
+          { label: 'Explore Points', path: '/manager/explore-points' },
+          { label: 'Reward', path: '/manager/rewards' },
+          { label: 'Analitik', path: '/manager/analytics' }
+        ];
+      case 'umkm':
+        return [
+          { label: 'Dashboard', path: '/umkm/dashboard' },
+          { label: 'Usaha', path: '/umkm/profile' },
+          { label: 'Produk', path: '/umkm/products' }
+        ];
+      case 'government':
+        return [
+          { label: 'Overview', path: '/government/dashboard' },
+          { label: 'Tren', path: '/government/trends' },
+          { label: 'Kinerja', path: '/government/performance' }
+        ];
+      case 'admin':
+        return [
+          { label: 'Overview', path: '/admin/dashboard' },
+          { label: 'Verifikasi', path: '/admin/umkm-approval' },
+          { label: 'Pengguna', path: '/admin/users' }
+        ];
+      default:
+        return [
+          { label: 'Jelajah Budaya', path: '/traveler/home' },
+          { label: 'Panduan Rute', path: '/traveler/smart-guide' },
+          { label: 'Tukar Poin', path: '/traveler/points' },
+          { label: 'Album Stempel', path: '/traveler/album' }
+        ];
+    }
+  };
 
-      {/* Global QR Scanner Modal (Simulates Physical Camera & Plaque Scan) */}
+  const footerLinks = getFooterLinks();
+
+  return (
+    <div className="min-h-screen bg-[#FAF9F6] text-[#1A1A1A] flex flex-col selection:bg-blue-600 selection:text-white font-sans antialiased">
+      {/* Dynamic Header */}
+      <AppHeader />
+      
+      {/* Main Container Area */}
+      <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-20">
+        {renderActiveView()}
+      </main>
+
+      {/* Global QR Scanner Modal */}
       <QRScannerModal />
 
-      {/* Authentication Modal (Login / Register) */}
+      {/* Authentication Modal */}
       <AuthModal />
 
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-6 px-4 text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
+     {/* Standard Natural Footer */}
+      <footer className="border-t border-neutral-200 bg-white py-6 px-4 sm:px-8 text-neutral-600 font-sans">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+          
           <div className="flex items-center gap-2">
-            <span className="font-bold text-slate-800 tracking-wider">TAKONO</span>
-            <span>— Ekosistem Pariwisata Berkelanjutan Terintegrasi</span>
+            <span className="font-bold text-neutral-800">TAKONO</span>
+            <span className="text-neutral-300">|</span>
+            <span className="text-neutral-500">© 2026 Ekowisata & Budaya Indonesia.</span>
           </div>
-          <div className="flex items-center gap-3 text-[11px]">
-            <span>Traveler → Role → Destination → Journey → Activity → Engagement → Reward → Analytics</span>
+
+          <div className="flex items-center gap-4 text-neutral-500">
+            {footerLinks.map((item) => (
+              <button
+                key={item.path}
+                type="button"
+                onClick={() => navigateTo(item.path)}
+                className="hover:text-neutral-900 transition"
+              >
+                {item.label}
+              </button>
+            ))}
           </div>
+
         </div>
       </footer>
     </div>

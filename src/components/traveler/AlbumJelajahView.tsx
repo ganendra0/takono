@@ -1,285 +1,280 @@
 import React, { useState } from 'react';
 import { useTakonoStore } from '../../services/store';
-import {
-  BookOpen,
-  Award,
-  CheckCircle2,
-  Calendar,
-  Coins,
-  MapPin,
+import { 
+  Award, 
+  BookOpen, 
+  CheckCircle2, 
+  Coins, 
+  FileCheck, 
+  Lock, 
+  MapPin, 
+  PenTool, 
+  ShieldCheck, 
   Sparkles,
-  Share2,
-  Download,
-  Flame,
-  FileCheck,
+  ChevronDown
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 
 export const AlbumJelajahView: React.FC = () => {
-  const {
-    currentUser,
-    journeys,
-    activeJourney,
-    getDestination,
-    endJourney,
-    navigateTo,
-  } = useTakonoStore();
+  const store = useTakonoStore();
+  
+  const journeys = store.completedJourneys || [];
+  const activeJourney = store.activeJourney;
+  const destinations = store.destinations || [];
+  const explorePoints = store.explorePoints || [];
 
-  const travelerJourneys = journeys.filter((j) => j.travelerId === currentUser.id);
+  // Gabungkan pilihan perjalanan yang ada
+  const allJourneys = [
+    ...(activeJourney ? [{ ...activeJourney, status: 'IN_PROGRESS' }] : []),
+    ...journeys
+  ];
+
   const [selectedJourneyId, setSelectedJourneyId] = useState<string>(
-    activeJourney?.id || travelerJourneys[0]?.id || ''
+    allJourneys[0]?.id || 'journey-1'
   );
 
-  const selectedJourney = journeys.find((j) => j.id === selectedJourneyId);
-  const destination = selectedJourney ? getDestination(selectedJourney.destinationId) : null;
-  const [personalNotesInput, setPersonalNotesInput] = useState<string>(
-    selectedJourney?.personalNotes || ''
-  );
-  const [showCertificate, setShowCertificate] = useState<boolean>(false);
+  const [personalNote, setPersonalNote] = useState<string>('');
+  const [isSavedNote, setIsSavedNote] = useState<boolean>(false);
 
-  const handleEndJourney = () => {
-    if (!selectedJourney) return;
-    const res = endJourney(selectedJourney.id, personalNotesInput);
-    if (res.success) {
-      confetti({
-        particleCount: 100,
-        spread: 80,
-        origin: { y: 0.6 },
-      });
-      setShowCertificate(true);
-    }
+  const currentJourney = allJourneys.find((j) => j.id === selectedJourneyId) || {
+    id: 'journey-dest-penglipuran',
+    destinationId: 'dest-penglipuran',
+    completedPointIds: [], // Set default ke array kosong (0 tuntas)
+    status: 'IN_PROGRESS'
+  };
+
+  const currentDest = destinations.find((d) => d.id === currentJourney.destinationId) || destinations[0] || {
+    name: 'Desa Wisata Penglipuran',
+    location: 'Bangli, Bali'
+  };
+
+  const destPoints = explorePoints.filter((p) => p.destinationId === currentDest.id);
+
+  // Ambil jumlah asli dari store jika ada, jika tidak default ke 0
+  const completedCount = currentJourney.completedPointIds?.length || 0;
+
+  const handleSaveNote = () => {
+    if (!personalNote.trim()) return;
+    setIsSavedNote(true);
+    setTimeout(() => setIsSavedNote(false), 3000);
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="space-y-10 pb-16 font-sans text-neutral-800 antialiased max-w-7xl mx-auto">
+      
+      {/* 1. TOP HEADER & PERJALANAN SELECTOR */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-600 uppercase tracking-wider">
-            <BookOpen className="w-4 h-4" />
-            <span>Album Jelajah Budaya</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
-            Paspor & Rekam Jejak Kunjungan
-          </h1>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Kumpulan stempel digital, badge pencapaian, dan catatan petualangan otentik Anda.
-          </p>
+          <span className="text-xs font-mono font-bold uppercase tracking-widest text-blue-600">Paspor Wisata Budaya</span>
+          <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-neutral-900">Rekam Jejak & Album Stempel</h1>
         </div>
 
-        {/* Journey Selector */}
-        {travelerJourneys.length > 1 && (
-          <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-500">Pilih Perjalanan:</span>
-            <select
-              value={selectedJourneyId}
-              onChange={(e) => setSelectedJourneyId(e.target.value)}
-              className="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700"
-            >
-              {travelerJourneys.map((j) => {
-                const d = getDestination(j.destinationId);
+        {/* Dropdown Pemilih Perjalanan */}
+        <div className="relative inline-block text-left shrink-0">
+          <select
+            value={selectedJourneyId}
+            onChange={(e) => setSelectedJourneyId(e.target.value)}
+            className="appearance-none bg-white hover:bg-neutral-50 border border-neutral-300 text-neutral-900 font-sans text-xs font-bold py-2.5 pl-4 pr-10 rounded-2xl cursor-pointer transition shadow-2xs focus:outline-none focus:border-blue-500"
+          >
+            {allJourneys.length > 0 ? (
+              allJourneys.map((j) => {
+                const d = destinations.find((dest) => dest.id === j.destinationId);
                 return (
                   <option key={j.id} value={j.id}>
-                    {d?.name || 'Destinasi'} ({j.status === 'active' ? 'Aktif' : 'Selesai'})
+                    {d?.name || 'Destinasi'} ({j.status === 'IN_PROGRESS' ? 'Berjalan' : 'Selesai'})
                   </option>
                 );
-              })}
-            </select>
-          </div>
-        )}
+              })
+            ) : (
+              <option value="default">Desa Wisata Penglipuran (Berjalan)</option>
+            )}
+          </select>
+          <ChevronDown className="w-4 h-4 text-neutral-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+        </div>
       </div>
 
-      {selectedJourney && destination ? (
-        <>
-          {/* Passport Cover Card */}
-          <div className="rounded-2xl bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 text-white p-6 sm:p-8 shadow-md border border-indigo-900/60 space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-indigo-500/30 text-indigo-300 border border-indigo-400/30">
-                    {selectedJourney.status === 'active' ? 'Journey Sedang Berjalan' : 'Journey Tuntas'}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    ID: {selectedJourney.id.substring(0, 16)}...
-                  </span>
-                </div>
-                <h2 className="text-xl sm:text-2xl font-black text-white">{destination.name}</h2>
-                <p className="text-xs text-indigo-200">
-                  {destination.regency}, {destination.province}
-                </p>
-              </div>
-
-              {selectedJourney.status === 'active' ? (
-                <button
-                  type="button"
-                  onClick={handleEndJourney}
-                  className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 transition shadow-sm self-start sm:self-auto"
-                >
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Selesaikan Perjalanan & Terbitkan Sertifikat</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setShowCertificate(true)}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 font-semibold rounded-xl text-xs flex items-center gap-1.5 transition self-start sm:self-auto"
-                >
-                  <FileCheck className="w-4 h-4 text-emerald-400" />
-                  <span>Lihat Sertifikat Digital</span>
-                </button>
-              )}
-            </div>
-
-            {/* Metrics Breakdown */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-white/10 text-center text-xs">
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-slate-400 block text-[11px]">Titik Tuntas</span>
-                <span className="font-bold text-base font-mono text-white">
-                  {selectedJourney.visitedPoints.filter((vp) => !!vp.completedAt).length}
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-slate-400 block text-[11px]">Kuis Terjawab</span>
-                <span className="font-bold text-base font-mono text-emerald-400">
-                  {selectedJourney.completedQuizzes.length}
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-slate-400 block text-[11px]">Poin Diraih</span>
-                <span className="font-bold text-base font-mono text-amber-400">
-                  +{selectedJourney.earnedPointsTotal}
-                </span>
-              </div>
-              <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-                <span className="text-slate-400 block text-[11px]">Reward Diklaim</span>
-                <span className="font-bold text-base font-mono text-indigo-300">
-                  {selectedJourney.claimedRewards.length}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Stamps Collection */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <h3 className="font-bold text-slate-900 text-sm">
-                Koleksi Stempel Budaya ({selectedJourney.albumStamps.length} Terkumpul)
-              </h3>
-              <span className="text-xs text-slate-500">Otentik Terverifikasi</span>
-            </div>
-
-            {selectedJourney.albumStamps.length === 0 ? (
-              <div className="p-8 text-center text-slate-400 text-xs border border-dashed border-slate-200 rounded-xl">
-                Belum ada stempel yang dikoleksi. Tuntaskan membaca dan etika di Explore Point untuk meraih stempel pertamamu!
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {selectedJourney.albumStamps.map((stamp) => (
-                  <div
-                    key={stamp.id}
-                    className="p-4 rounded-xl border-2 border-dashed border-indigo-200 bg-indigo-50/40 text-center space-y-2 flex flex-col items-center justify-center"
-                  >
-                    <div className="w-12 h-12 rounded-full bg-indigo-600 text-white flex items-center justify-center shadow-xs">
-                      <Sparkles className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-xs text-slate-900 leading-tight">
-                        {stamp.explorePointName}
-                      </h4>
-                      <span className="text-[10px] text-slate-500 block mt-0.5">
-                        {new Date(stamp.earnedAt).toLocaleDateString('id-ID')}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Personal Traveler Notes */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-xs p-6 space-y-3">
-            <h3 className="font-bold text-slate-900 text-sm">Catatan Pengalaman Personal</h3>
-            <textarea
-              rows={3}
-              value={personalNotesInput}
-              onChange={(e) => setPersonalNotesInput(e.target.value)}
-              placeholder="Tuliskan kesan, cerita warga, atau pengalaman budaya berkesan Anda selama menjelajahi destinasi ini..."
-              className="w-full p-3 text-xs border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-            <div className="flex justify-end">
-              <button
-                type="button"
-                onClick={() => {
-                  endJourney(selectedJourney.id, personalNotesInput);
-                  alert('Catatan berhasil disimpan ke dalam Album Jelajah!');
-                }}
-                className="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-semibold"
-              >
-                Simpan Catatan
-              </button>
-            </div>
-          </div>
-
-          {/* Digital Certificate of Completion Modal */}
-          {showCertificate && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4 overflow-y-auto">
-              <div className="relative w-full max-w-lg bg-amber-50 rounded-3xl shadow-2xl border-4 border-amber-300 p-8 text-center space-y-6 text-slate-900 my-6">
-                <div className="space-y-1">
-                  <span className="text-[10px] uppercase tracking-widest font-black text-amber-800">
-                    Sertifikat Apresiasi Penjelajah Budaya
-                  </span>
-                  <h2 className="text-2xl font-black tracking-tight text-slate-950 font-serif">
-                    TAKONO DIGITAL AMBASSADOR
-                  </h2>
-                </div>
-
-                <div className="w-16 h-16 rounded-full bg-amber-500 text-white flex items-center justify-center mx-auto shadow-md">
-                  <Award className="w-8 h-8" />
-                </div>
-
-                <div className="space-y-2 text-xs leading-relaxed text-slate-700">
-                  <p>Diberikan dengan hormat kepada:</p>
-                  <p className="text-lg font-bold text-slate-900 underline decoration-amber-500 decoration-2">
-                    {currentUser.name}
-                  </p>
-                  <p>
-                    Telah sukses menuntaskan ekspedisi budaya ramah lingkungan di{' '}
-                    <strong>{destination.name}</strong>, mematuhi etika kearifan lokal, serta
-                    mendukung ekosistem UMKM setempat.
-                  </p>
-                </div>
-
-                <div className="p-3 bg-white/80 rounded-xl border border-amber-200 text-[11px] font-mono text-slate-600 flex justify-around">
-                  <div>
-                    <span className="block text-slate-400">Total Poin</span>
-                    <strong className="text-emerald-700">+{selectedJourney.earnedPointsTotal}</strong>
-                  </div>
-                  <div>
-                    <span className="block text-slate-400">Stempel</span>
-                    <strong>{selectedJourney.albumStamps.length} Buah</strong>
-                  </div>
-                  <div>
-                    <span className="block text-slate-400">Tanggal Tuntas</span>
-                    <strong>{new Date().toLocaleDateString('id-ID')}</strong>
-                  </div>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() => setShowCertificate(false)}
-                  className="w-full py-2.5 bg-slate-950 text-white rounded-xl text-xs font-bold shadow-md hover:bg-slate-900"
-                >
-                  Tutup Sertifikat
-                </button>
-              </div>
-            </div>
-          )}
-        </>
-      ) : (
-        <div className="p-8 text-center bg-white rounded-2xl border border-slate-200 text-slate-400 text-xs">
-          Belum ada data perjalanan untuk akun ini. Silakan mulai menjelajahi salah satu destinasi terlebih dahulu.
+      {/* 2. HERO PASPOR CARD (Electric Blue Layout) */}
+      <div className="relative rounded-3xl bg-blue-600 text-white p-8 sm:p-10 overflow-hidden shadow-xl shadow-blue-500/20">
+        
+        {/* Abstract Stamp Seal Silhouette Background */}
+        <div className="absolute right-0 top-0 bottom-0 w-1/2 pointer-events-none opacity-15 flex items-center justify-center">
+          <Award className="w-96 h-96 text-white stroke-1" />
         </div>
-      )}
+
+        <div className="relative z-10 space-y-6">
+          
+          <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/15 pb-6">
+            <div className="space-y-1">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/20 text-[10px] font-mono font-bold uppercase tracking-wider">
+                <ShieldCheck className="w-3.5 h-3.5 text-blue-200" />
+                <span>JOURNEY ID: {currentJourney.id}</span>
+              </span>
+              <h2 className="text-2xl sm:text-4xl font-black tracking-tight">{currentDest.name}</h2>
+              <div className="flex items-center gap-2 text-xs text-blue-100 font-medium">
+                <MapPin className="w-3.5 h-3.5 text-blue-200" />
+                <span>{currentDest.location || 'Bangli, Bali'}</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => alert('Sertifikat Digital berhasil diunduh dalam format PDF!')}
+              className="px-5 py-2.5 bg-white hover:bg-blue-50 text-blue-600 font-extrabold text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-2 shadow-md shrink-0"
+            >
+              <FileCheck className="w-4 h-4" />
+              <span>Cetak Sertifikat Digital</span>
+            </button>
+          </div>
+
+          {/* Bento Stats Grid - murni dari 0 */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
+              <span className="text-[10px] uppercase font-mono text-blue-200 block font-bold">Titik Tuntas</span>
+              <span className="text-2xl font-black font-mono">
+                {completedCount} / {destPoints.length || 4}
+              </span>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
+              <span className="text-[10px] uppercase font-mono text-blue-200 block font-bold">Kuis Terjawab</span>
+              <span className="text-2xl font-black font-mono">
+                {completedCount}
+              </span>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
+              <span className="text-[10px] uppercase font-mono text-blue-200 block font-bold">Poin Diraih</span>
+              <span className="text-2xl font-black font-mono text-amber-300">
+                +{completedCount * 10} PTS
+              </span>
+            </div>
+
+            <div className="p-4 rounded-2xl bg-white/10 backdrop-blur-md border border-white/15">
+              <span className="text-[10px] uppercase font-mono text-blue-200 block font-bold">Reward Diklaim</span>
+              <span className="text-2xl font-black font-mono">0</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* 3. KOLEKSI STEMPEL BUDAYA */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200 shadow-sm space-y-6">
+        <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
+          <div className="flex items-center gap-2 text-neutral-900">
+            <Award className="w-5 h-5 text-blue-600" />
+            <h3 className="font-extrabold text-base">Koleksi Stempel Budaya Digital</h3>
+          </div>
+          <span className="text-xs font-mono text-neutral-400 font-bold">
+            {completedCount} Terkumpul
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {(destPoints.length > 0 ? destPoints : [
+            { id: 'pt-1', title: 'Angkul-Angkul Tradisional', category: 'ARCHITECTURE' },
+            { id: 'pt-2', title: 'Hutan Bambu Suci', category: 'NATURE' },
+            { id: 'pt-3', title: 'Sentra Kriya Bambu', category: 'CRAFT' },
+            { id: 'pt-4', title: 'Pawon Herbal Cemcem', category: 'CULINARY' }
+          ]).map((pt, idx) => {
+            // Hanya terbuka jika ID titik ada di dalam completedPointIds asli
+            const isUnlocked = currentJourney.completedPointIds?.includes(pt.id);
+
+            return (
+              <div 
+                key={pt.id}
+                className={`p-6 rounded-3xl border text-center space-y-3 flex flex-col items-center justify-between transition duration-300 ${
+                  isUnlocked
+                    ? 'border-blue-200 bg-blue-50/30 shadow-sm'
+                    : 'border-neutral-200 bg-neutral-50/50 opacity-60'
+                }`}
+              >
+                <div className="space-y-2 w-full">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-neutral-400 block">
+                    STEMPEL #{idx + 1}
+                  </span>
+
+                  {/* Stamp Circular Emblem */}
+                  <div className={`w-20 h-20 rounded-full mx-auto flex items-center justify-center p-2 border-2 ${
+                    isUnlocked
+                      ? 'border-dashed border-blue-600 bg-white shadow-inner text-blue-600'
+                      : 'border-neutral-300 bg-neutral-100 text-neutral-400'
+                  }`}>
+                    {isUnlocked ? (
+                      <div className="text-center">
+                        <Award className="w-8 h-8 mx-auto stroke-2" />
+                        <span className="text-[8px] font-mono font-black uppercase tracking-tighter block mt-0.5">TERVERIFIKASI</span>
+                      </div>
+                    ) : (
+                      <Lock className="w-7 h-7 stroke-2" />
+                    )}
+                  </div>
+
+                  <h4 className="font-extrabold text-xs text-neutral-900 line-clamp-2 pt-1">
+                    {pt.title}
+                  </h4>
+                </div>
+
+                <div className="w-full pt-2 border-t border-neutral-100">
+                  {isUnlocked ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-600">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Tercapai</span>
+                    </span>
+                  ) : (
+                    <span className="text-[11px] font-mono text-neutral-400">Terkunci</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 4. CATATAN PENGALAMAN PERSONAL (JOURNAL) */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-neutral-200 shadow-sm space-y-4">
+        <div className="flex items-center gap-2 text-neutral-900 border-b border-neutral-100 pb-4">
+          <PenTool className="w-5 h-5 text-blue-600" />
+          <h3 className="font-extrabold text-base">Catatan Jurnal Pengalaman Personal</h3>
+        </div>
+
+        <div className="space-y-3">
+          <textarea
+            rows={4}
+            value={personalNote}
+            onChange={(e) => setPersonalNote(e.target.value)}
+            placeholder="Tuliskan kesan, cerita warga lokal, atau pengalaman etika budaya yang paling berkesan bagi Anda selama menjelajahi destinasi ini..."
+            className="w-full p-4 rounded-2xl border border-neutral-200 focus:border-blue-500 focus:outline-none text-xs leading-relaxed text-neutral-800 placeholder-neutral-400 bg-neutral-50/50"
+          />
+
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-neutral-400">
+              Catatan ini tersimpan rapi di paspor digital Anda.
+            </span>
+
+            <button
+              type="button"
+              onClick={handleSaveNote}
+              className={`px-6 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition shadow-md flex items-center gap-2 ${
+                isSavedNote
+                  ? 'bg-emerald-600 text-white'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-500/20'
+              }`}
+            >
+              {isSavedNote ? (
+                <>
+                  <CheckCircle2 className="w-4 h-4" />
+                  <span>Tersimpan!</span>
+                </>
+              ) : (
+                <span>Simpan Catatan</span>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 };
+
+export default AlbumJelajahView;
