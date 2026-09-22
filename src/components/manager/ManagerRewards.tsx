@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useTakonoStore } from '../../services/store';
 import { DestinationReward } from '../../types/destination';
-import { Award, Plus, ArrowLeft, Edit3, X, Coins, ShoppingBag } from 'lucide-react';
+import { Award, Plus, ArrowLeft, Edit3, X, Coins, ShoppingBag, Trash2, Store } from 'lucide-react';
 
 export const ManagerRewards: React.FC = () => {
   const {
@@ -94,7 +94,7 @@ export const ManagerRewards: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <button
@@ -112,7 +112,7 @@ export const ManagerRewards: React.FC = () => {
           <select
             value={selectedDestId}
             onChange={(e) => setSelectedDestId(e.target.value)}
-            className="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-medium"
+            className="text-xs bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium shadow-2xs"
           >
             {destinations.map((d) => (
               <option key={d.id} value={d.id}>
@@ -124,10 +124,10 @@ export const ManagerRewards: React.FC = () => {
           <button
             type="button"
             onClick={handleOpenAddModal}
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition shrink-0"
+            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span>Tambah Reward</span>
+            <span>TAMBAH REWARD</span>
           </button>
         </div>
       </div>
@@ -140,41 +140,52 @@ export const ManagerRewards: React.FC = () => {
             className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden flex flex-col justify-between"
           >
             <div>
-              <div className="h-40 overflow-hidden relative">
+              <div className="h-48 overflow-hidden relative">
                 <img
                   src={reward.imageUrl}
                   alt={reward.title}
                   className="w-full h-full object-cover"
                 />
-                <div className="absolute top-2.5 right-2.5">
-                  <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-500 text-white font-mono shadow-xs">
-                    {reward.pointsCost} Poin
+                <div className="absolute top-3 left-3">
+                  <span className="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider bg-neutral-900/80 text-white backdrop-blur-xs">
+                    {reward.category}
+                  </span>
+                </div>
+                <div className="absolute top-3 right-3">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-600 text-white font-mono shadow-xs">
+                    {reward.pointsCost} PTS
                   </span>
                 </div>
               </div>
-              <div className="p-4 space-y-1.5">
-                <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">
-                  {reward.category}
-                </span>
-                <h3 className="font-bold text-sm text-slate-900">{reward.title}</h3>
+              <div className="p-5 space-y-2">
+                <h3 className="font-bold text-sm text-slate-900 line-clamp-1">{reward.title}</h3>
                 <p className="text-xs text-slate-500 line-clamp-2">{reward.description}</p>
-                <div className="pt-2 text-[11px] text-slate-600 flex justify-between">
-                  <span>Stok Tersedia:</span>
-                  <strong className="font-mono">
-                    {reward.currentStock} / {reward.initialStock}
-                  </strong>
+                <div className="pt-3 flex items-center justify-between text-[11px] text-slate-600 border-t border-slate-100 font-medium">
+                  <span className="flex items-center gap-1 text-slate-500">
+                    <Store className="w-3.5 h-3.5" /> Mitra UMKM Desa
+                  </span>
+                  <span className="font-mono">
+                    Stok: <strong className="text-slate-900">{reward.currentStock} / {reward.initialStock}</strong>
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className="p-4 pt-0">
+            <div className="p-5 pt-0 flex items-center gap-2">
               <button
                 type="button"
                 onClick={() => handleOpenEditModal(reward)}
-                className="w-full py-1.5 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1"
+                className="flex-1 py-2 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center justify-center gap-1.5 transition"
               >
-                <Edit3 className="w-3.5 h-3.5" />
+                <Edit3 className="w-3.5 h-3.5 text-blue-600" />
                 <span>Sunting Reward</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleOpenEditModal(reward)}
+                className="p-2 rounded-xl border border-slate-200 hover:bg-red-50 text-slate-400 hover:text-red-600 transition"
+              >
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -299,7 +310,7 @@ export const ManagerRewards: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-amber-500 hover:bg-amber-600 text-white font-semibold rounded-lg shadow-sm"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm"
                 >
                   Simpan Reward
                 </button>

@@ -9,17 +9,15 @@ import {
   ShieldCheck,
   QrCode,
   Coins,
-  ChevronDown,
-  Sparkles,
+  Map,
   BookOpen,
   Award,
   ShoppingBag,
   BarChart3,
   Calendar,
-  Database,
   LogIn,
-  UserPlus,
   LogOut,
+  ChevronDown
 } from 'lucide-react';
 
 export const AppHeader: React.FC = () => {
@@ -29,310 +27,223 @@ export const AppHeader: React.FC = () => {
     activeRoute,
     navigateTo,
     setQrModalOpen,
-    activeJourney,
-    destinations,
-    dbStatus,
     setAuthModalOpen,
     setAuthModalMode,
     authToken,
     logout,
   } = useTakonoStore();
 
-  const roleConfigs: Record<
-    UserRole,
-    { label: string; icon: React.FC<{ className?: string }>; color: string }
-  > = {
-    traveler: { label: 'Traveler', icon: Compass, color: 'bg-emerald-500' },
-    manager: { label: 'Destination Manager', icon: MapPin, color: 'bg-indigo-500' },
-    umkm: { label: 'UMKM Mitra', icon: Building2, color: 'bg-amber-500' },
-    government: { label: 'Government Intelligence', icon: Landmark, color: 'bg-blue-500' },
-    admin: { label: 'Super Admin', icon: ShieldCheck, color: 'bg-purple-500' },
+  const roleLabels: Record<UserRole, string> = {
+    traveler: 'Traveler',
+    manager: 'Manager',
+    umkm: 'UMKM',
+    government: 'Govt',
+    admin: 'Admin',
   };
 
-  const currentRoleConfig = roleConfigs[currentUser.role];
+  const navItemsMap: Record<UserRole, Array<{ label: string; route: string; icon: React.FC<{ className?: string }> }>> = {
+    traveler: [
+      { label: 'Jelajah Budaya', route: '/traveler/home', icon: Compass },
+      { label: 'Panduan Rute', route: '/traveler/smart-guide', icon: Map },
+      { label: 'Tukar Poin', route: '/traveler/points', icon: Coins },
+      { label: 'Album Stempel', route: '/traveler/album', icon: BookOpen },
+    ],
+    manager: [
+      { label: 'Dashboard', route: '/manager/dashboard', icon: BarChart3 },
+      { label: 'Destinasi', route: '/manager/destinations', icon: MapPin },
+      { label: 'Explore Points', route: '/manager/explore-points', icon: Compass },
+      { label: 'Kuis Budaya', route: '/manager/quizzes', icon: BookOpen },
+      { label: 'Katalog Reward', route: '/manager/rewards', icon: Award },
+      { label: 'Event', route: '/manager/events', icon: Calendar },
+      { label: 'Kode QR', route: '/manager/qr-codes', icon: QrCode },
+      { label: 'Analitik', route: '/manager/analytics', icon: BarChart3 },
+    ],
+    umkm: [
+      { label: 'Dashboard', route: '/umkm/dashboard', icon: BarChart3 },
+      { label: 'Profil Usaha', route: '/umkm/profile', icon: Building2 },
+      { label: 'Produk', route: '/umkm/products', icon: ShoppingBag },
+      { label: 'Promosi', route: '/umkm/promotions', icon: Award },
+    ],
+    government: [
+      { label: 'Overview', route: '/government/dashboard', icon: Landmark },
+      { label: 'Tren Pariwisata', route: '/government/trends', icon: BarChart3 },
+      { label: 'Kinerja Wilayah', route: '/government/performance', icon: MapPin },
+      { label: 'Laporan Kebijakan', route: '/government/reports', icon: BookOpen },
+    ],
+    admin: [
+      { label: 'Overview', route: '/admin/dashboard', icon: ShieldCheck },
+      { label: 'Verifikasi UMKM', route: '/admin/umkm-approval', icon: Building2 },
+      { label: 'Moderasi Destinasi', route: '/admin/destinations', icon: MapPin },
+      { label: 'Pengguna', route: '/admin/users', icon: ShieldCheck },
+      { label: 'Pengaturan', route: '/admin/settings', icon: Landmark },
+    ]
+  };
 
-  // Traveler sub-navigation items
-  const travelerNavItems = [
-    { label: 'Beranda', route: '/traveler/home', icon: Compass },
-    { label: 'Rute & Panduan Cerdas', route: '/traveler/smart-guide', icon: Sparkles },
-    { label: 'Tukar Poin & Hadiah', route: '/traveler/points', icon: Coins },
-    { label: 'Album Stempel', route: '/traveler/album', icon: BookOpen },
-  ];
-
-  // Manager sub-navigation items
-  const managerNavItems = [
-    { label: 'Dashboard', route: '/manager/dashboard', icon: BarChart3 },
-    { label: 'Kelola Destinasi', route: '/manager/destinations', icon: MapPin },
-    { label: 'Explore Points', route: '/manager/explore-points', icon: Compass },
-    { label: 'Kuis Budaya', route: '/manager/quizzes', icon: BookOpen },
-    { label: 'Katalog Reward', route: '/manager/rewards', icon: Award },
-    { label: 'Event & Festival', route: '/manager/events', icon: Calendar },
-    { label: 'Generator QR', route: '/manager/qr-codes', icon: QrCode },
-    { label: 'Analytics Pengunjung', route: '/manager/analytics', icon: BarChart3 },
-  ];
-
-  // UMKM sub-navigation items
-  const umkmNavItems = [
-    { label: 'Dashboard UMKM', route: '/umkm/dashboard', icon: BarChart3 },
-    { label: 'Profil Usaha', route: '/umkm/profile', icon: Building2 },
-    { label: 'Katalog Produk', route: '/umkm/products', icon: ShoppingBag },
-    { label: 'Promosi Traveler', route: '/umkm/promotions', icon: Award },
-  ];
-
-  // Government sub-navigation items
-  const govNavItems = [
-    { label: 'Intelligence Overview', route: '/government/dashboard', icon: Landmark },
-    { label: 'Tren Pariwisata', route: '/government/trends', icon: BarChart3 },
-    { label: 'Kinerja Destinasi', route: '/government/performance', icon: MapPin },
-    { label: 'Laporan Kebijakan', route: '/government/reports', icon: BookOpen },
-  ];
-
-  // Admin sub-navigation items
-  const adminNavItems = [
-    { label: 'Overview Platform', route: '/admin/dashboard', icon: ShieldCheck },
-    { label: 'Verifikasi UMKM', route: '/admin/umkm-approval', icon: Building2 },
-    { label: 'Moderasi Destinasi', route: '/admin/destinations', icon: MapPin },
-    { label: 'Kelola Pengguna', route: '/admin/users', icon: ShieldCheck },
-    { label: 'Pengaturan Sistem', route: '/admin/settings', icon: Landmark },
-  ];
-
-  const currentNavItems =
-    currentUser.role === 'traveler'
-      ? travelerNavItems
-      : currentUser.role === 'manager'
-      ? managerNavItems
-      : currentUser.role === 'umkm'
-      ? umkmNavItems
-      : currentUser.role === 'government'
-      ? govNavItems
-      : adminNavItems;
-
-  const currentActiveDest = activeJourney
-    ? destinations.find((d) => d.id === activeJourney.destinationId)
-    : null;
+  const currentNavItems = navItemsMap[currentUser.role] || navItemsMap.traveler;
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
-      {/* Top Bar: Role Switcher & User Profile */}
-      <div className="bg-slate-900 text-slate-200 text-xs px-4 py-2 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-          {/* Brand Logo & Tagline */}
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                if (currentUser.role === 'traveler') navigateTo('/traveler/home');
-                else navigateTo(`/${currentUser.role}/dashboard`);
-              }}
-              className="flex items-center gap-2 font-bold text-white tracking-wider hover:text-emerald-400 transition"
-            >
-              <div className="w-6 h-6 rounded-md bg-emerald-500 flex items-center justify-center text-slate-950 font-black text-xs shadow-sm">
-                T
-              </div>
-              <span className="text-sm font-black tracking-tight text-white">TAKONO</span>
-            </button>
-            <span className="hidden sm:inline-block text-[11px] text-slate-400 border-l border-slate-700 pl-3">
-              Tourism Experience & Ecosystem Platform
-            </span>
-          </div>
+    <header className="sticky top-0 z-40 w-full px-4 sm:px-8 py-4 bg-neutral-100/60 backdrop-blur-md antialiased font-sans">
+      <div className="max-w-7xl mx-auto relative bg-white rounded-full shadow-xl shadow-neutral-200/60 border border-neutral-200/90 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 overflow-hidden min-h-[72px]">
+        
+        {/* SILUET GELOMBANG (Electric Blue Gradient) */}
+        <div className="absolute left-0 top-0 bottom-0 w-[180px] pointer-events-none z-0 overflow-hidden rounded-l-full">
+          <svg className="absolute top-0 left-0 h-full w-full text-blue-600/10 fill-current" viewBox="0 0 200 100" preserveAspectRatio="none">
+            <path d="M0,0 L120,0 C170,30 130,70 180,100 L0,100 Z" />
+          </svg>
+          <svg className="absolute top-0 left-0 h-full w-full text-blue-500/15 fill-current" viewBox="0 0 200 100" preserveAspectRatio="none">
+            <path d="M0,0 L90,0 C140,25 100,75 150,100 L0,100 Z" />
+          </svg>
+        </div>
 
-          {/* Active Role Switcher Selector & Auth Controls */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Database & Backend Status Badge */}
-            <button
-              type="button"
-              onClick={() => setAuthModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 text-[11px] transition"
-              title="Klik untuk melihat status koneksi MySQL dan info endpoint"
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  dbStatus?.connected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
-                }`}
+        {/* 1. KIRI: BRAND LOGO & ROLE SELECTOR */}
+        <div className="flex items-center gap-3 relative z-10 shrink-0">
+          <button
+            type="button"
+            onClick={() => navigateTo(currentUser.role === 'traveler' ? '/traveler/home' : `/${currentUser.role}/dashboard`)}
+            className="flex items-center gap-2 text-left focus:outline-none group"
+          >
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white border border-blue-100 shadow-sm flex items-center justify-center p-1.5 overflow-hidden group-hover:scale-105 group-hover:border-blue-300 transition duration-300 shrink-0">
+              <img
+                src="/logo.png"
+                alt="TAKONO Logo"
+                className="w-full h-full object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/logo.png';
+                }}
               />
-              <Database className="w-3 h-3 text-slate-400" />
-              <span className="font-mono font-medium">
-                {dbStatus?.connected ? 'MySQL Live' : 'Express + MySQL'}
+            </div>
+            <div className="hidden sm:block">
+              <span className="font-extrabold text-sm tracking-widest text-neutral-900 uppercase block leading-tight">
+                TAKONO
               </span>
-            </button>
+              <span className="text-[10px] text-blue-600 font-semibold tracking-tight block">
+                Ekowisata & Budaya
+              </span>
+            </div>
+          </button>
 
-            {/* Login / Register Button */}
+          {/* Role Dropdown Selector */}
+          <div className="relative inline-block text-left">
+            <select
+              value={currentUser.role}
+              onChange={(e) => switchUserRole(e.target.value as UserRole)}
+              className="appearance-none bg-neutral-100 hover:bg-neutral-200/80 border border-neutral-300/80 text-neutral-800 font-mono text-[11px] font-bold py-1.5 pl-2.5 pr-6 rounded-full cursor-pointer transition focus:outline-none shadow-2xs"
+            >
+              {(['traveler', 'manager', 'umkm', 'government', 'admin'] as UserRole[]).map((r) => (
+                <option key={r} value={r}>
+                  {roleLabels[r]} Mode
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="w-3 h-3 text-neutral-600 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+        </div>
+
+        {/* 2. TENGAH: FLOATING CAPSULE NAVIGATION MENU (Lebar menyesuaikan isi / fit-content namun aman untuk menu banyak) */}
+        <nav className="hidden lg:flex items-center gap-1 bg-neutral-50/90 border border-neutral-200/90 rounded-full px-2 py-1 shadow-inner relative z-10 overflow-x-auto scrollbar-none shrink-0 max-w-[50vw]">
+          <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
+            {currentNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive =
+                activeRoute === item.route ||
+                (item.route !== '/traveler/home' &&
+                  item.route !== '/manager/dashboard' &&
+                  activeRoute.startsWith(item.route));
+
+              return (
+                <button
+                  key={item.route}
+                  type="button"
+                  onClick={() => navigateTo(item.route)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition relative shrink-0 ${
+                    isActive
+                      ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
+                      : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
+                  }`}
+                >
+                  <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-neutral-400'}`} />
+                  <span>{item.label}</span>
+                  {isActive && (
+                    <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-2.5 h-0.5 bg-white rounded-full" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </nav>
+
+        {/* 3. KANAN: POIN & ACTION BUTTONS */}
+        <div className="flex items-center gap-2.5 relative z-10 shrink-0">
+          
+          {/* Poin Balance Badge */}
+          {currentUser.role === 'traveler' && (
+            <button
+              type="button"
+              onClick={() => navigateTo('/traveler/points')}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-950 hover:bg-blue-100 transition"
+            >
+              <Coins className="w-3.5 h-3.5 text-blue-600" />
+              <span className="text-xs font-black font-mono text-blue-900">{currentUser.pointsBalance} PTS</span>
+            </button>
+          )}
+
+          {/* Quick Scan QR Button */}
+          <button
+            type="button"
+            onClick={() => setQrModalOpen(true)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-extrabold rounded-full text-xs uppercase tracking-wider shadow-md shadow-blue-500/25 transition active:scale-95 shrink-0"
+          >
+            <QrCode className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Scan QR</span>
+          </button>
+
+          {/* Auth Controls */}
+          {!authToken ? (
             <button
               type="button"
               onClick={() => {
                 setAuthModalMode('login');
                 setAuthModalOpen(true);
               }}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-700/80 hover:bg-emerald-600 text-white font-medium text-[11px] transition"
-              title="Buka dialog Masuk / Daftar Akun"
+              className="p-2 rounded-full bg-neutral-100 hover:bg-neutral-200 text-neutral-700 transition shrink-0"
+              title="Masuk Akun"
             >
-              <LogIn className="w-3 h-3" />
-              <span>Masuk / Daftar</span>
+              <LogIn className="w-4 h-4" />
             </button>
-
-            <span className="text-[11px] text-slate-400 hidden md:inline ml-1">Peran:</span>
-            <div className="inline-flex rounded-lg p-0.5 bg-slate-800 border border-slate-700">
-              {(['traveler', 'manager', 'umkm', 'government', 'admin'] as UserRole[]).map((r) => {
-                const isCurrent = currentUser.role === r;
-                return (
-                  <button
-                    key={r}
-                    type="button"
-                    onClick={() => switchUserRole(r)}
-                    className={`px-2 py-1 rounded-md text-[11px] font-medium transition ${
-                      isCurrent
-                        ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
-                        : 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-                    }`}
-                  >
-                    {r === 'traveler'
-                      ? 'Traveler'
-                      : r === 'manager'
-                      ? 'Manager'
-                      : r === 'umkm'
-                      ? 'UMKM'
-                      : r === 'government'
-                      ? 'Govt'
-                      : 'Admin'}
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Quick QR Scanner Simulator Button */}
-            <button
-              type="button"
-              onClick={() => setQrModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-medium transition shadow-sm"
-              title="Buka QR Scanner TAKONO"
-            >
-              <QrCode className="w-3.5 h-3.5" />
-              <span className="font-semibold text-[11px]">Scan QR</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Main App Bar */}
-      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
-        {/* Left: Role identity and Active Journey Banner */}
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2.5">
-            <img
-              src={currentUser.avatarUrl}
-              alt={currentUser.name}
-              className="w-9 h-9 rounded-full object-cover border border-slate-200 shadow-sm"
-            />
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-900 text-sm">{currentUser.name}</span>
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
-                  {currentRoleConfig.label}
-                </span>
-              </div>
-              <p className="text-xs text-slate-500">
-                {currentUser.agencyName ||
-                  (currentUser.role === 'manager'
-                    ? 'Pengelola Desa Wisata Penglipuran'
-                    : currentUser.role === 'umkm'
-                    ? 'Pemilik Warung Loloh Cemcem Bu Made'
-                    : currentUser.email)}
-              </p>
-            </div>
-          </div>
-
-          {/* Active Traveler Journey Chip */}
-          {currentUser.role === 'traveler' && currentActiveDest && (
-            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-              <span className="text-emerald-900 font-medium">
-                Aktif di <strong>{currentActiveDest.name}</strong>
-              </span>
-              <button
-                type="button"
-                onClick={() => navigateTo(`/traveler/smart-guide`)}
-                className="text-[11px] font-semibold text-emerald-700 hover:underline flex items-center gap-0.5"
-              >
-                <span>Smart Guide</span>
-                <span>→</span>
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Right: Points Balance for Traveler, or quick stats for other roles */}
-        <div className="flex items-center gap-3">
-          {currentUser.role === 'traveler' && (
-            <button
-              type="button"
-              onClick={() => navigateTo('/traveler/points')}
-              className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 hover:bg-amber-100/80 transition"
-            >
-              <div className="w-6 h-6 rounded-full bg-amber-500 flex items-center justify-center text-white shadow-sm">
-                <Coins className="w-3.5 h-3.5" />
-              </div>
-              <div className="text-left">
-                <span className="block text-[10px] uppercase font-bold text-amber-800 tracking-wider">
-                  Jejak Points
-                </span>
-                <span className="text-sm font-bold text-amber-950 font-mono">
-                  {currentUser.pointsBalance}
-                </span>
-              </div>
-            </button>
-          )}
-
-          {currentUser.role === 'manager' && (
-            <div className="text-right hidden sm:block">
-              <span className="text-[11px] text-slate-400 block">Destinasi Kelolaan</span>
-              <span className="text-xs font-semibold text-slate-800">Desa Wisata Penglipuran</span>
-            </div>
-          )}
-
-          {currentUser.role === 'government' && (
-            <div className="text-right hidden sm:block">
-              <span className="text-[11px] text-slate-400 block">Cakupan Wilayah</span>
-              <span className="text-xs font-semibold text-slate-800">Provinsi Bali & D.I. Yogyakarta</span>
-            </div>
-          )}
-
-          {authToken && (
+          ) : (
             <button
               type="button"
               onClick={logout}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 text-slate-600 text-xs font-medium transition"
-              title="Keluar dari akun saat ini"
+              className="p-2 rounded-full bg-neutral-100 hover:bg-rose-50 hover:text-rose-600 text-neutral-600 transition shrink-0"
+              title="Keluar"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Keluar</span>
+              <LogOut className="w-4 h-4" />
             </button>
           )}
+
         </div>
+
       </div>
 
-      {/* Sub-navigation Menu per Role */}
-      <div className="border-t border-slate-100 bg-slate-50/70 px-4 overflow-x-auto scrollbar-none">
-        <div className="max-w-7xl mx-auto flex items-center gap-1 py-1.5">
+      {/* Mobile & Tablet Horizontal Scroll Nav Drawer */}
+      <div className="lg:hidden mt-2.5 px-2 overflow-x-auto scrollbar-none">
+        <div className="flex items-center gap-2 py-1">
           {currentNavItems.map((item) => {
             const Icon = item.icon;
-            const isActive =
-              activeRoute === item.route ||
-              (item.route !== '/traveler/home' &&
-                item.route !== '/manager/dashboard' &&
-                activeRoute.startsWith(item.route));
+            const isActive = activeRoute === item.route;
 
             return (
               <button
                 key={item.route}
                 type="button"
                 onClick={() => navigateTo(item.route)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition shrink-0 ${
                   isActive
-                    ? 'bg-white text-emerald-700 shadow-xs border border-slate-200 font-semibold'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'bg-white text-neutral-600 border border-neutral-200'
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-emerald-600' : 'text-slate-400'}`} />
+                <Icon className="w-3.5 h-3.5" />
                 <span>{item.label}</span>
               </button>
             );
@@ -342,3 +253,5 @@ export const AppHeader: React.FC = () => {
     </header>
   );
 };
+
+export default AppHeader;

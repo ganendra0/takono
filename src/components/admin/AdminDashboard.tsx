@@ -13,7 +13,6 @@ import {
   FileCheck,
   Lock,
   Sliders,
-  Sparkles,
   Award,
   Layers,
   CheckCircle2,
@@ -84,50 +83,50 @@ export const AdminDashboard: React.FC = () => {
   const totalPointsInCirculation = users.reduce((acc, u) => acc + (u.pointsBalance || 0), 0);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-6xl mx-auto px-4 py-6 sm:py-8 space-y-6 animate-fade-in">
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="p-3 bg-purple-900 text-white text-xs font-semibold rounded-xl shadow-lg flex items-center justify-between gap-3 animate-fade-in">
+        <div className="p-3 bg-stone-900 text-white text-xs font-semibold rounded-xl shadow-lg flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-purple-300" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
             <span>{toastMessage}</span>
           </div>
         </div>
       )}
 
       {/* Header Banner */}
-      <div className="rounded-2xl bg-gradient-to-r from-purple-950 via-slate-900 to-slate-950 text-white p-6 sm:p-8 shadow-md border border-purple-900/60 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="rounded-3xl bg-[#1C2024] text-white p-6 sm:p-8 shadow-sm border border-stone-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-500 text-white">
-              Super Admin Ecosystem Control
+            <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-stone-700 text-white">
+              Super Admin Governance
             </span>
-            <span className="text-xs text-purple-300">Level Hak Akses Tertinggi</span>
+            <span className="text-xs text-stone-400">Hak Akses Tata Kelola Sistem</span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight">
             TAKONO Governance & Moderation
           </h1>
-          <p className="text-xs text-slate-300 max-w-2xl">
+          <p className="text-xs text-stone-300 max-w-2xl font-normal">
             Verifikasi kelayakan UMKM mitra, moderasi status publikasi destinasi, audit integritas poin, dan manajemen seluruh entitas ekosistem.
           </p>
         </div>
 
-        <div className="p-3 rounded-xl bg-purple-900/40 border border-purple-700/50 text-xs text-purple-200">
-          <span className="block font-semibold text-white">Status Platform: SEHAT</span>
-          <span className="text-[11px]">Enkripsi & atomic ledger aktif</span>
+        <div className="p-3.5 rounded-2xl bg-stone-800/80 border border-stone-700 text-xs text-stone-300">
+          <span className="block font-bold text-white">Status Platform: SEHAT</span>
+          <span className="text-[11px] text-stone-400 font-mono">Enkripsi & atomic ledger aktif</span>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="flex border-b border-slate-200 bg-slate-50 text-xs font-semibold overflow-x-auto">
+      <div className="bg-white rounded-3xl border border-stone-200 shadow-2xs overflow-hidden">
+        <div className="flex border-b border-stone-200 bg-stone-50/80 text-xs font-bold px-2 pt-1 overflow-x-auto scrollbar-none">
           <button
             type="button"
             onClick={() => handleTabChange('dashboard')}
-            className={`px-5 py-3 border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
+            className={`px-5 py-3 border-b-2 transition whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === 'dashboard'
-                ? 'border-purple-600 text-purple-800 bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
+                ? 'border-stone-800 text-stone-900 font-bold bg-white rounded-t-xl'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
             <ShieldCheck className="w-4 h-4" />
@@ -136,10 +135,10 @@ export const AdminDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabChange('umkm')}
-            className={`px-5 py-3 border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
+            className={`px-5 py-3 border-b-2 transition whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === 'umkm'
-                ? 'border-purple-600 text-purple-800 bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
+                ? 'border-stone-800 text-stone-900 font-bold bg-white rounded-t-xl'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
             <Building2 className="w-4 h-4" />
@@ -148,10 +147,10 @@ export const AdminDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabChange('destinations')}
-            className={`px-5 py-3 border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
+            className={`px-5 py-3 border-b-2 transition whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === 'destinations'
-                ? 'border-purple-600 text-purple-800 bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
+                ? 'border-stone-800 text-stone-900 font-bold bg-white rounded-t-xl'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
             <MapPin className="w-4 h-4" />
@@ -160,10 +159,10 @@ export const AdminDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabChange('users')}
-            className={`px-5 py-3 border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
+            className={`px-5 py-3 border-b-2 transition whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === 'users'
-                ? 'border-purple-600 text-purple-800 bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
+                ? 'border-stone-800 text-stone-900 font-bold bg-white rounded-t-xl'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -172,179 +171,205 @@ export const AdminDashboard: React.FC = () => {
           <button
             type="button"
             onClick={() => handleTabChange('settings')}
-            className={`px-5 py-3 border-b-2 transition whitespace-nowrap flex items-center gap-2 ${
+            className={`px-5 py-3 border-b-2 transition whitespace-nowrap flex items-center gap-2 cursor-pointer ${
               activeTab === 'settings'
-                ? 'border-purple-600 text-purple-800 bg-white'
-                : 'border-transparent text-slate-600 hover:text-slate-900'
+                ? 'border-stone-800 text-stone-900 font-bold bg-white rounded-t-xl'
+                : 'border-transparent text-stone-600 hover:text-stone-900'
             }`}
           >
             <Sliders className="w-4 h-4" />
-            <span>Pengaturan Sistem & Audit</span>
+            <span>Pengaturan Sistem</span>
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="p-6 sm:p-8">
           {/* TAB 1: OVERVIEW PLATFORM */}
           {activeTab === 'dashboard' && (
             <div className="space-y-6">
               {/* Macro Summary Cards */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="flex items-center gap-2 text-slate-500 text-xs mb-1">
-                    <Users className="w-4 h-4 text-purple-600" />
-                    <span>Total Pengguna</span>
+                <div className="p-5 rounded-3xl bg-stone-50 border border-stone-200">
+                  <div className="flex items-center gap-2 text-stone-500 text-xs mb-1">
+                    <Users className="w-4 h-4 text-stone-700" />
+                    <span className="font-semibold">Total Pengguna</span>
                   </div>
-                  <span className="text-2xl font-bold font-mono text-slate-900">
+                  <span className="text-2xl font-extrabold font-mono text-stone-900">
                     {users.length}
                   </span>
-                  <span className="text-[11px] text-slate-500 block">5 Role Terdefinisi</span>
+                  <span className="text-[11px] text-stone-500 block font-medium">5 Role Terdefinisi</span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="flex items-center gap-2 text-slate-500 text-xs mb-1">
-                    <Building2 className="w-4 h-4 text-amber-600" />
-                    <span>Antrean UMKM</span>
+                <div className="p-5 rounded-3xl bg-stone-50 border border-stone-200">
+                  <div className="flex items-center gap-2 text-amber-800 text-xs mb-1">
+                    <Building2 className="w-4 h-4 text-amber-700" />
+                    <span className="font-semibold">Antrean UMKM</span>
                   </div>
-                  <span className="text-2xl font-bold font-mono text-amber-700">
+                  <span className="text-2xl font-extrabold font-mono text-amber-800">
                     {pendingUmkms.length}
                   </span>
-                  <span className="text-[11px] text-amber-600 font-medium block">Memerlukan Review</span>
+                  <span className="text-[11px] text-amber-700 font-semibold block">Memerlukan Review</span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="flex items-center gap-2 text-slate-500 text-xs mb-1">
-                    <MapPin className="w-4 h-4 text-blue-600" />
-                    <span>Total Destinasi</span>
+                <div className="p-5 rounded-3xl bg-stone-50 border border-stone-200">
+                  <div className="flex items-center gap-2 text-stone-500 text-xs mb-1">
+                    <MapPin className="w-4 h-4 text-stone-700" />
+                    <span className="font-semibold">Total Destinasi</span>
                   </div>
-                  <span className="text-2xl font-bold font-mono text-slate-900">
+                  <span className="text-2xl font-extrabold font-mono text-stone-900">
                     {destinations.length}
                   </span>
-                  <span className="text-[11px] text-emerald-600 font-medium block">
-                    {destinations.filter((d) => d.status === 'published').length} Terpublikasi
-                  </span>
+                  <span className="text-[11px] text-stone-500 block font-medium">Wisata Budaya Aktif</span>
                 </div>
 
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <div className="flex items-center gap-2 text-slate-500 text-xs mb-1">
-                    <Award className="w-4 h-4 text-emerald-600" />
-                    <span>Poin Beredar</span>
+                <div className="p-5 rounded-3xl bg-stone-50 border border-stone-200">
+                  <div className="flex items-center gap-2 text-emerald-800 text-xs mb-1">
+                    <Activity className="w-4 h-4 text-emerald-700" />
+                    <span className="font-semibold">Poin Beredar</span>
                   </div>
-                  <span className="text-2xl font-bold font-mono text-emerald-700">
-                    {totalPointsInCirculation}
+                  <span className="text-2xl font-extrabold font-mono text-emerald-800">
+                    {totalPointsInCirculation.toLocaleString('id-ID')}
                   </span>
-                  <span className="text-[11px] text-slate-500 block">Buku Besar Terlindungi</span>
+                  <span className="text-[11px] text-emerald-800 font-semibold block">Atomic Ledger Terlindungi</span>
                 </div>
               </div>
 
-              {/* Quick Action Shortcuts */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-5 rounded-xl border border-amber-200 bg-amber-50/50 space-y-3">
-                  <div>
-                    <h4 className="font-bold text-sm text-amber-950">Antrean Verifikasi UMKM</h4>
-                    <p className="text-xs text-amber-800 mt-1">
-                      Terdapat {pendingUmkms.length} permohonan kemitraan UMKM yang menunggu keputusan persetujuan dari Super Admin.
-                    </p>
-                  </div>
+              {/* Quick Actions & Recent Pending UMKM */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-sm text-stone-900">
+                    UMKM Menunggu Verifikasi ({pendingUmkms.length})
+                  </h3>
                   <button
                     type="button"
                     onClick={() => handleTabChange('umkm')}
-                    className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-xs"
+                    className="text-xs font-bold text-stone-700 hover:text-stone-900 cursor-pointer"
                   >
-                    <span>Periksa Antrean UMKM</span>
+                    Buka Modul Verifikasi →
                   </button>
                 </div>
 
-                <div className="p-5 rounded-xl border border-blue-200 bg-blue-50/50 space-y-3">
-                  <div>
-                    <h4 className="font-bold text-sm text-blue-950">Moderasi Status Destinasi</h4>
-                    <p className="text-xs text-blue-800 mt-1">
-                      Kelola hak tayang destinasi wisata desa untuk memastikan seluruh konten etika & plakat QR siap dikunjungi traveler.
-                    </p>
+                {pendingUmkms.length === 0 ? (
+                  <div className="p-8 text-center text-stone-400 text-xs border border-dashed border-stone-200 rounded-3xl">
+                    Semua pendaftaran UMKM telah diproses dan diverifikasi.
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleTabChange('destinations')}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition shadow-xs"
-                  >
-                    <span>Buka Moderasi Destinasi</span>
-                  </button>
-                </div>
+                ) : (
+                  <div className="space-y-3">
+                    {pendingUmkms.slice(0, 3).map((u) => (
+                      <div
+                        key={u.id}
+                        className="p-5 rounded-3xl border border-amber-200 bg-amber-50/40 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+                      >
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-900">
+                            {u.category}
+                          </span>
+                          <h4 className="font-bold text-sm text-stone-900">{u.businessName}</h4>
+                          <p className="text-xs text-stone-600 font-normal">
+                            Pemilik: {u.ownerName} • {u.address}
+                          </p>
+                        </div>
+
+                        <div className="flex items-center gap-2 self-end sm:self-auto">
+                          <button
+                            type="button"
+                            onClick={() => handleReject(u.id, u.businessName)}
+                            className="px-3.5 py-1.5 rounded-xl border border-rose-300 text-rose-700 hover:bg-rose-50 text-xs font-bold transition cursor-pointer"
+                          >
+                            Tolak
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleApprove(u.id, u.businessName)}
+                            className="px-4 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-600 text-white text-xs font-bold transition shadow-2xs cursor-pointer"
+                          >
+                            Setujui & Terbitkan
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* TAB 2: VERIFIKASI UMKM */}
+          {/* TAB 2: UMKM APPROVAL */}
           {activeTab === 'umkm' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-sm text-slate-900">
-                    Antrean Verifikasi Dokumen & Legalitas UMKM
-                  </h3>
-                  <p className="text-xs text-slate-500">
-                    Setujui atau tolak pendaftaran pelaku usaha lokal untuk menjaga standar ekosistem.
-                  </p>
-                </div>
-                <span className="text-xs text-slate-500 font-mono">
-                  Total Terdaftar: {allUmkms.length}
-                </span>
-              </div>
-
-              <div className="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden">
-                {allUmkms.map((umkm) => (
+              <h3 className="font-bold text-stone-900 text-sm">Daftar Pengajuan UMKM Mitra</h3>
+              <div className="space-y-3">
+                {allUmkms.map((u) => (
                   <div
-                    key={umkm.id}
-                    className="p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 hover:bg-slate-50/70 transition text-xs"
+                    key={u.id}
+                    className="p-5 rounded-3xl border border-stone-200 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
                   >
-                    <div className="flex items-start gap-3">
-                      <img
-                        src={umkm.imageUrl}
-                        alt={umkm.businessName}
-                        className="w-14 h-14 rounded-xl object-cover border border-slate-200 shrink-0"
-                      />
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-slate-900 text-sm">{umkm.businessName}</h4>
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                              umkm.approvalStatus === 'approved'
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : umkm.approvalStatus === 'pending'
-                                ? 'bg-amber-100 text-amber-800'
-                                : 'bg-rose-100 text-rose-800'
-                            }`}
-                          >
-                            {umkm.approvalStatus}
-                          </span>
-                        </div>
-                        <p className="text-slate-500">{umkm.description}</p>
-                        <span className="text-[11px] text-slate-400 block">
-                          Alamat: {umkm.address} • Kategori: {umkm.category} • Produk: {umkm.products?.length || 0}
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded ${
+                            u.approvalStatus === 'approved'
+                              ? 'bg-emerald-100 text-emerald-900'
+                              : u.approvalStatus === 'rejected'
+                              ? 'bg-rose-100 text-rose-900'
+                              : 'bg-amber-100 text-amber-900'
+                          }`}
+                        >
+                          {u.approvalStatus}
                         </span>
+                        <span className="text-xs text-stone-400 capitalize">{u.category}</span>
                       </div>
+                      <h4 className="font-bold text-sm text-stone-900">{u.businessName}</h4>
+                      <p className="text-xs text-stone-600 font-normal">{u.description}</p>
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                      {umkm.approvalStatus !== 'approved' && (
+                    {u.approvalStatus === 'pending' && (
+                      <div className="flex items-center gap-2 shrink-0">
                         <button
                           type="button"
-                          onClick={() => handleApprove(umkm.id, umkm.businessName)}
-                          className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg flex items-center gap-1 shadow-xs transition"
+                          onClick={() => handleReject(u.id, u.businessName)}
+                          className="px-3 py-1.5 rounded-xl border border-rose-300 text-rose-700 hover:bg-rose-50 text-xs font-bold cursor-pointer"
                         >
-                          <CheckCircle className="w-3.5 h-3.5" />
-                          <span>Setujui (Approve)</span>
+                          Tolak
                         </button>
-                      )}
-                      {umkm.approvalStatus !== 'rejected' && (
                         <button
                           type="button"
-                          onClick={() => handleReject(umkm.id, umkm.businessName)}
-                          className="px-3.5 py-1.5 border border-rose-300 hover:bg-rose-50 text-rose-700 font-semibold rounded-lg flex items-center gap-1 transition"
+                          onClick={() => handleApprove(u.id, u.businessName)}
+                          className="px-4 py-1.5 rounded-xl bg-emerald-700 text-white hover:bg-emerald-600 text-xs font-bold cursor-pointer"
                         >
-                          <XCircle className="w-3.5 h-3.5" />
-                          <span>Tolak (Reject)</span>
+                          Setujui
                         </button>
-                      )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: DESTINATIONS */}
+          {activeTab === 'destinations' && (
+            <div className="space-y-4">
+              <h3 className="font-bold text-stone-900 text-sm">Moderasi Status Destinasi Wisata</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {destinations.map((d) => (
+                  <div key={d.id} className="p-5 rounded-3xl border border-stone-200 bg-white space-y-3">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <h4 className="font-bold text-sm text-stone-900">{d.name}</h4>
+                        <p className="text-xs text-stone-500">{d.regency}, {d.province}</p>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 uppercase">
+                        {d.status}
+                      </span>
+                    </div>
+                    <p className="text-xs text-stone-600 line-clamp-2">{d.description}</p>
+                    <div className="flex gap-2 pt-2 border-t border-stone-100">
+                      <button
+                        onClick={() => updateDestination(d.id, { status: d.status === 'published' ? 'draft' : 'published' })}
+                        className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 text-xs font-bold transition cursor-pointer"
+                      >
+                        Ubah ke {d.status === 'published' ? 'Draft' : 'Published'}
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -352,173 +377,37 @@ export const AdminDashboard: React.FC = () => {
             </div>
           )}
 
-          {/* TAB 3: MODERASI DESTINASI */}
-          {activeTab === 'destinations' && (
-            <div className="space-y-4">
-              <div>
-                <h3 className="font-bold text-sm text-slate-900">
-                  Moderasi Status Publikasi Destinasi
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Destinasi hanya boleh dipublikasikan jika memiliki konten edukasi etika dan titik jelajah yang memadai.
-                </p>
-              </div>
-
-              <div className="space-y-3">
-                {destinations.map((d) => {
-                  const destPoints = explorePoints.filter((p) => p.destinationId === d.id);
-                  return (
-                    <div
-                      key={d.id}
-                      className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 text-xs"
-                    >
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-bold text-sm text-slate-900">{d.name}</h4>
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                              d.status === 'published'
-                                ? 'bg-emerald-100 text-emerald-800'
-                                : 'bg-amber-100 text-amber-800'
-                            }`}
-                          >
-                            Status: {d.status}
-                          </span>
-                        </div>
-                        <p className="text-slate-500 mt-0.5">
-                          {d.regency}, {d.province} • Pengelola: {d.managerName} ({destPoints.length} Titik Jelajah)
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {d.status !== 'published' ? (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              updateDestination(d.id, { status: 'published' });
-                              showToast(`Destinasi "${d.name}" berhasil dipublikasikan!`);
-                            }}
-                            className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-xs transition"
-                          >
-                            Publikasikan (Publish)
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => {
-                              updateDestination(d.id, { status: 'draft' });
-                              showToast(`Destinasi "${d.name}" diubah ke status Draft.`);
-                            }}
-                            className="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg font-semibold transition"
-                          >
-                            Ubah Jadi Draft
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* TAB 4: KELOLA PENGGUNA */}
+          {/* TAB 4: USERS */}
           {activeTab === 'users' && (
             <div className="space-y-4">
-              <div>
-                <h3 className="font-bold text-sm text-slate-900">Daftar Akun Pengguna Platform</h3>
-                <p className="text-xs text-slate-500">
-                  Data seluruh akun pengguna berdasarkan 5 peran sistem (Traveler, Manager, UMKM, Govt, Admin).
-                </p>
-              </div>
-
-              <div className="overflow-x-auto border border-slate-200 rounded-xl">
-                <table className="w-full text-left text-xs">
-                  <thead className="bg-slate-50 text-slate-600 uppercase text-[10px] font-semibold border-b border-slate-200">
-                    <tr>
-                      <th className="px-4 py-2.5">Nama</th>
-                      <th className="px-4 py-2.5">Email</th>
-                      <th className="px-4 py-2.5">Peran (Role)</th>
-                      <th className="px-4 py-2.5">Saldo Jejak Points</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100">
-                    {users.map((u) => (
-                      <tr key={u.id} className="hover:bg-slate-50/70 transition">
-                        <td className="px-4 py-3 font-semibold text-slate-900">{u.name}</td>
-                        <td className="px-4 py-3 text-slate-500 font-mono">{u.email}</td>
-                        <td className="px-4 py-3">
-                          <span className="px-2 py-0.5 rounded text-[10px] uppercase font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                            {u.role}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 font-mono font-bold text-amber-700">
-                          {u.pointsBalance || 0}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <h3 className="font-bold text-stone-900 text-sm">Daftar Akun Pengguna</h3>
+              <div className="divide-y divide-stone-100">
+                {users.map((u) => (
+                  <div key={u.id} className="py-3 flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-3">
+                      <img src={u.avatarUrl} alt={u.name} className="w-8 h-8 rounded-full border border-stone-200" />
+                      <div>
+                        <strong className="block font-bold text-stone-900">{u.name}</strong>
+                        <span className="text-stone-400">{u.email}</span>
+                      </div>
+                    </div>
+                    <span className="px-2.5 py-0.5 rounded-md bg-stone-100 font-bold uppercase text-[10px] text-stone-700">
+                      {u.role}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
 
-          {/* TAB 5: PENGATURAN SISTEM & AUDIT */}
+          {/* TAB 5: SETTINGS */}
           {activeTab === 'settings' && (
-            <div className="space-y-6">
-              <div>
-                <h3 className="font-bold text-sm text-slate-900">
-                  Pengaturan Keamanan & Log Audit Sistem
-                </h3>
-                <p className="text-xs text-slate-500">
-                  Konfigurasi aturan insentif poin dan rekam jejak aktivitas real-time.
-                </p>
-              </div>
-
-              {/* Security parameters */}
-              <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3 text-xs">
-                <span className="font-bold text-slate-800 uppercase tracking-wider block">
-                  Aturan Keamanan Anti-Fraud TAKONO:
-                </span>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <span className="font-semibold text-slate-900 block">Buku Besar Poin Atomik</span>
-                    <span className="text-slate-600 text-[11px]">Poin tidak dapat dimodifikasi di browser; hanya tercatat lewat event QR resmi.</span>
-                  </div>
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <span className="font-semibold text-slate-900 block">Kuis Sekali Tuntas (Idempotent)</span>
-                    <span className="text-slate-600 text-[11px]">Poin kuis hanya diberikan 1x per titik jelajah untuk mencegah farming poin.</span>
-                  </div>
-                  <div className="p-3 bg-white rounded-lg border border-slate-200">
-                    <span className="font-semibold text-slate-900 block">Verifikasi UMKM Wajib</span>
-                    <span className="text-slate-600 text-[11px]">Voucher dan produk UMKM hanya aktif setelah disetujui Super Admin.</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Audit trail list */}
-              <div className="space-y-3">
-                <h4 className="font-bold text-xs text-slate-800 uppercase tracking-wider">
-                  Audit Log Aktivitas ({analyticsEvents.length} Event Terakhir)
-                </h4>
-                <div className="space-y-2 max-h-80 overflow-y-auto border border-slate-200 rounded-xl p-3 bg-slate-50/50">
-                  {analyticsEvents.map((evt) => (
-                    <div
-                      key={evt.id}
-                      className="p-2.5 bg-white rounded-lg border border-slate-200 flex items-center justify-between text-xs shadow-2xs"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-purple-100 text-purple-800">
-                          {evt.eventType}
-                        </span>
-                        <span className="text-slate-700 font-mono">{evt.targetId || 'Sistem'}</span>
-                      </div>
-                      <span className="text-[11px] text-slate-400 font-mono">
-                        {new Date(evt.timestamp).toLocaleTimeString('id-ID')}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+            <div className="space-y-4 text-xs text-stone-600">
+              <h3 className="font-bold text-stone-900 text-sm">Pengaturan Sistem & Keamanan</h3>
+              <div className="p-5 rounded-3xl bg-stone-50 border border-stone-200 space-y-2">
+                <p><strong>Database:</strong> MySQL Live connection active with Express engine.</p>
+                <p><strong>Ledger Poin:</strong> Transaksi poin terisolasi secara transaksional (*atomic updates*).</p>
+                <p><strong>Audit Log:</strong> Seluruh event pemindaian QR terekam ke tabel analitik pemerintah.</p>
               </div>
             </div>
           )}

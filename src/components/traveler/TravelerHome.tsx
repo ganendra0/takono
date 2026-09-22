@@ -8,23 +8,19 @@ import {
   Compass,
   QrCode,
   MapPin,
-  Sparkles,
   ArrowRight,
   CheckCircle2,
   Clock,
   Coins,
-  BookOpen,
-  Award,
   ShoppingBag,
-  Tag,
-  Check,
   ChevronRight,
-  Camera,
   RotateCcw,
   Footprints,
-  Info,
   ShieldCheck,
-  Sparkle,
+  Check,
+  Search,
+  Globe,
+  Award,
 } from 'lucide-react';
 
 export const TravelerHome: React.FC = () => {
@@ -33,19 +29,19 @@ export const TravelerHome: React.FC = () => {
     destinations,
     explorePoints,
     activeJourney,
-    startOrResumeJourney,
     leaveDestination,
     navigateTo,
     setQrModalOpen,
     redeemReward,
     getRewardsByDestination,
-    simulateScanCode,
+    verifyGatePasscode,
   } = useTakonoStore();
 
   const [selectedPointForModal, setSelectedPointForModal] = useState<ExplorePoint | null>(null);
   const [pointModalOpen, setPointModalOpen] = useState<boolean>(false);
   const [quickRedeemMsg, setQuickRedeemMsg] = useState<string | null>(null);
-  const [manualCodeInput, setManualCodeInput] = useState<string>('');
+  const [passcode, setPasscode] = useState('');
+  const [passcodeError, setPasscodeError] = useState('');
   const [checkInSuccessMsg, setCheckInSuccessMsg] = useState<string | null>(null);
 
   const activeDest = activeJourney
@@ -89,257 +85,205 @@ export const TravelerHome: React.FC = () => {
     }
   };
 
-  const handleScanGate = (gateCode: string, destName: string) => {
-    confetti({ particleCount: 70, spread: 70, origin: { y: 0.5 } });
-    simulateScanCode(gateCode);
-    setCheckInSuccessMsg(`Berhasil Check-In di ${destName}! Panduan rute dan plakat budaya telah diaktifkan.`);
-    setTimeout(() => setCheckInSuccessMsg(null), 5000);
-  };
-
-  const handleManualGateSubmit = (e: React.FormEvent) => {
+  const handleVerifyPasscode = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!manualCodeInput.trim()) return;
-    simulateScanCode(manualCodeInput.trim());
-    setManualCodeInput('');
+    if (!passcode.trim()) return;
+
+    const matchedDest = verifyGatePasscode(passcode.trim());
+    if (matchedDest) {
+      setPasscodeError('');
+      confetti({ particleCount: 70, spread: 70, origin: { y: 0.5 } });
+      setCheckInSuccessMsg(`Berhasil Check-In di ${matchedDest.name}! Panduan rute dan plakat budaya telah diaktifkan.`);
+      setTimeout(() => setCheckInSuccessMsg(null), 5000);
+    } else {
+      setPasscodeError('Kode gerbang tidak valid. Coba: dest-penglipuran atau dest-prambanan');
+    }
   };
 
   /* =========================================================================
-     CASE 1: NO ACTIVE DESTINATION SCANNED YET (PROMINENT GATE SCAN LANDING)
-     The user is at the entrance gate of a tourist destination.
-     We prioritize the Call-to-Action to SCAN, without showing destination catalogs.
+     CASE 1: NO ACTIVE DESTINATION SCANNED YET
      ========================================================================= */
   if (!activeDest) {
     return (
-      <div className="max-w-4xl mx-auto px-4 py-8 space-y-8">
-        {/* Success Alert if just checked in */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16 pb-12 font-sans text-neutral-900 antialiased">
         {checkInSuccessMsg && (
-          <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center gap-3 shadow-sm animate-fade-in">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
-            <span className="text-sm font-semibold">{checkInSuccessMsg}</span>
+          <div className="pt-4">
+            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center gap-3 shadow-sm">
+              <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
+              <span className="text-sm font-semibold">{checkInSuccessMsg}</span>
+            </div>
           </div>
         )}
 
-        {/* 1. HERO: PROMINENT CALL TO SCAN AT ENTRANCE GATE */}
-        <div className="relative rounded-3xl bg-gradient-to-br from-emerald-950 via-teal-950 to-slate-950 text-white p-6 sm:p-10 overflow-hidden shadow-2xl border border-emerald-800/60">
-          {/* Background decorative glow */}
-          <div className="absolute -right-16 -top-16 w-80 h-80 bg-emerald-500/15 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute -left-16 -bottom-16 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
+        <section className="relative pt-4 lg:pt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+            <div className="lg:col-span-6 space-y-6">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider">
+                <Globe className="w-3.5 h-3.5 text-blue-600" />
+                <span>Ekowisata & Warisan Budaya</span>
+              </div>
 
-          <div className="relative z-10 flex flex-col items-center text-center max-w-2xl mx-auto space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Gerbang Masuk Digital • TAKONO Heritage</span>
-            </div>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-neutral-900 leading-[1.1]">
+                Jelajahi Warisan <br />
+                <span className="text-blue-600">Budaya Nusantara</span>
+              </h1>
 
-            <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white leading-tight">
-              Pindai QR di Gerbang Masuk Wisata
-            </h1>
-
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Selamat datang di kawasan wisata budaya nusantara! Plakat QR resmi terpasang di gerbang masuk untuk memverifikasi kedatangan Anda, mengaktifkan peta panduan budaya, dan membuka diskon UMKM warga lokal.
-            </p>
-
-            {/* Prominent Optical Scanner Trigger */}
-            <div className="pt-2 w-full flex flex-col sm:flex-row items-center justify-center gap-3">
-              <button
-                type="button"
-                onClick={() => setQrModalOpen(true)}
-                className="w-full sm:w-auto px-8 py-4 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded-2xl text-sm flex items-center justify-center gap-3 transition shadow-lg shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98]"
-              >
-                <Camera className="w-5 h-5 text-slate-950" />
-                <span>Buka Kamera Pemindai QR</span>
-              </button>
-            </div>
-
-            <p className="text-[11px] text-slate-400 flex items-center justify-center gap-1.5">
-              <Info className="w-3.5 h-3.5 text-slate-400" />
-              <span>Arahkan kamera ke plakat QR fisik yang tertera di pintu masuk lokasi wisata.</span>
-            </p>
-          </div>
-        </div>
-
-        {/* 2. INSTANT GATE SIMULATION (For Testing & Preview) */}
-        <div className="bg-white rounded-3xl border border-slate-200 p-6 sm:p-7 shadow-xs space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-100">
-            <div>
-              <h2 className="font-bold text-sm sm:text-base text-slate-900 flex items-center gap-2">
-                <QrCode className="w-4 h-4 text-emerald-600" />
-                <span>Simulasi Pindai Gerbang (Uji Coba Pengunjung)</span>
-              </h2>
-              <p className="text-xs text-slate-500">
-                Pilih gerbang lokasi wisata di bawah untuk menyimulasikan pengalaman scan plakat di pintu masuk:
+              <p className="text-neutral-600 text-base sm:text-lg max-w-xl leading-relaxed">
+                Nikmati pengalaman wisata imersif. Pindai plakat di gerbang masuk, selesaikan kuis budaya, dan kumpulkan poin untuk ditukarkan produk UMKM lokal.
               </p>
-            </div>
-            <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full w-fit">
-              1-Klik Simulasi
-            </span>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-            {/* Simulation Option 1: Penglipuran */}
-            <div className="p-4 rounded-2xl border border-emerald-200 bg-gradient-to-br from-emerald-50/50 to-slate-50 flex flex-col justify-between space-y-3 hover:border-emerald-400 transition">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-emerald-600 text-white">
-                    Desa Wisata
-                  </span>
-                  <span className="text-[11px] text-slate-400 font-mono">TAKONO:DEST:dest-penglipuran</span>
+              <div className="bg-white p-3 rounded-2xl border border-neutral-200 shadow-xl shadow-neutral-100 space-y-3">
+                <form onSubmit={handleVerifyPasscode} className="flex flex-col sm:flex-row gap-2">
+                  <div className="relative flex-1">
+                    <Search className="w-4 h-4 text-neutral-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      value={passcode}
+                      onChange={(e) => {
+                        setPasscode(e.target.value);
+                        setPasscodeError('');
+                      }}
+                      placeholder="Masukkan kode gerbang (cth: dest-penglipuran)"
+                      className="w-full pl-10 pr-4 py-3 bg-neutral-50 rounded-xl text-xs sm:text-sm font-mono border border-neutral-200 focus:outline-none focus:border-blue-600 focus:bg-white transition"
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition flex items-center justify-center gap-2 shrink-0 shadow-md shadow-blue-500/20"
+                  >
+                    <span>Verifikasi</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </form>
+
+                {passcodeError && (
+                  <p className="text-xs text-rose-600 font-medium px-2">{passcodeError}</p>
+                )}
+
+                <div className="flex items-center justify-between border-t border-neutral-100 pt-2.5 px-1">
+                  <span className="text-xs text-neutral-500">Atau gunakan pemindai cepat:</span>
+                  <button
+                    type="button"
+                    onClick={() => setQrModalOpen(true)}
+                    className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 transition"
+                  >
+                    <QrCode className="w-3.5 h-3.5" />
+                    <span>Buka Kamera QR</span>
+                  </button>
                 </div>
-                <h3 className="font-bold text-sm text-slate-900">
-                  Gerbang Utama Desa Wisata Penglipuran
-                </h3>
-                <p className="text-xs text-slate-600 flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                  <span>Kec. Bangli, Kab. Bangli, Bali</span>
-                </p>
-                <p className="text-[11px] text-slate-500">
-                  4 Titik Plakat Budaya • Angkul-Angkul, Bale Banjar, Pura Penataran, Hutan Bambu
-                </p>
               </div>
 
-              <button
-                type="button"
-                onClick={() => handleScanGate('TAKONO:DEST:dest-penglipuran', 'Desa Wisata Penglipuran')}
-                className="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-xs"
-              >
-                <QrCode className="w-4 h-4" />
-                <span>Simulasi Pindai Gerbang Penglipuran</span>
-              </button>
-            </div>
-
-            {/* Simulation Option 2: Kintamani */}
-            <div className="p-4 rounded-2xl border border-slate-200 bg-gradient-to-br from-slate-50 to-slate-100/50 flex flex-col justify-between space-y-3 hover:border-teal-400 transition">
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-teal-600 text-white">
-                    Kawasan Budaya
-                  </span>
-                  <span className="text-[11px] text-slate-400 font-mono">TAKONO:DEST:dest-kintamani</span>
+              <div className="flex items-center gap-6 pt-2">
+                <div className="flex -space-x-2">
+                  <img className="w-9 h-9 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="User" />
+                  <img className="w-9 h-9 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" alt="User" />
+                  <img className="w-9 h-9 rounded-full border-2 border-white object-cover" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80" alt="User" />
                 </div>
-                <h3 className="font-bold text-sm text-slate-900">
-                  Gerbang Kawasan Budaya Kintamani
-                </h3>
-                <p className="text-xs text-slate-600 flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-teal-600 shrink-0" />
-                  <span>Kintamani, Kab. Bangli, Bali</span>
-                </p>
-                <p className="text-[11px] text-slate-500">
-                  3 Titik Plakat Budaya • Kopi Tradisi, Kaldera Batur, Pura Ulun Danu
-                </p>
+                <div>
+                  <span className="block text-xs font-bold text-neutral-900">2,400+ Penjelajah Aktif</span>
+                  <span className="text-[11px] text-neutral-500">Telah melestarikan budaya lokal</span>
+                </div>
               </div>
+            </div>
 
-              <button
-                type="button"
-                onClick={() => handleScanGate('TAKONO:DEST:dest-kintamani', 'Kawasan Budaya Kintamani')}
-                className="w-full py-2.5 px-4 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs flex items-center justify-center gap-2 transition shadow-xs"
-              >
-                <QrCode className="w-4 h-4" />
-                <span>Simulasi Pindai Gerbang Kintamani</span>
-              </button>
+            <div className="lg:col-span-6 relative">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-4">
+                  <div className="h-64 rounded-3xl overflow-hidden border border-neutral-200 shadow-md bg-neutral-100">
+                    <img
+                      src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80"
+                      alt="Bali Culture"
+                      className="w-full h-full object-cover hover:scale-105 transition duration-500"
+                    />
+                  </div>
+                  <div className="p-6 rounded-3xl bg-blue-600 text-white space-y-2 shadow-lg shadow-blue-500/25">
+                    <div className="flex items-center justify-between">
+                      <Award className="w-6 h-6 text-blue-200" />
+                      <span className="text-[10px] font-mono font-black uppercase px-2.5 py-1 rounded-md bg-white/20 text-white">Poin Aktif</span>
+                    </div>
+                    <div className="text-3xl font-black font-mono">{currentUser.pointsBalance} PTS</div>
+                    <p className="text-xs font-medium text-blue-100">Tukarkan voucher kuliner & suvenir khas warga.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4 pt-8">
+                  <div className="p-6 rounded-3xl bg-neutral-900 text-white space-y-2">
+                    <ShieldCheck className="w-6 h-6 text-blue-400" />
+                    <h4 className="font-bold text-sm">Terverifikasi Plakat</h4>
+                    <p className="text-xs text-neutral-400">Konten resmi dari dinas & pengelola adat setempat.</p>
+                  </div>
+                  <div className="h-64 rounded-3xl overflow-hidden border border-neutral-200 shadow-md bg-neutral-100">
+                    <img
+                      src="https://images.unsplash.com/photo-1596402184320-417e7178b2cd?auto=format&fit=crop&w=800&q=80"
+                      alt="Temple"
+                      className="w-full h-full object-cover hover:scale-105 transition duration-500"
+                    />
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
+        </section>
 
-          {/* Manual Code Input Form */}
-          <form onSubmit={handleManualGateSubmit} className="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-2">
-            <div className="relative flex-1 w-full">
-              <input
-                type="text"
-                value={manualCodeInput}
-                onChange={(e) => setManualCodeInput(e.target.value)}
-                placeholder="Atau masukkan kode plakat gerbang (cth: TAKONO:DEST:dest-penglipuran)..."
-                className="w-full text-xs px-3.5 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-emerald-500 bg-slate-50 focus:bg-white transition"
-              />
+        <section className="bg-white rounded-3xl p-8 border border-neutral-200/90 shadow-2xs">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-neutral-100">
+            <div className="pt-4 md:pt-0">
+              <span className="block text-3xl font-black font-mono text-neutral-900">100+</span>
+              <span className="text-xs font-medium text-neutral-500">Titik Plakat Budaya</span>
             </div>
-            <button
-              type="submit"
-              disabled={!manualCodeInput.trim()}
-              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-slate-900 disabled:opacity-50 text-white font-bold text-xs hover:bg-emerald-600 transition"
-            >
-              Verifikasi Kode
-            </button>
-          </form>
-        </div>
-
-        {/* 3. HOW IT WORKS IN 3 SIMPLE STEPS */}
-        <div className="bg-slate-900 text-white rounded-3xl p-6 sm:p-8 space-y-6">
-          <div>
-            <h2 className="text-base sm:text-lg font-bold">Bagaimana Alur Pengalaman di Lokasi?</h2>
-            <p className="text-xs text-slate-400 mt-1">
-              TAKONO menjamin pengalaman kunjungan yang bermakna, beretika, dan mendukung ekonomi lokal.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm">
-                1
-              </div>
-              <h3 className="text-xs font-bold text-white">Scan di Gerbang Masuk</h3>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Pindai plakat gerbang untuk mengaktifkan panduan rute dan merekam kedatangan Anda di lokasi wisata.
-              </p>
+            <div className="pt-4 md:pt-0">
+              <span className="block text-3xl font-black font-mono text-neutral-900">50+</span>
+              <span className="text-xs font-medium text-neutral-500">Mitra UMKM Desa</span>
             </div>
-
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-teal-500/20 text-teal-400 flex items-center justify-center font-bold text-sm">
-                2
-              </div>
-              <h3 className="text-xs font-bold text-white">Jelajahi Titik & Kuis</h3>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Kunjungi tiap plakat fisik, pelajari kisah adat dan etika berkunjung, lalu pecahkan kuis berhadiah poin.
-              </p>
+            <div className="pt-4 md:pt-0">
+              <span className="block text-3xl font-black font-mono text-neutral-900">12K+</span>
+              <span className="text-xs font-medium text-neutral-500">Kuis Budaya Selesai</span>
             </div>
-
-            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 space-y-2">
-              <div className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold text-sm">
-                3
-              </div>
-              <h3 className="text-xs font-bold text-white">Tukar Poin di UMKM Warga</h3>
-              <p className="text-[11px] text-slate-300 leading-relaxed">
-                Gunakan Jejak Points untuk mendapatkan potongan harga kuliner khas dan cinderamata di warung UMKM terdekat.
-              </p>
+            <div className="pt-4 md:pt-0">
+              <span className="block text-3xl font-black font-mono text-blue-600">100%</span>
+              <span className="text-xs font-medium text-neutral-500">Keberlanjutan Lokal</span>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* 4. TRAVELER WALLET SUMMARY (Ready State) */}
-        <div className="p-5 rounded-3xl bg-amber-50/80 border border-amber-200/80 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-amber-500 text-slate-950 flex items-center justify-center font-bold">
-              <Coins className="w-5 h-5" />
-            </div>
-            <div>
-              <span className="text-[10px] font-bold uppercase tracking-wider text-amber-800">
-                Dompet Jejak Points Anda
-              </span>
-              <p className="text-sm font-black text-slate-900">
-                Saldo: <span className="font-mono text-amber-700">{currentUser.pointsBalance} Points</span>
-              </p>
-            </div>
+        <section className="space-y-10">
+          <div className="text-center max-w-2xl mx-auto space-y-3">
+            <span className="text-xs font-mono font-bold uppercase tracking-widest text-blue-600">Panduan Langkah</span>
+            <h2 className="text-3xl font-black tracking-tight text-neutral-900">Bagaimana Cara Kerjanya?</h2>
+            <p className="text-neutral-500 text-sm">Tiga langkah mudah menikmati wisata budaya yang bermakna dan berdampak bagi warga lokal.</p>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigateTo('/traveler/points')}
-            className="text-xs font-bold text-amber-900 hover:text-amber-700 flex items-center gap-1"
-          >
-            <span>Katalog Hadiah UMKM</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-white p-8 rounded-3xl border border-neutral-200 hover:border-neutral-300 transition space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-black font-mono text-lg">01</div>
+              <h3 className="font-bold text-lg text-neutral-900">Pindai Plakat Gerbang</h3>
+              <p className="text-neutral-500 text-xs leading-relaxed">Arahkan kamera ke kode QR resmi di pintu masuk wisata untuk mengaktifkan alur rute dan pemandu pintar.</p>
+            </div>
+
+            <div className="bg-white p-8 rounded-3xl border border-neutral-200 hover:border-neutral-300 transition space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-neutral-900 text-white flex items-center justify-center font-black font-mono text-lg">02</div>
+              <h3 className="font-bold text-lg text-neutral-900">Jelajahi & Jawab Kuis</h3>
+              <p className="text-neutral-500 text-xs leading-relaxed">Kunjungi setiap titik lokasi budaya, pelajari narasi sejarah adat, dan jawab kuis edukatif untuk mengumpulkan poin.</p>
+            </div>
+
+            <div className="bg-white p-8 rounded-3xl border border-neutral-200 hover:border-neutral-300 transition space-y-4">
+              <div className="w-12 h-12 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center font-black font-mono text-lg">03</div>
+              <h3 className="font-bold text-lg text-neutral-900">Tukar Poin di UMKM</h3>
+              <p className="text-neutral-500 text-xs leading-relaxed">Gunakan poin untuk mengklaim kupon diskon kuliner khas, cenderamata, dan karya pengerajin warga lokal.</p>
+            </div>
+          </div>
+        </section>
       </div>
     );
   }
 
   /* =========================================================================
      CASE 2: ACTIVE DESTINATION SCANNED
-     User is currently checked into this specific destination (e.g. Penglipuran).
-     The screen is strictly focused on THIS destination (NO list of other destinations).
      ========================================================================= */
   const activeRewards = getRewardsByDestination(activeDest.id).filter((r) => r.status === 'active');
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans text-neutral-900 antialiased">
       {/* Toast Notification for Quick Redeem */}
       {quickRedeemMsg && (
         <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-300 text-emerald-900 flex items-center gap-3 shadow-sm animate-fade-in">
@@ -349,17 +293,19 @@ export const TravelerHome: React.FC = () => {
       )}
 
       {/* 1. TOP ACTIVE LOCATION BAR */}
-      <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-2xl text-xs">
-        <div className="flex items-center gap-2 text-emerald-900 font-semibold">
-          <span className="relative flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-600"></span>
+      <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 bg-white border border-neutral-200/90 rounded-2xl text-xs shadow-2xs">
+        <div className="flex items-center gap-3 text-neutral-800 font-semibold">
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-600"></span>
           </span>
-          <span>Sedang Mengunjungi:</span>
-          <span className="font-black text-emerald-950 underline decoration-emerald-400 underline-offset-2">
+          <span className="text-neutral-400 font-medium">Sedang Mengunjungi:</span>
+          <span className="font-black text-neutral-900 text-sm tracking-tight">
             {activeDest.name}
           </span>
-          <span className="text-emerald-700">({activeDest.regency}, {activeDest.province})</span>
+          <span className="text-neutral-500 font-mono text-[11px] bg-neutral-100 px-2.5 py-1 rounded-lg">
+            {activeDest.regency}, {activeDest.province}
+          </span>
         </div>
 
         <button
@@ -369,44 +315,44 @@ export const TravelerHome: React.FC = () => {
               leaveDestination();
             }
           }}
-          className="px-3 py-1 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 font-medium text-[11px] flex items-center gap-1.5 transition shadow-2xs"
+          className="px-4 py-2.5 rounded-xl bg-neutral-50 hover:bg-neutral-100 text-neutral-700 border border-neutral-200 font-bold text-xs flex items-center gap-1.5 transition shadow-2xs"
         >
-          <RotateCcw className="w-3 h-3 text-slate-500" />
+          <RotateCcw className="w-3.5 h-3.5 text-neutral-500" />
           <span>Ganti Lokasi / Pindai Gerbang Lain</span>
         </button>
       </div>
 
       {/* 2. DESTINATION HERO CARD */}
-      <div className="relative rounded-3xl bg-slate-900 text-white overflow-hidden shadow-xl border border-slate-800">
-        <div className="relative h-64 sm:h-72 w-full overflow-hidden">
+      <div className="relative rounded-3xl bg-neutral-950 text-white overflow-hidden shadow-xl border border-neutral-800">
+        <div className="relative h-72 sm:h-80 w-full overflow-hidden">
           <img
             src={activeDest.heroImage}
             alt={activeDest.name}
-            className="w-full h-full object-cover brightness-[0.7]"
+            className="w-full h-full object-cover brightness-[0.75] hover:scale-105 transition duration-700"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent" />
 
           {/* Hero Content Overlay */}
-          <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-            <div className="space-y-2 max-w-xl">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/80 backdrop-blur-md text-white text-xs font-bold shadow-sm">
-                <MapPin className="w-3.5 h-3.5" />
+          <div className="absolute bottom-6 left-6 right-6 flex flex-col md:flex-row md:items-end justify-between gap-6">
+            <div className="space-y-3 max-w-xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-bold border border-white/20 shadow-sm">
+                <MapPin className="w-3.5 h-3.5 text-blue-400" />
                 <span>{activeDest.regency}, {activeDest.province}</span>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
+              <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-tight">
                 {activeDest.name}
               </h1>
-              <p className="text-xs sm:text-sm text-slate-200 line-clamp-2 leading-relaxed">
+              <p className="text-xs sm:text-sm text-neutral-300 line-clamp-2 leading-relaxed font-normal">
                 {activeDest.description}
               </p>
             </div>
 
             {/* Quick Actions */}
-            <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
               <button
                 type="button"
                 onClick={() => setQrModalOpen(true)}
-                className="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-2 transition shadow-md"
+                className="px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 transition shadow-lg shadow-blue-500/25"
               >
                 <QrCode className="w-4 h-4" />
                 <span>Pindai QR Plakat di Titik</span>
@@ -415,7 +361,7 @@ export const TravelerHome: React.FC = () => {
               <button
                 type="button"
                 onClick={() => navigateTo('/traveler/smart-guide')}
-                className="px-4 py-2.5 bg-white/20 hover:bg-white/30 backdrop-blur-md text-white font-semibold rounded-xl text-xs flex items-center gap-1.5 transition border border-white/20"
+                className="px-5 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 transition border border-white/20"
               >
                 <Compass className="w-4 h-4" />
                 <span>Rute Cerdas</span>
@@ -425,74 +371,74 @@ export const TravelerHome: React.FC = () => {
         </div>
 
         {/* Info Strip */}
-        <div className="px-6 py-3 bg-slate-950/90 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-300">
+        <div className="px-6 py-4 bg-neutral-900 border-t border-neutral-800 flex flex-wrap items-center justify-between gap-4 text-xs text-neutral-300 font-mono">
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="flex items-center gap-1.5 text-neutral-300">
+              <Clock className="w-4 h-4 text-blue-400" />
               <span>Buka: 08:00 - 18:30 WITA</span>
             </span>
-            <span>•</span>
-            <span className="flex items-center gap-1.5">
-              <Sparkle className="w-3.5 h-3.5 text-amber-400" />
+            <span className="text-neutral-600">•</span>
+            <span className="flex items-center gap-1.5 text-neutral-300">
+              <Globe className="w-4 h-4 text-amber-400" />
               <span>{destPoints.length} Titik Plakat Budaya</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-slate-400">Dompet Jejak Anda:</span>
-            <span className="font-bold text-amber-400 font-mono text-sm">{currentUser.pointsBalance} Pts</span>
+          <div className="flex items-center gap-2 bg-neutral-950 px-4 py-1.5 rounded-xl border border-neutral-800">
+            <span className="text-neutral-400 font-sans text-xs">Dompet Jejak Anda:</span>
+            <span className="font-black text-amber-400 text-sm">{currentUser.pointsBalance} PTS</span>
           </div>
         </div>
       </div>
 
       {/* 3. ACTIVE JOURNEY PROGRESS COMPANION */}
-      <div className="p-6 rounded-3xl bg-white border border-slate-200/90 shadow-2xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="space-y-0.5">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-700">
+      <div className="p-7 rounded-3xl bg-white border border-neutral-200/90 shadow-2xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-1">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
               Progres Jelajah Aktif
             </span>
-            <h2 className="text-base sm:text-lg font-black text-slate-900">
+            <h2 className="text-lg sm:text-xl font-black text-neutral-900 tracking-tight pt-1">
               {completedPointsCount} dari {totalPointsForActive} Titik Warisan Selesai ({progressPercent}%)
             </h2>
           </div>
 
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Poin Sesi Ini:</span>
-            <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 font-bold font-mono text-xs border border-emerald-200">
-              +{activeJourney.earnedPointsTotal} Pts
+          <div className="flex items-center gap-2.5 bg-neutral-50 px-4 py-2 rounded-2xl border border-neutral-200">
+            <span className="text-xs text-neutral-500 font-medium">Poin Sesi Ini:</span>
+            <span className="px-3 py-1 rounded-xl bg-blue-600 text-white font-mono font-black text-xs shadow-xs">
+              +{activeJourney.earnedPointsTotal} PTS
             </span>
           </div>
         </div>
 
         {/* Visual Progress Bar */}
-        <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+        <div className="w-full h-3 bg-neutral-100 rounded-full overflow-hidden p-0.5 border border-neutral-200/60">
           <div
-            className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full transition-all duration-500"
+            className="h-full bg-blue-600 rounded-full transition-all duration-700 shadow-sm"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
 
         {/* SMART GUIDE RECOMMENDATION CALLOUT */}
-        {smartRec && (
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/50 to-white border border-emerald-200/90 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-xs">
-                <Compass className="w-4 h-4" />
+        {smartRec?.recommendedPoint && (
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-50/70 via-neutral-50 to-white border border-blue-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20">
+                <Compass className="w-5 h-5" />
               </div>
-              <div className="space-y-0.5">
+              <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-200/70 text-emerald-900">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-600 text-white">
                     Rekomendasi Rute Selanjutnya
                   </span>
-                  <span className="text-xs font-semibold text-slate-500">
-                    Titik #{smartRec.recommendedPoint.sequenceOrder}
+                  <span className="text-xs font-semibold text-neutral-500 font-mono">
+                    Titik #{smartRec.recommendedPoint?.sequenceOrder}
                   </span>
                 </div>
-                <h3 className="font-bold text-sm text-slate-900">
-                  {smartRec.recommendedPoint.name}
+                <h3 className="font-extrabold text-sm sm:text-base text-neutral-900">
+                  {smartRec.recommendedPoint?.name}
                 </h3>
-                <p className="text-xs text-slate-600 line-clamp-1">
+                <p className="text-xs text-neutral-600 line-clamp-1 leading-relaxed">
                   {smartRec.reason}
                 </p>
               </div>
@@ -500,25 +446,25 @@ export const TravelerHome: React.FC = () => {
 
             <button
               type="button"
-              onClick={() => handleOpenPoint(smartRec.recommendedPoint)}
-              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition flex items-center gap-1.5 shadow-xs shrink-0"
+              onClick={() => smartRec.recommendedPoint && handleOpenPoint(smartRec.recommendedPoint)}
+              className="px-5 py-3 bg-neutral-900 hover:bg-blue-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-2 shadow-sm shrink-0"
             >
               <span>Buka Materi Titik</span>
-              <ArrowRight className="w-3.5 h-3.5" />
+              <ArrowRight className="w-4 h-4" />
             </button>
           </div>
         )}
       </div>
 
       {/* 4. SEQUENTIAL HERITAGE POINTS AT THIS DESTINATION */}
-      <div className="space-y-4">
+      <div className="space-y-5">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
-              <Footprints className="w-5 h-5 text-emerald-600" />
+            <h2 className="text-lg sm:text-xl font-black text-neutral-900 tracking-tight flex items-center gap-2.5">
+              <Footprints className="w-5 h-5 text-blue-600" />
               <span>Titik Jelajah Warisan Budaya Berurutan</span>
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-neutral-500 mt-0.5">
               Kunjungi dan pelajari etika adat di setiap titik untuk mengumpulkan poin dan membuka kuis.
             </p>
           </div>
@@ -526,85 +472,85 @@ export const TravelerHome: React.FC = () => {
           <button
             type="button"
             onClick={() => navigateTo('/traveler/smart-guide')}
-            className="text-xs font-bold text-emerald-700 hover:underline flex items-center gap-1"
+            className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition"
           >
             <span>Peta Rute Interaktif</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           {destPoints.map((point) => {
             const visitedRecord = activeJourney.visitedPoints.find(
               (vp) => vp.explorePointId === point.id
             );
             const isCompleted = !!visitedRecord?.completedAt;
-            const isRecommended = smartRec?.recommendedPoint.id === point.id;
+            const isRecommended = smartRec?.recommendedPoint?.id === point.id;
 
             return (
               <div
                 key={point.id}
                 onClick={() => handleOpenPoint(point)}
-                className={`p-4 rounded-2xl border transition cursor-pointer flex flex-col justify-between space-y-3 ${
+                className={`p-6 rounded-3xl border transition cursor-pointer flex flex-col justify-between space-y-4 ${
                   isCompleted
-                    ? 'bg-emerald-50/40 border-emerald-200'
+                    ? 'bg-emerald-50/30 border-emerald-200/80 shadow-2xs'
                     : isRecommended
-                    ? 'bg-white border-emerald-400 shadow-md ring-2 ring-emerald-500/20'
-                    : 'bg-white border-slate-200 hover:border-slate-300 shadow-2xs'
+                    ? 'bg-white border-blue-500 shadow-lg shadow-blue-500/5 ring-2 ring-blue-500/10'
+                    : 'bg-white border-neutral-200 hover:border-neutral-300 shadow-2xs'
                 }`}
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3.5">
                     <div
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold text-xs ${
+                      className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black font-mono text-xs ${
                         isCompleted
-                          ? 'bg-emerald-600 text-white'
+                          ? 'bg-emerald-600 text-white shadow-sm'
                           : isRecommended
-                          ? 'bg-emerald-500 text-slate-950 font-black'
-                          : 'bg-slate-100 text-slate-700'
+                          ? 'bg-blue-600 text-white shadow-sm'
+                          : 'bg-neutral-100 text-neutral-700'
                       }`}
                     >
                       {isCompleted ? <Check className="w-4 h-4 stroke-[3]" /> : `#${point.sequenceOrder}`}
                     </div>
                     <div>
-                      <h3 className="font-bold text-sm text-slate-900 leading-tight">
+                      <h3 className="font-extrabold text-sm sm:text-base text-neutral-900 leading-tight">
                         {point.name}
                       </h3>
-                      <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
+                      <span className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider">
                         {point.category}
                       </span>
                     </div>
                   </div>
 
                   {isCompleted ? (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1">
-                      <CheckCircle2 className="w-3 h-3" />
+                    <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1 shadow-2xs">
+                      <CheckCircle2 className="w-3.5 h-3.5" />
                       <span>Selesai</span>
                     </span>
                   ) : isRecommended ? (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                    <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 font-mono">
                       Rekomendasi
                     </span>
                   ) : (
-                    <span className="text-[11px] font-semibold text-slate-400">
-                      +{point.completionPoints || 5} Pts
+                    <span className="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">
+                      +{point.completionPoints || 5} PTS
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed">
                   {point.storySummary}
                 </p>
 
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                  <span className="text-[11px] text-slate-500 flex items-center gap-1">
-                    <Clock className="w-3 h-3 text-slate-400" />
+                <div className="pt-4 border-t border-neutral-100 flex items-center justify-between text-xs">
+                  <span className="text-[11px] text-neutral-400 flex items-center gap-1.5 font-mono">
+                    <Clock className="w-3.5 h-3.5 text-neutral-400" />
                     <span>~{point.estimatedMinutes} menit jelajah</span>
                   </span>
 
-                  <span className="text-xs font-bold text-emerald-700 flex items-center gap-1">
+                  <span className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1.5">
                     <span>Pelajari & Kuis</span>
-                    <ArrowRight className="w-3 h-3" />
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
               </div>
@@ -614,15 +560,17 @@ export const TravelerHome: React.FC = () => {
       </div>
 
       {/* 5. LOCAL UMKM DISCOUNTS AT THIS DESTINATION */}
-      <div className="p-6 rounded-3xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200/80 shadow-2xs space-y-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <ShoppingBag className="w-5 h-5 text-amber-700" />
+      <div className="p-7 rounded-3xl bg-white border border-neutral-200/90 shadow-2xs space-y-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center shrink-0">
+              <ShoppingBag className="w-5 h-5" />
+            </div>
             <div>
-              <h2 className="font-bold text-sm sm:text-base text-slate-900">
+              <h2 className="font-extrabold text-base text-neutral-900 tracking-tight">
                 Voucher Diskon Warung & UMKM di {activeDest.name}
               </h2>
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-neutral-500 mt-0.5">
                 Tukarkan Jejak Points hasil kuis Anda dengan promo kuliner & kerajinan tangan warga sekitar.
               </p>
             </div>
@@ -631,42 +579,42 @@ export const TravelerHome: React.FC = () => {
           <button
             type="button"
             onClick={() => navigateTo('/traveler/points')}
-            className="text-xs font-bold text-amber-800 hover:underline flex items-center gap-1 shrink-0"
+            className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 shrink-0 transition"
           >
             <span>Semua Hadiah</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
         {activeRewards.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {activeRewards.slice(0, 3).map((reward) => (
               <div
                 key={reward.id}
-                className="p-3.5 rounded-2xl bg-white border border-amber-200 shadow-2xs flex flex-col justify-between space-y-3"
+                className="p-5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 flex flex-col justify-between space-y-4 hover:border-amber-300 transition"
               >
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-amber-100 text-amber-800">
+                <div className="space-y-2">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-200">
                     {reward.category}
                   </span>
-                  <h3 className="font-bold text-xs text-slate-900 mt-2">
+                  <h3 className="font-extrabold text-xs sm:text-sm text-neutral-900 mt-1 leading-snug">
                     {reward.title}
                   </h3>
-                  <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">
+                  <p className="text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
                     {reward.description}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
-                  <span className="font-black text-xs text-amber-700 font-mono">
-                    {reward.pointsCost} Pts
+                <div className="pt-3.5 border-t border-neutral-200/70 flex items-center justify-between">
+                  <span className="font-black text-xs text-neutral-900 font-mono bg-amber-50 text-amber-800 px-2 py-1 rounded-lg border border-amber-200/50">
+                    {reward.pointsCost} PTS
                   </span>
 
                   <button
                     type="button"
                     onClick={() => handleQuickClaimReward(reward.id, reward.title)}
                     disabled={currentUser.pointsBalance < reward.pointsCost}
-                    className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 disabled:opacity-40 text-white font-bold text-[11px] transition shadow-2xs"
+                    className="px-4 py-2 rounded-xl bg-neutral-900 hover:bg-blue-600 disabled:opacity-40 text-white font-bold text-xs uppercase tracking-wider transition shadow-2xs"
                   >
                     Tukar
                   </button>
@@ -675,7 +623,7 @@ export const TravelerHome: React.FC = () => {
             ))}
           </div>
         ) : (
-          <div className="p-4 bg-white/80 rounded-2xl text-center text-xs text-slate-500">
+          <div className="p-8 bg-neutral-50 rounded-2xl text-center text-xs text-neutral-500 font-mono border border-dashed border-neutral-200">
             Katalog voucher lokal untuk destinasi ini sedang disiapkan oleh mitra UMKM warga.
           </div>
         )}

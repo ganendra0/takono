@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTakonoStore } from '../../services/store';
-import { Coins, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownLeft, ShieldAlert, Award, HelpCircle } from 'lucide-react';
+import { Coins, TrendingUp, TrendingDown, ArrowUpRight, ArrowDownLeft, Award, HelpCircle, ArrowRight } from 'lucide-react';
 
 export const PointsLedgerView: React.FC = () => {
   const { currentUser, getTravelerTransactions, navigateTo } = useTakonoStore();
@@ -17,117 +17,149 @@ export const PointsLedgerView: React.FC = () => {
   );
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-      {/* Header & Balance Card */}
-      <div className="rounded-2xl bg-gradient-to-br from-amber-500 via-amber-600 to-amber-700 text-white p-6 sm:p-8 shadow-md">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8 font-sans text-neutral-900 antialiased">
+      
+      {/* Top Header Section */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-neutral-200">
+        <div className="space-y-1.5">
+          <div className="inline-flex items-center gap-1.5 text-xs font-mono font-bold uppercase tracking-widest text-blue-600">
+            <Coins className="w-4 h-4" /> Buku Besar Jejak Points
+          </div>
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-neutral-900">
+            Dompet & Riwayat Poin
+          </h1>
+          <p className="text-xs sm:text-sm text-neutral-500 max-w-xl">
+            Transparansi perolehan dan penukaran poin reward budaya Anda dari setiap titik jelajah dan kuis edukasi.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigateTo('/traveler/rewards')}
+          className="px-6 py-3.5 bg-neutral-900 hover:bg-blue-600 text-white font-bold rounded-2xl text-xs uppercase tracking-wider transition shadow-sm flex items-center gap-2 self-start md:self-auto shrink-0"
+        >
+          <Award className="w-4 h-4 text-amber-400" />
+          <span>Tukarkan ke Hadiah</span>
+          <ArrowRight className="w-4 h-4" />
+        </button>
+      </div>
+
+      {/* Main Balance & Stats Grid (Clean Editorial Style) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Main Balance Card */}
+        <div className="lg:col-span-6 bg-white p-8 rounded-3xl border border-neutral-200 shadow-2xs flex flex-col justify-between space-y-6">
           <div className="space-y-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-100 flex items-center gap-1.5">
-              <Coins className="w-4 h-4" /> Buku Besar Jejak Points
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400">
+              Saldo Poin Aktif
             </span>
-            <div className="flex items-baseline gap-2">
-              <h1 className="text-3xl sm:text-4xl font-black tracking-tight font-mono">
+            <div className="flex items-baseline gap-3 pt-2">
+              <span className="text-5xl sm:text-6xl font-black font-mono tracking-tight text-neutral-900">
                 {currentUser.pointsBalance}
-              </h1>
-              <span className="text-sm font-semibold text-amber-100">Poin Aktif</span>
+              </span>
+              <span className="text-sm font-bold text-blue-600 font-mono">PTS</span>
             </div>
-            <p className="text-xs text-amber-100/90 max-w-md">
-              Poin reward budaya yang Anda kumpulkan dengan menuntaskan titik jelajah dan kuis edukasi.
-            </p>
           </div>
-
-          <button
-            type="button"
-            onClick={() => navigateTo('/traveler/rewards')}
-            className="px-5 py-2.5 bg-slate-950 hover:bg-slate-900 text-white font-bold rounded-xl text-xs transition shadow-sm shrink-0 flex items-center gap-1.5 self-start sm:self-auto"
-          >
-            <Award className="w-4 h-4 text-amber-400" />
-            <span>Tukarkan ke Hadiah</span>
-          </button>
+          <p className="text-xs text-neutral-500 leading-relaxed border-t border-neutral-100 pt-4">
+            Poin ini dapat digunakan langsung untuk mendapatkan potongan harga di warung dan UMKM mitra lokal di sekitar destinasi.
+          </p>
         </div>
 
-        {/* Aggregate Stats */}
-        <div className="grid grid-cols-2 gap-4 mt-6 pt-6 border-t border-amber-400/40 text-xs">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-amber-400/30 flex items-center justify-center">
-              <ArrowUpRight className="w-4 h-4 text-white" />
+        {/* Aggregate Stats Cards */}
+        <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="bg-white p-6 rounded-3xl border border-neutral-200 shadow-2xs flex flex-col justify-between space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400">Diperoleh</span>
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                <ArrowUpRight className="w-4 h-4" />
+              </div>
             </div>
             <div>
-              <span className="text-amber-100 text-[11px] block">Total Poin Diperoleh</span>
-              <span className="font-bold text-sm font-mono text-white">+{totalEarned}</span>
+              <span className="text-2xl sm:text-3xl font-black font-mono text-emerald-600">
+                +{totalEarned}
+              </span>
+              <span className="text-[11px] text-neutral-400 block mt-0.5">Total akumulasi masuk</span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-amber-400/30 flex items-center justify-center">
-              <ArrowDownLeft className="w-4 h-4 text-white" />
+          <div className="bg-white p-6 rounded-3xl border border-neutral-200 shadow-2xs flex flex-col justify-between space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-neutral-400">Ditukarkan</span>
+              <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100">
+                <ArrowDownLeft className="w-4 h-4" />
+              </div>
             </div>
             <div>
-              <span className="text-amber-100 text-[11px] block">Total Poin Ditukarkan</span>
-              <span className="font-bold text-sm font-mono text-white">-{totalRedeemed}</span>
+              <span className="text-2xl sm:text-3xl font-black font-mono text-rose-600">
+                -{totalRedeemed}
+              </span>
+              <span className="text-[11px] text-neutral-400 block mt-0.5">Total voucher diklaim</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Point Earning Rules Guide (Section 14) */}
-      <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-2">
-        <h3 className="font-bold text-slate-900 text-xs uppercase tracking-wider flex items-center gap-1.5">
-          <HelpCircle className="w-3.5 h-3.5 text-emerald-600" />
-          <span>Aturan Resmi Perolehan Jejak Points:</span>
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-600">
-          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-            <strong className="text-slate-900 block font-semibold">+5 Poin</strong>
-            <span>Menuntaskan membaca cerita & edukasi etika di Explore Point.</span>
+      {/* Point Earning Rules Guide */}
+      <div className="bg-white p-6 sm:p-8 rounded-3xl border border-neutral-200 shadow-2xs space-y-4">
+        <div className="flex items-center gap-2 text-neutral-900 font-bold text-xs uppercase tracking-wider">
+          <HelpCircle className="w-4 h-4 text-blue-600" />
+          <span>Aturan Resmi Perolehan Jejak Points</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200/60 space-y-1.5">
+            <span className="font-mono font-bold text-blue-600 text-sm block">+5 Poin</span>
+            <p className="text-neutral-600">Menuntaskan membaca cerita & edukasi etika di Explore Point.</p>
           </div>
-          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-            <strong className="text-slate-900 block font-semibold">+10 Poin</strong>
-            <span>Menjawab kuis budaya dengan benar (hanya 1x per titik).</span>
+          <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200/60 space-y-1.5">
+            <span className="font-mono font-bold text-blue-600 text-sm block">+10 Poin</span>
+            <p className="text-neutral-600">Menjawab kuis budaya dengan benar (hanya 1x per titik).</p>
           </div>
-          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200">
-            <strong className="text-slate-900 block font-semibold">-20 s/d -80 Poin</strong>
-            <span>Penukaran voucher kuliner & cinderamata UMKM lokal.</span>
+          <div className="p-4 rounded-2xl bg-neutral-50 border border-neutral-200/60 space-y-1.5">
+            <span className="font-mono font-bold text-amber-700 text-sm block">-20 s/d -80 Poin</span>
+            <p className="text-neutral-600">Penukaran voucher kuliner & cinderamata UMKM lokal.</p>
           </div>
         </div>
       </div>
 
-      {/* Transactions Ledger Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h3 className="font-bold text-slate-900 text-sm">Riwayat Transaksi Poin (Ledger)</h3>
-          <span className="text-xs text-slate-500 font-mono">{transactions.length} entri</span>
+      {/* Transactions Ledger Table / List */}
+      <div className="bg-white rounded-3xl border border-neutral-200 shadow-2xs overflow-hidden">
+        <div className="px-6 sm:px-8 py-5 border-b border-neutral-200 flex items-center justify-between">
+          <h3 className="font-black text-neutral-900 text-sm tracking-tight">Riwayat Transaksi (Ledger)</h3>
+          <span className="text-xs text-neutral-500 font-mono bg-neutral-100 px-3 py-1 rounded-xl">
+            {transactions.length} entri tercatat
+          </span>
         </div>
 
         {transactions.length === 0 ? (
-          <div className="p-8 text-center text-slate-400 text-xs">
-            Belum ada transaksi poin yang tercatat.
+          <div className="p-16 text-center text-neutral-400 text-xs font-mono">
+            Belum ada transaksi poin yang tercatat dalam sistem.
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-neutral-100">
             {transactions.map((tx) => {
               const isEarn = tx.amount > 0;
               return (
                 <div
                   key={tx.id}
-                  className="p-4 sm:px-6 flex items-center justify-between gap-4 hover:bg-slate-50/70 transition text-xs"
+                  className="px-6 sm:px-8 py-4.5 flex items-center justify-between gap-4 hover:bg-neutral-50/80 transition text-xs"
                 >
-                  <div className="flex items-start gap-3">
+                  <div className="flex items-start gap-4">
                     <div
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${
-                        isEarn ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'
+                      className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 mt-0.5 border ${
+                        isEarn 
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
+                          : 'bg-rose-50 border-rose-200 text-rose-600'
                       }`}
                     >
                       {isEarn ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                     </div>
-                    <div>
-                      <h4 className="font-semibold text-slate-900 leading-tight">{tx.description}</h4>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-1">
-                        <span className="uppercase font-bold tracking-wider text-[10px] px-1.5 py-0.2 rounded bg-slate-100 text-slate-700">
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-neutral-900 text-sm leading-tight">{tx.description}</h4>
+                      <div className="flex items-center gap-2.5 text-[11px] text-neutral-500">
+                        <span className="uppercase font-mono font-bold tracking-wider text-[10px] px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200">
                           {tx.type}
                         </span>
                         <span>•</span>
-                        <span>
+                        <span className="font-mono">
                           {(() => {
                             try {
                               return new Date(tx.createdAt).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
@@ -142,13 +174,13 @@ export const PointsLedgerView: React.FC = () => {
 
                   <div className="text-right shrink-0">
                     <span
-                      className={`text-sm font-bold font-mono ${
+                      className={`text-base font-black font-mono ${
                         isEarn ? 'text-emerald-600' : 'text-rose-600'
                       }`}
                     >
                       {isEarn ? `+${tx.amount}` : tx.amount}
                     </span>
-                    <span className="block text-[11px] text-slate-400 font-mono">
+                    <span className="block text-[11px] text-neutral-400 font-mono mt-0.5">
                       Saldo: {tx.balanceAfter}
                     </span>
                   </div>

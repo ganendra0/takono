@@ -32,13 +32,13 @@ export const ManagerEvents: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <button
             type="button"
             onClick={() => navigateTo('/manager/dashboard')}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 mb-1"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-600 hover:text-slate-900 mb-1 transition"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Kembali ke Dashboard Manager</span>
@@ -50,7 +50,7 @@ export const ManagerEvents: React.FC = () => {
           <select
             value={selectedDestId}
             onChange={(e) => setSelectedDestId(e.target.value)}
-            className="text-xs bg-white border border-slate-300 rounded-lg px-3 py-2 font-medium"
+            className="text-xs bg-white border border-slate-300 rounded-xl px-3.5 py-2.5 font-medium shadow-2xs"
           >
             {destinations.map((d) => (
               <option key={d.id} value={d.id}>
@@ -67,10 +67,10 @@ export const ManagerEvents: React.FC = () => {
               setLocationName('Pelataran Utama Desa');
               setModalOpen(true);
             }}
-            className="px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition shrink-0"
+            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition shrink-0"
           >
             <Plus className="w-4 h-4" />
-            <span>Jadwalkan Event</span>
+            <span>JADWALKAN EVENT</span>
           </button>
         </div>
       </div>
@@ -79,40 +79,40 @@ export const ManagerEvents: React.FC = () => {
         {destEvents.map((ev) => (
           <div
             key={ev.id}
-            className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
+            className="p-6 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4"
           >
-            <div className="space-y-1.5">
+            <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-purple-100 text-purple-800">
-                  {ev.status}
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-100">
+                  STATUS: {ev.status}
                 </span>
-                <span className="text-xs text-slate-500 font-mono">Kode QR: {ev.qrCodeId}</span>
+                <span className="text-xs text-slate-500 font-mono">Kode QR: <strong className="text-slate-800">{ev.qrCodeId}</strong></span>
               </div>
-              <h3 className="font-bold text-sm text-slate-900">{ev.title}</h3>
-              <p className="text-xs text-slate-600 max-w-xl">{ev.description}</p>
-              <div className="flex items-center gap-4 text-xs text-slate-500 pt-1">
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3.5 h-3.5 text-purple-600" />
+              <h3 className="font-bold text-base text-slate-900">{ev.title}</h3>
+              <p className="text-xs text-slate-600 max-w-3xl leading-relaxed">{ev.description}</p>
+              <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500 pt-1">
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Calendar className="w-3.5 h-3.5 text-blue-600" />
                   {ev.date}
                 </span>
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-purple-600" />
+                <span className="flex items-center gap-1.5 font-medium">
+                  <Clock className="w-3.5 h-3.5 text-blue-600" />
                   {ev.time}
                 </span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-purple-600" />
+                <span className="flex items-center gap-1.5 font-medium">
+                  <MapPin className="w-3.5 h-3.5 text-blue-600" />
                   {ev.locationName}
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 self-end md:self-center">
+            <div className="flex items-center gap-2 self-end md:self-center shrink-0">
               <button
                 type="button"
                 onClick={() => simulateScanCode(ev.qrCodeId)}
-                className="px-3.5 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold flex items-center gap-1"
+                className="px-4 py-2 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs"
               >
-                <QrCode className="w-3.5 h-3.5" />
+                <QrCode className="w-4 h-4 text-blue-600" />
                 <span>Simulasi Pindai QR</span>
               </button>
             </div>
@@ -122,7 +122,7 @@ export const ManagerEvents: React.FC = () => {
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
-          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden my-6">
+          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden my-6">
             <div className="flex items-center justify-between px-6 py-4 bg-slate-900 text-white">
               <h3 className="font-bold text-sm">Jadwalkan Event Budaya Baru</h3>
               <button
@@ -202,7 +202,7 @@ export const ManagerEvents: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-sm"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm"
                 >
                   Jadwalkan & Generate QR
                 </button>
