@@ -9,7 +9,6 @@ import {
   ShieldCheck,
   QrCode,
   Coins,
-  Map,
   BookOpen,
   Award,
   ShoppingBag,
@@ -44,7 +43,6 @@ export const AppHeader: React.FC = () => {
   const navItemsMap: Record<UserRole, Array<{ label: string; route: string; icon: React.FC<{ className?: string }> }>> = {
     traveler: [
       { label: 'Jelajah Budaya', route: '/traveler/home', icon: Compass },
-      { label: 'Panduan Rute', route: '/traveler/smart-guide', icon: Map },
       { label: 'Tukar Poin', route: '/traveler/points', icon: Coins },
       { label: 'Album Stempel', route: '/traveler/album', icon: BookOpen },
     ],
@@ -139,7 +137,7 @@ export const AppHeader: React.FC = () => {
           </div>
         </div>
 
-        {/* 2. TENGAH: FLOATING CAPSULE NAVIGATION MENU (Lebar menyesuaikan isi / fit-content namun aman untuk menu banyak) */}
+        {/* 2. TENGAH: FLOATING CAPSULE NAVIGATION MENU */}
         <nav className="hidden lg:flex items-center gap-1 bg-neutral-50/90 border border-neutral-200/90 rounded-full px-2 py-1 shadow-inner relative z-10 overflow-x-auto scrollbar-none shrink-0 max-w-[50vw]">
           <div className="flex items-center gap-1 overflow-x-auto scrollbar-none">
             {currentNavItems.map((item) => {

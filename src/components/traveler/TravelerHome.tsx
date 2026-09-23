@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useTakonoStore } from '../../services/store';
-import { InteractivePointModal } from './InteractivePointModal';
 import { calculateSmartGuideRecommendation } from '../../services/smartGuideEngine';
 import { ExplorePoint } from '../../types/destination';
 import confetti from 'canvas-confetti';
@@ -37,8 +36,6 @@ export const TravelerHome: React.FC = () => {
     verifyGatePasscode,
   } = useTakonoStore();
 
-  const [selectedPointForModal, setSelectedPointForModal] = useState<ExplorePoint | null>(null);
-  const [pointModalOpen, setPointModalOpen] = useState<boolean>(false);
   const [quickRedeemMsg, setQuickRedeemMsg] = useState<string | null>(null);
   const [passcode, setPasscode] = useState('');
   const [passcodeError, setPasscodeError] = useState('');
@@ -54,8 +51,11 @@ export const TravelerHome: React.FC = () => {
         .sort((a, b) => a.sequenceOrder - b.sequenceOrder)
     : [];
 
+  // PERBAIKAN: Hitung titik selesai berdasarkan completedAt, quizPassed, atau pointsEarned > 0
   const completedPointsCount = activeJourney
-    ? activeJourney.visitedPoints.filter((vp) => !!vp.completedAt).length
+    ? activeJourney.visitedPoints.filter(
+        (vp) => !!vp.completedAt || vp.quizPassed || (vp.pointsEarned && vp.pointsEarned > 0)
+      ).length
     : 0;
 
   const totalPointsForActive = destPoints.length;
@@ -69,9 +69,9 @@ export const TravelerHome: React.FC = () => {
     ? calculateSmartGuideRecommendation(destPoints, activeJourney || undefined)
     : null;
 
+  // Navigasi langsung ke halaman penuh detail titik
   const handleOpenPoint = (point: ExplorePoint) => {
-    setSelectedPointForModal(point);
-    setPointModalOpen(true);
+    navigateTo(`/traveler/explore/${point.id}`);
   };
 
   const handleQuickClaimReward = (rewardId: string, title: string) => {
@@ -101,8 +101,8 @@ export const TravelerHome: React.FC = () => {
   };
 
   /* =========================================================================
-     CASE 1: NO ACTIVE DESTINATION SCANNED YET
-     ========================================================================= */
+      CASE 1: NO ACTIVE DESTINATION SCANNED YET
+      ========================================================================= */
   if (!activeDest) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16 pb-12 font-sans text-neutral-900 antialiased">
@@ -278,9 +278,10 @@ export const TravelerHome: React.FC = () => {
   }
 
   /* =========================================================================
-     CASE 2: ACTIVE DESTINATION SCANNED
-     ========================================================================= */
+      CASE 2: ACTIVE DESTINATION SCANNED
+      ========================================================================= */
   const activeRewards = getRewardsByDestination(activeDest.id).filter((r) => r.status === 'active');
+  const targetPoint = smartRec?.recommendedPoint || destPoints[0];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 font-sans text-neutral-900 antialiased">
@@ -357,15 +358,6 @@ export const TravelerHome: React.FC = () => {
                 <QrCode className="w-4 h-4" />
                 <span>Pindai QR Plakat di Titik</span>
               </button>
-
-              <button
-                type="button"
-                onClick={() => navigateTo('/traveler/smart-guide')}
-                className="px-5 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold rounded-2xl text-xs uppercase tracking-wider flex items-center gap-2 transition border border-white/20"
-              >
-                <Compass className="w-4 h-4" />
-                <span>Rute Cerdas</span>
-              </button>
             </div>
           </div>
         </div>
@@ -391,175 +383,159 @@ export const TravelerHome: React.FC = () => {
         </div>
       </div>
 
-      {/* 3. ACTIVE JOURNEY PROGRESS COMPANION */}
-      <div className="p-7 rounded-3xl bg-white border border-neutral-200/90 shadow-2xs space-y-5">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="space-y-1">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md border border-blue-100">
-              Progres Jelajah Aktif
-            </span>
-            <h2 className="text-lg sm:text-xl font-black text-neutral-900 tracking-tight pt-1">
-              {completedPointsCount} dari {totalPointsForActive} Titik Warisan Selesai ({progressPercent}%)
-            </h2>
-          </div>
-
-          <div className="flex items-center gap-2.5 bg-neutral-50 px-4 py-2 rounded-2xl border border-neutral-200">
-            <span className="text-xs text-neutral-500 font-medium">Poin Sesi Ini:</span>
-            <span className="px-3 py-1 rounded-xl bg-blue-600 text-white font-mono font-black text-xs shadow-xs">
-              +{activeJourney.earnedPointsTotal} PTS
-            </span>
-          </div>
-        </div>
-
-        {/* Visual Progress Bar */}
-        <div className="w-full h-3 bg-neutral-100 rounded-full overflow-hidden p-0.5 border border-neutral-200/60">
-          <div
-            className="h-full bg-blue-600 rounded-full transition-all duration-700 shadow-sm"
-            style={{ width: `${progressPercent}%` }}
-          />
-        </div>
-
-        {/* SMART GUIDE RECOMMENDATION CALLOUT */}
-        {smartRec?.recommendedPoint && (
-          <div className="p-5 rounded-2xl bg-gradient-to-r from-blue-50/70 via-neutral-50 to-white border border-blue-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-2xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-blue-500/20">
-                <Compass className="w-5 h-5" />
+      {/* 3. SECTION PANDUAN RUTE JELAJAH BUDAYA */}
+      <div className="space-y-6">
+        
+        {/* Card Header & Pilihan Manajer */}
+        <div className="bg-white rounded-3xl border border-neutral-200 p-6 sm:p-8 shadow-2xs space-y-6">
+          {/* Header & Progress Rute Bar */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-neutral-100">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <Footprints className="w-4 h-4 text-emerald-600" />
+                <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-100">
+                  PANDUAN RUTE JELAJAH BUDAYA
+                </span>
               </div>
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-blue-600 text-white">
-                    Rekomendasi Rute Selanjutnya
-                  </span>
-                  <span className="text-xs font-semibold text-neutral-500 font-mono">
-                    Titik #{smartRec.recommendedPoint?.sequenceOrder}
-                  </span>
-                </div>
-                <h3 className="font-extrabold text-sm sm:text-base text-neutral-900">
-                  {smartRec.recommendedPoint?.name}
-                </h3>
-                <p className="text-xs text-neutral-600 line-clamp-1 leading-relaxed">
-                  {smartRec.reason}
-                </p>
-              </div>
+              <h2 className="text-2xl font-black text-neutral-900 tracking-tight pt-1">
+                Mau ke mana selanjutnya?
+              </h2>
+              <p className="text-xs text-neutral-500">
+                Rekomendasi titik warisan budaya berurutan agar perjalanan Anda lebih bermakna dan terarah.
+              </p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => smartRec.recommendedPoint && handleOpenPoint(smartRec.recommendedPoint)}
-              className="px-5 py-3 bg-neutral-900 hover:bg-blue-600 text-white font-bold text-xs uppercase tracking-wider rounded-xl transition flex items-center gap-2 shadow-sm shrink-0"
-            >
-              <span>Buka Materi Titik</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-      </div>
-
-      {/* 4. SEQUENTIAL HERITAGE POINTS AT THIS DESTINATION */}
-      <div className="space-y-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg sm:text-xl font-black text-neutral-900 tracking-tight flex items-center gap-2.5">
-              <Footprints className="w-5 h-5 text-blue-600" />
-              <span>Titik Jelajah Warisan Budaya Berurutan</span>
-            </h2>
-            <p className="text-xs text-neutral-500 mt-0.5">
-              Kunjungi dan pelajari etika adat di setiap titik untuk mengumpulkan poin dan membuka kuis.
-            </p>
+            <div className="bg-neutral-50 border border-neutral-200/80 rounded-2xl p-4 min-w-[240px] shrink-0">
+              <div className="flex justify-between items-center text-xs font-bold mb-2">
+                <span className="text-neutral-700">Progres Rute di {activeDest.name}</span>
+                <span className="text-emerald-600 font-mono">{progressPercent}%</span>
+              </div>
+              <div className="w-full h-2.5 bg-neutral-200 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-emerald-500 rounded-full transition-all duration-500"
+                  style={{ width: `${progressPercent}%` }}
+                />
+              </div>
+              <span className="text-[11px] text-neutral-400 font-mono mt-2 block">
+                {completedPointsCount} dari {totalPointsForActive} titik warisan terselesaikan
+              </span>
+            </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigateTo('/traveler/smart-guide')}
-            className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1 transition"
-          >
-            <span>Peta Rute Interaktif</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
+          {/* Card Pilihan Manajer (Rekomendasi) */}
+          {targetPoint && (
+            <div className="bg-neutral-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl space-y-6 relative overflow-hidden">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <span className="bg-emerald-500 text-neutral-950 text-[10px] font-extrabold uppercase px-3 py-1 rounded-full tracking-wider">
+                    PILIHAN MANAJER
+                  </span>
+                  <span className="text-xs text-neutral-400 font-mono flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-emerald-400" /> Est. {targetPoint.estimatedMinutes || 15} menit
+                  </span>
+                </div>
+                <span className="text-xs font-mono text-neutral-400 font-bold">
+                  Titik #{targetPoint.sequenceOrder} dari {totalPointsForActive}
+                </span>
+              </div>
+
+              <div className="space-y-2">
+                <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                  {targetPoint.name}
+                </h3>
+                <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed max-w-3xl">
+                  {targetPoint.shortDescription || targetPoint.storySummary}
+                </p>
+              </div>
+
+              <div className="bg-neutral-800/80 border border-neutral-700/60 rounded-2xl p-4 text-xs text-neutral-300">
+                <strong className="text-emerald-400 font-mono">Alasan Panduan:</strong> {smartRec?.reason || 'Rekomendasi kurasi utama dari Pengelola Destinasi untuk pengalaman budaya terbaik.'}
+              </div>
+
+              <div className="pt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-2 text-xs text-neutral-400 font-mono">
+                  <MapPin className="w-4 h-4 text-emerald-400" />
+                  <span>{targetPoint.locationHint || 'Pintu Masuk Utama ' + activeDest.name}</span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleOpenPoint(targetPoint)}
+                  className="w-full sm:w-auto px-6 py-3.5 bg-emerald-500 hover:bg-emerald-400 text-neutral-950 font-black rounded-2xl text-xs uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 transition active:scale-95 shrink-0"
+                >
+                  <span>Buka Panduan & Kuis (+{targetPoint.completionPoints || 5} Pts)</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          {destPoints.map((point) => {
-            const visitedRecord = activeJourney.visitedPoints.find(
-              (vp) => vp.explorePointId === point.id
-            );
-            const isCompleted = !!visitedRecord?.completedAt;
-            const isRecommended = smartRec?.recommendedPoint?.id === point.id;
+        {/* Daftar Urutan Titik Jelajah Berurutan */}
+        <div className="space-y-4 pt-2">
+          <h3 className="text-lg font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
+            <Footprints className="w-5 h-5 text-blue-600" />
+            <span>Daftar Urutan Rute Kunjungan ({destPoints.length} Titik)</span>
+          </h3>
 
-            return (
-              <div
-                key={point.id}
-                onClick={() => handleOpenPoint(point)}
-                className={`p-6 rounded-3xl border transition cursor-pointer flex flex-col justify-between space-y-4 ${
-                  isCompleted
-                    ? 'bg-emerald-50/30 border-emerald-200/80 shadow-2xs'
-                    : isRecommended
-                    ? 'bg-white border-blue-500 shadow-lg shadow-blue-500/5 ring-2 ring-blue-500/10'
-                    : 'bg-white border-neutral-200 hover:border-neutral-300 shadow-2xs'
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {destPoints.map((point) => {
+              const visitedRecord = activeJourney.visitedPoints.find(
+                (vp) => vp.explorePointId === point.id
+              );
+              // PERBAIKAN: Tandai selesai jika completedAt, quizPassed, atau pointsEarned > 0 bernilai true
+              const isCompleted = !!(
+                visitedRecord?.completedAt ||
+                visitedRecord?.quizPassed ||
+                (visitedRecord?.pointsEarned && visitedRecord.pointsEarned > 0)
+              );
+
+              return (
+                <div
+                  key={point.id}
+                  onClick={() => handleOpenPoint(point)}
+                  className={`p-5 rounded-3xl border transition cursor-pointer flex items-center justify-between gap-4 group ${
+                    isCompleted
+                      ? 'bg-emerald-50/50 border-emerald-200 hover:border-emerald-400'
+                      : 'bg-white border-neutral-200 hover:border-blue-400 shadow-2xs'
+                  }`}
+                >
+                  <div className="flex items-center gap-4">
                     <div
-                      className={`w-9 h-9 rounded-2xl flex items-center justify-center font-black font-mono text-xs ${
+                      className={`w-12 h-12 rounded-2xl font-mono font-black text-sm flex items-center justify-center shrink-0 ${
                         isCompleted
-                          ? 'bg-emerald-600 text-white shadow-sm'
-                          : isRecommended
-                          ? 'bg-blue-600 text-white shadow-sm'
-                          : 'bg-neutral-100 text-neutral-700'
+                          ? 'bg-emerald-500 text-white'
+                          : 'bg-neutral-100 text-neutral-700 group-hover:bg-blue-600 group-hover:text-white transition duration-300'
                       }`}
                     >
-                      {isCompleted ? <Check className="w-4 h-4 stroke-[3]" /> : `#${point.sequenceOrder}`}
+                      #{point.sequenceOrder}
                     </div>
-                    <div>
-                      <h3 className="font-extrabold text-sm sm:text-base text-neutral-900 leading-tight">
-                        {point.name}
-                      </h3>
-                      <span className="text-[10px] font-mono font-bold text-neutral-400 uppercase tracking-wider">
-                        {point.category}
-                      </span>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-extrabold text-sm text-neutral-900 tracking-tight group-hover:text-blue-600 transition">
+                          {point.name}
+                        </h4>
+                        {isCompleted && (
+                          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                        )}
+                      </div>
+                      <p className="text-xs text-neutral-500 line-clamp-1">
+                        {point.shortDescription}
+                      </p>
                     </div>
                   </div>
 
-                  {isCompleted ? (
-                    <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1 shadow-2xs">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                      <span>Selesai</span>
-                    </span>
-                  ) : isRecommended ? (
-                    <span className="px-3 py-1 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 font-mono">
-                      Rekomendasi
-                    </span>
-                  ) : (
-                    <span className="text-xs font-mono font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-lg">
-                      +{point.completionPoints || 5} PTS
-                    </span>
-                  )}
+                  <ChevronRight className="w-5 h-5 text-neutral-400 group-hover:text-blue-600 group-hover:translate-x-1 transition shrink-0" />
                 </div>
-
-                <p className="text-xs text-neutral-600 line-clamp-2 leading-relaxed">
-                  {point.storySummary}
-                </p>
-
-                <div className="pt-4 border-t border-neutral-100 flex items-center justify-between text-xs">
-                  <span className="text-[11px] text-neutral-400 flex items-center gap-1.5 font-mono">
-                    <Clock className="w-3.5 h-3.5 text-neutral-400" />
-                    <span>~{point.estimatedMinutes} menit jelajah</span>
-                  </span>
-
-                  <span className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1.5">
-                    <span>Pelajari & Kuis</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
+
       </div>
 
-      {/* 5. LOCAL UMKM DISCOUNTS AT THIS DESTINATION */}
+      {/* 4. LOCAL UMKM DISCOUNTS AT THIS DESTINATION */}
       <div className="p-7 rounded-3xl bg-white border border-neutral-200/90 shadow-2xs space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -628,24 +604,6 @@ export const TravelerHome: React.FC = () => {
           </div>
         )}
       </div>
-
-      {/* Unified Interactive Point Modal */}
-      <InteractivePointModal
-        point={selectedPointForModal}
-        isOpen={pointModalOpen}
-        onClose={() => {
-          setPointModalOpen(false);
-          setSelectedPointForModal(null);
-        }}
-        onNavigateToNextPoint={(nextPointId) => {
-          const nextPt = destPoints.find((p) => p.id === nextPointId);
-          if (nextPt) {
-            setSelectedPointForModal(nextPt);
-          } else {
-            setPointModalOpen(false);
-          }
-        }}
-      />
     </div>
   );
 };
