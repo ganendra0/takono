@@ -1,0 +1,6 @@
+{
+  "name": "TAKONO - Digital Tourism & Smart Guide Platform",
+  "description": "Platform digital pariwisata yang membantu wisatawan menemukan, memahami, dan menjelajahi lebih banyak hal di destinasi wisata Indonesia.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
