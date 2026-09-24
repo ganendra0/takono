@@ -1,14 +1,14 @@
 import React from 'react';
-import { 
-  Compass, 
-  QrCode, 
-  MapPin, 
-  Gift, 
-  ArrowRight, 
-  Sparkles, 
-  Building2, 
-  Landmark, 
-  Store, 
+import {
+  Compass,
+  QrCode,
+  MapPin,
+  Gift,
+  ArrowRight,
+  Sparkles,
+  Building2,
+  Landmark,
+  Store,
   Footprints,
   BookOpen,
   Clock,
@@ -17,35 +17,37 @@ import {
   CheckCircle2,
   Trophy
 } from 'lucide-react';
-import { Destination, LocalDiscovery } from '../../types/index.js';
-import { DemoDataNotice } from '../../components/DemoDataNotice.js';
+import { Destination, LocalDiscovery, ExplorePoint } from '../../types/index.js';
+import heroImage from '../../assets/images/hero_takono_tourism_1790168118274.jpg';
 import { TakonoLogo } from '../../components/TakonoLogo.js';
 
 interface HomePageProps {
+  explorePoints?: ExplorePoint[];
   destination: Destination | null;
   localDiscoveries: LocalDiscovery[];
   onNavigate: (path: string) => void;
   onOpenScanModal: () => void;
 }
 
-export const HomePage: React.FC<HomePageProps> = ({ 
-  destination, 
-  localDiscoveries, 
+export const HomePage: React.FC<HomePageProps> = ({
+  destination,
+  explorePoints = [],
+  localDiscoveries,
   onNavigate,
   onOpenScanModal
 }) => {
   return (
     <div className="min-h-screen bg-white">
-      
+
       {/* 1. HERO SECTION */}
       <section className="relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24 border-b border-slate-100 bg-gradient-to-b from-blue-50/40 via-white to-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            
+
             {/* Left Column: Headline & Action */}
             <div className="lg:col-span-7 space-y-6">
-              
+
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-blue-700 text-xs font-semibold">
                 <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
                 <span>Platform Pemandu Wisata & Smart Guide Interaktif</span>
@@ -84,22 +86,22 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               <div className="pt-2">
-                <DemoDataNotice className="max-w-xl" />
+
               </div>
 
               {/* Live Metric Badges */}
               <div className="grid grid-cols-3 gap-6 pt-6 border-t border-slate-100 max-w-lg">
                 <div className="space-y-0.5">
-                  <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tabular-nums">6</div>
+                  <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono tabular-nums">{explorePoints.length}</div>
                   <div className="text-xs text-slate-500 font-medium">Explore Points Aktif</div>
                 </div>
                 <div className="space-y-0.5">
-                  <div className="text-2xl sm:text-3xl font-black text-blue-600 font-mono tabular-nums">+150</div>
+                  <div className="text-2xl sm:text-3xl font-black text-blue-600 font-mono tabular-nums">{explorePoints.reduce((sum,p)=>sum+p.pointsReward+(p.quiz?.questions.reduce((n,q)=>n+q.points,0)||0),0)}</div>
                   <div className="text-xs text-slate-500 font-medium">Jejak Points Hadiah</div>
                 </div>
                 <div className="space-y-0.5">
-                  <div className="text-2xl sm:text-3xl font-black text-emerald-600 font-mono tabular-nums">100%</div>
-                  <div className="text-xs text-slate-500 font-medium">Cerita Terverifikasi</div>
+                  <div className="text-2xl sm:text-3xl font-black text-emerald-600 font-mono tabular-nums">{localDiscoveries.length}</div>
+                  <div className="text-xs text-slate-500 font-medium">Mitra Lokal</div>
                 </div>
               </div>
 
@@ -109,13 +111,13 @@ export const HomePage: React.FC<HomePageProps> = ({
             <div className="lg:col-span-5 relative">
               <div className="relative rounded-3xl overflow-hidden border border-slate-200 shadow-xl bg-slate-100 group">
                 <img
-                  src="/src/assets/images/hero_takono_tourism_1790168118274.jpg"
+                  src={destination?.heroImage || heroImage}
                   alt="Wisatawan menjelajahi destinasi dengan TAKONO"
                   className="w-full h-[460px] object-cover transition-transform duration-700 group-hover:scale-103"
                   loading="eager"
                   referrerPolicy="no-referrer"
                 />
-                
+
                 {/* Floating Destination Card */}
                 <div className="absolute bottom-4 left-4 right-4 p-4 sm:p-5 bg-white/95 backdrop-blur-md rounded-2xl border border-white/80 shadow-lg space-y-2.5">
                   <div className="flex items-center justify-between text-xs">
@@ -124,21 +126,21 @@ export const HomePage: React.FC<HomePageProps> = ({
                       <span>Destinasi Percontohan 2026</span>
                     </div>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-mono text-[11px] font-semibold border border-emerald-200">
-                      Buka Hari Ini
+                      {destination?.operatingHours || 'Lihat destinasi'}
                     </span>
                   </div>
 
                   <div className="text-base font-extrabold text-slate-900 leading-tight">
-                    Kebun Binatang Surabaya (KBS)
+                    {destination?.name || 'Jelajahi destinasi'}
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-slate-500 pt-1 border-t border-slate-100">
                     <span className="flex items-center gap-1 font-medium">
                       <MapPin className="w-3.5 h-3.5 text-blue-600" />
-                      Wonokromo, Kota Surabaya
+                      {destination?.city}
                     </span>
-                    <button 
-                      onClick={() => onNavigate('/destinations/kebun-binatang-surabaya')}
+                    <button
+                      onClick={() => onNavigate(destination ? '/destinations/'+destination.slug : '/destinations')}
                       className="text-blue-600 font-bold hover:text-blue-800 flex items-center gap-1 cursor-pointer transition-colors"
                     >
                       <span>Jelajahi Peta</span>
@@ -157,7 +159,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* 2. VALUE PROPOSITION: BUKAN SEKADAR DIREKTORI */}
       <section className="py-20 bg-slate-50/80 border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="max-w-3xl mx-auto text-center space-y-4 mb-14">
             <span className="text-xs font-bold text-blue-700 tracking-wider uppercase">
               Solusi Pengalaman Pariwisata Terintegrasi
@@ -171,7 +173,7 @@ export const HomePage: React.FC<HomePageProps> = ({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            
+
             <div className="p-7 bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition-all space-y-4 group">
               <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold group-hover:bg-blue-600 group-hover:text-white transition-colors">
                 <Compass className="w-6 h-6" />
@@ -222,7 +224,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* 3. ALUR PERJALANAN (8-STEP USER FLOW) */}
       <section className="py-20 bg-white border-b border-slate-200/80">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="max-w-3xl mb-14">
             <span className="text-xs font-bold text-blue-700 tracking-wider uppercase">
               Alur Pengalaman Wisatawan
@@ -246,8 +248,8 @@ export const HomePage: React.FC<HomePageProps> = ({
               { step: '07', title: 'Koleksi Stempel', desc: 'Buku Album Jelajah otomatis mencatat setiap pencapaian dan foto memorimu.' },
               { step: '08', title: 'Klaim Reward & UMKM', desc: 'Tukarkan poin dengan voucher kuliner lokal atau suvenir resmi destinasi!' }
             ].map((item, idx) => (
-              <div 
-                key={idx} 
+              <div
+                key={idx}
                 className="p-5 bg-slate-50/70 hover:bg-white rounded-2xl border border-slate-200/80 hover:border-blue-400/80 hover:shadow-md transition-all space-y-2.5 relative"
               >
                 <div className="flex items-center justify-between">
@@ -269,7 +271,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {destination && (
         <section className="py-20 bg-slate-50/90 border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            
+
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
               <div>
                 <span className="text-xs font-bold text-blue-700 tracking-wider uppercase">
@@ -284,16 +286,16 @@ export const HomePage: React.FC<HomePageProps> = ({
               </div>
 
               <button
-                onClick={() => onNavigate('/destinations/kebun-binatang-surabaya')}
+                onClick={() => onNavigate(destination ? '/destinations/'+destination.slug : '/destinations')}
                 className="px-5 py-2.5 border border-slate-300 text-slate-800 bg-white rounded-xl text-xs font-bold hover:bg-slate-50 transition-colors flex items-center gap-2 self-start md:self-auto cursor-pointer shadow-xs"
               >
-                <span>Lihat Panduan Lengkap KBS</span>
+                <span>Lihat Panduan Destinasi</span>
                 <ArrowRight className="w-4 h-4 text-blue-600" />
               </button>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-6 sm:p-10 rounded-3xl border border-slate-200/90 shadow-sm">
-              
+
               <div className="lg:col-span-6 space-y-5">
                 <p className="text-sm text-slate-700 leading-relaxed">
                   {destination.description}
@@ -327,13 +329,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                     className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 transition-all flex items-center gap-2 cursor-pointer shadow-sm active:scale-98"
                   >
                     <Compass className="w-4 h-4" />
-                    <span>Buka Smart Guide KBS</span>
+                    <span>Buka Smart Guide</span>
                   </button>
                   <button
                     onClick={onOpenScanModal}
                     className="px-5 py-3 text-xs font-semibold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl cursor-pointer transition-colors"
                   >
-                    Simulasi Scan QR KBS
+                    Scan QR Destinasi
                   </button>
                 </div>
               </div>
@@ -346,13 +348,13 @@ export const HomePage: React.FC<HomePageProps> = ({
                   loading="lazy"
                 />
                 <img
-                  src="/src/assets/images/kbs_elephant_exhibit_1790168144417.jpg"
+                  src={destination.gallery?.[0] || destination.heroImage}
                   alt="Konservasi Gajah KBS"
                   className="rounded-2xl h-40 w-full object-cover border border-slate-200 shadow-xs"
                   loading="lazy"
                 />
                 <img
-                  src="/src/assets/images/kbs_aquarium_building_1790168158103.jpg"
+                  src={destination.gallery?.[1] || destination.heroImage}
                   alt="Aquarium Bersejarah KBS"
                   className="rounded-2xl h-40 w-full object-cover border border-slate-200 shadow-xs"
                   loading="lazy"
@@ -368,7 +370,7 @@ export const HomePage: React.FC<HomePageProps> = ({
       {/* 5. LOCAL DISCOVERY: MITRA UMKM & KULINER SEKITAR */}
       <section className="py-20 bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
+
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-4">
             <div>
               <span className="text-xs font-bold text-blue-700 tracking-wider uppercase">
@@ -393,7 +395,7 @@ export const HomePage: React.FC<HomePageProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
             {localDiscoveries.slice(0, 3).map(partner => (
-              <div 
+              <div
                 key={partner.id}
                 className="rounded-2xl border border-slate-200/90 overflow-hidden hover:shadow-lg transition-all bg-white flex flex-col justify-between group"
               >

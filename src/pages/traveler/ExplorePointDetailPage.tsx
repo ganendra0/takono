@@ -29,6 +29,7 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
   const [alreadyCompleted, setAlreadyCompleted] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   // Quiz state
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
@@ -45,11 +46,14 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
   useEffect(() => {
     const fetchPoint = async () => {
       setIsLoading(true);
+      setPoint(null); setQuizResult(null); setSelectedOptions({}); setError('');
       const res = await ApiClient.getExplorePoint(slug);
       if (res.success && res.data) {
         setPoint(res.data.explorePoint);
         setAlreadyCompleted(res.data.alreadyCompleted);
         setQuizCompleted(res.data.quizCompleted);
+      } else {
+        setError(res.message || 'Gagal memuat titik.');
       }
       setIsLoading(false);
     };
@@ -85,6 +89,8 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
         });
         await refreshUserData();
       }
+    } else {
+      setError(res.message || 'Gagal mengirim kuis.');
     }
     setIsSubmitting(false);
   };
@@ -117,6 +123,7 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
 
   return (
     <div className="space-y-6 pb-12">
+      {error && <p role="alert" className="text-rose-700">{error}</p>}
       
       {/* Top Back Navigation */}
       <div className="flex items-center justify-between">
@@ -167,7 +174,7 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
           </span>
         </div>
         <span className="text-slate-500 font-mono text-[11px]">
-          Token: {point.secureToken.substring(0, 8)}...
+          {alreadyCompleted ? 'QR tervalidasi' : 'Pindai QR fisik untuk mencatat kunjungan'}
         </span>
       </div>
 
@@ -227,7 +234,7 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
               </div>
               <div>
                 <h3 className="text-sm font-bold text-slate-900">Mini Quiz Jelajah</h3>
-                <p className="text-[11px] text-slate-500">Raih +15 Jejak Points dengan menjawab kuis</p>
+                <p className="text-[11px] text-slate-500">Raih +{quiz.questions.reduce((sum,q)=>sum+q.points,0)} Jejak Points dengan menjawab kuis</p>
               </div>
             </div>
 

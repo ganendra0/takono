@@ -101,7 +101,7 @@ export const HowItWorksPage: React.FC<{ onNavigate: (path: string) => void }> = 
               onClick={() => onNavigate('/app/smart-guide')}
               className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer shadow-sm"
             >
-              Buka Smart Guide KBS
+              Buka Smart Guide
             </button>
           </div>
         </div>

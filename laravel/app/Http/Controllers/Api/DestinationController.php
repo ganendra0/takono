@@ -1,64 +1,19 @@
 <?php
-
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
-use Illuminate\Http\Request;
-
-class DestinationController extends Controller
-{
-    public function index()
-    {
-        $destinations = Destination::where('status', 'published')->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $destinations,
-        ]);
+use App\Services\Catalog;
+use App\Support\Api;
+class DestinationController extends Controller {
+    public function index() { return Api::ok(Destination::where('status','published')->get()); }
+    public function show(string $slug) {
+        $d=Catalog::destination($slug);
+        return Api::ok(['destination'=>$d,'explorePoints'=>Catalog::points()->where('destination_id',$d->id)->get()->map(fn($p)=>Api::point($p)),
+            'events'=>Catalog::events()->where('destination_id',$d->id)->get(),'rewards'=>Catalog::rewards()->where('destination_id',$d->id)->get(),
+            'localDiscoveries'=>Catalog::local()->where('destination_id',$d->id)->get()]);
     }
-
-    public function show(string $slug)
-    {
-        $destination = Destination::where('slug', $slug)->first();
-
-        if (!$destination) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Destinasi tidak ditemukan.',
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'destination' => $destination,
-                'explorePoints' => $destination->explorePoints()->where('status', 'published')->get(),
-                'events' => $destination->events()->where('status', 'published')->get(),
-                'localDiscoveries' => $destination->localDiscoveries()->where('status', 'published')->get(),
-                'rewards' => $destination->rewards()->where('status', 'active')->get(),
-            ],
-        ]);
-    }
-
-    public function scanDestinationQR(string $code)
-    {
-        $destination = Destination::where('code', strtoupper($code))->first();
-
-        if (!$destination) {
-            return response()->json([
-                'success' => false,
-                'message' => "Kode QR destinasi '{$code}' tidak terdaftar.",
-            ], 404);
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'destination' => $destination,
-                'welcomeTitle' => "Selamat Datang di {$destination->name}",
-                'welcomeSubtitle' => "Malu bertanya? TAKONO. Pindai titik jelajah dan temukan kisah tersembunyi!",
-            ],
-        ]);
+    public function scanDestinationQR(string $code) {
+        $d=Catalog::destination(strtoupper($code));
+        return Api::ok(['destination'=>$d,'welcomeTitle'=>"Selamat Datang di {$d->name}",'welcomeSubtitle'=>$d->tagline]);
     }
 }

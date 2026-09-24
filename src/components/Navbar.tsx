@@ -20,7 +20,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
 
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-18 flex items-center justify-between gap-3">
         
         {/* Zone 1: Takono Authentic Brand Logo */}
         <button
@@ -32,7 +32,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
         </button>
 
         {/* Zone 2: Primary Navigation Links */}
-        <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600">
+        <nav className="hidden xl:flex items-center gap-7 text-sm font-medium text-slate-600">
           <button
             onClick={() => handleNav('/')}
             className={`transition-colors py-1 cursor-pointer relative ${
@@ -87,22 +87,23 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
         </nav>
 
         {/* Zone 3: Actions */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           {onOpenScanModal && (
             <button
               onClick={onOpenScanModal}
               className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100/90 hover:bg-slate-200/90 rounded-xl transition-colors cursor-pointer border border-slate-200/60"
-              title="Simulasikan Scan QR Destinasi"
+              title="Scan QR Destinasi"
+              aria-label="Scan QR"
             >
               <QrCode className="w-4 h-4 text-blue-600" />
               <span className="hidden sm:inline">Scan QR</span>
             </button>
           )}
 
-          {role === 'traveler' ? (
+          {!user ? <button onClick={()=>handleNav('/app')} className="hidden sm:block px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl">Masuk</button> : role === 'traveler' ? (
             <button
               onClick={() => handleNav('/app')}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-sm active:scale-98 whitespace-nowrap cursor-pointer"
+              className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-sm active:scale-98 whitespace-nowrap cursor-pointer"
             >
               <span>Buka Aplikasi</span>
               <span className="bg-blue-700 px-2 py-0.5 rounded-md text-[11px] font-mono tabular-nums">
@@ -112,21 +113,21 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
           ) : role === 'destination_manager' ? (
             <button
               onClick={() => handleNav('/manager')}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-all shadow-sm whitespace-nowrap cursor-pointer"
+              className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-all shadow-sm whitespace-nowrap cursor-pointer"
             >
-              <span>Portal Pengelola KBS</span>
+              <span>Portal Pengelola</span>
             </button>
           ) : role === 'government' ? (
             <button
               onClick={() => handleNav('/government')}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-indigo-900 rounded-xl hover:bg-indigo-800 transition-all shadow-sm whitespace-nowrap cursor-pointer"
+              className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-indigo-900 rounded-xl hover:bg-indigo-800 transition-all shadow-sm whitespace-nowrap cursor-pointer"
             >
               <span>Tourism Intelligence</span>
             </button>
           ) : (
             <button
               onClick={() => handleNav('/admin')}
-              className="flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-all shadow-sm whitespace-nowrap cursor-pointer"
+              className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-slate-900 rounded-xl hover:bg-slate-800 transition-all shadow-sm whitespace-nowrap cursor-pointer"
             >
               <span>Admin Platform</span>
             </button>
@@ -135,7 +136,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 cursor-pointer"
+            className="xl:hidden p-3 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 cursor-pointer"
+            aria-expanded={mobileMenuOpen}
             aria-label="Toggle navigation"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -146,7 +148,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
 
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-2 shadow-lg animate-in slide-in-from-top-2">
+        <div className="xl:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-2 shadow-lg animate-in slide-in-from-top-2">
+          <button onClick={()=>handleNav(!user||role==='traveler'?'/app':role==='destination_manager'?'/manager':role==='government'?'/government':'/admin')} className="w-full p-3 text-left rounded-xl bg-blue-600 text-white font-semibold">{user?'Buka aplikasi':'Masuk / Daftar'}</button>
           <button
             onClick={() => handleNav('/')}
             className="w-full text-left px-3 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 cursor-pointer"

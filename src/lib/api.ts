@@ -12,8 +12,16 @@ import {
   TourismStats 
 } from '../types/index.js';
 
-// Production integration: Can point to external Laravel backend via VITE_API_URL or local proxy
-const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '') + '/api';
+// All requests target Laravel, directly or through Vite's development proxy.
+// Development always uses Vite's same-origin proxy, including access over LAN.
+const API_BASE = (import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || '')).replace(/\/+$/, '') + '/api';
+const bundledImages = import.meta.glob('/src/assets/images/*', { eager: true, query: '?url', import: 'default' }) as Record<string,string>;
+function resolveImages(value: any): any {
+  if (typeof value === 'string') return bundledImages[value] || value;
+  if (Array.isArray(value)) return value.map(resolveImages);
+  if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key,v])=>[key,resolveImages(v)]));
+  return value;
+}
 
 export class ApiClient {
   private static getToken(): string | null {
@@ -28,13 +36,14 @@ export class ApiClient {
     localStorage.removeItem('takono_token');
   }
 
-  private static async request<T>(
+  static async request<T>(
     endpoint: string, 
     options: RequestInit = {}
   ): Promise<{ success: boolean; data?: T; message?: string }> {
     const token = this.getToken();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Accept': 'application/json',
       ...(options.headers as Record<string, string> || {})
     };
 
@@ -45,11 +54,13 @@ export class ApiClient {
     try {
       const response = await fetch(`${API_BASE}${endpoint}`, {
         ...options,
+        signal: options.signal || AbortSignal.timeout(20000),
         headers
       });
 
       const json = await response.json();
-      return json;
+      if (!response.ok) return { success: false, message: Object.values(json.errors || {}).flat().join(' ') || json.message || 'Permintaan gagal.' };
+      return resolveImages(json);
     } catch (err: any) {
       return {
         success: false,
@@ -74,10 +85,10 @@ export class ApiClient {
     return res;
   }
 
-  static async register(name: string, email: string) {
+  static async register(name: string, email: string, password: string) {
     const res = await this.request<{ user: User; token: string }>('/auth/register', {
       method: 'POST',
-      body: JSON.stringify({ name, email })
+      body: JSON.stringify({ name, email, password })
     });
     if (res.success && res.data?.token) {
       this.setToken(res.data.token);
@@ -85,15 +96,19 @@ export class ApiClient {
     return res;
   }
 
-  static async switchDemoRole(role: UserRole) {
-    const res = await this.request<{ user: User; token: string }>('/auth/switch-demo-role', {
-      method: 'POST',
-      body: JSON.stringify({ role })
-    });
-    if (res.success && res.data?.token) {
-      this.setToken(res.data.token);
-    }
-    return res;
+  static async logout() {
+    return this.request('/auth/logout', { method: 'POST' });
+  }
+
+  static selectDestination(id: string) { localStorage.setItem('takono_destination', id); }
+  static async destinationKey(): Promise<string> {
+    const selected = localStorage.getItem('takono_destination');
+    const res = await this.getDestinations();
+    if (selected && res.data?.some(d=>d.id===selected || d.slug===selected)) return selected;
+    const id = res.data?.[0]?.id;
+    if (id) this.selectDestination(id);
+    if (!id) localStorage.removeItem('takono_destination');
+    return id || '';
   }
 
   // --- Destinations ---
@@ -101,7 +116,9 @@ export class ApiClient {
     return this.request<Destination[]>('/destinations');
   }
 
-  static async getDestinationBySlug(slug: string) {
+  static async getDestinationBySlug(slug?: string) {
+    slug = slug || await this.destinationKey();
+    if (!slug) return { success: false, data: undefined, message: 'Belum ada destinasi diterbitkan.' };
     return this.request<{
       destination: Destination;
       explorePoints: ExplorePoint[];
@@ -124,7 +141,7 @@ export class ApiClient {
       alreadyCompleted: boolean;
       message: string;
       awardResult?: any;
-    }>(`/scan/explore/${secureToken}`);
+    }>(`/scan/explore/${encodeURIComponent(secureToken)}`, { method: 'POST' });
   }
 
   // --- Traveler ---
@@ -142,7 +159,7 @@ export class ApiClient {
       completedPoints: ExplorePoint[];
       redemptions: RewardRedemption[];
       totalPointsEarned: number;
-    }>('/me/album');
+    }>(`/me/album?destinationId=${encodeURIComponent(await this.destinationKey())}`);
   }
 
   static async getSmartGuideRecommendations(params?: {
@@ -152,9 +169,9 @@ export class ApiClient {
     lng?: number;
   }) {
     const query = new URLSearchParams();
-    if (params?.destinationId) query.set('destinationId', params.destinationId);
+    query.set('destinationId', params?.destinationId || await this.destinationKey());
     if (params?.preferences?.length) query.set('preferences', params.preferences.join(','));
-    if (params?.lat && params?.lng) {
+    if (params?.lat != null && params?.lng != null) {
       query.set('lat', params.lat.toString());
       query.set('lng', params.lng.toString());
     }
@@ -174,15 +191,6 @@ export class ApiClient {
     }>(`/explore-points/${idOrSlug}`);
   }
 
-  static async simulateScanPoint(pointId: string) {
-    return this.request<{
-      alreadyCompleted: boolean;
-      pointsAwarded: number;
-      newBalance: number;
-      message: string;
-    }>(`/explore-points/${pointId}/scan`, { method: 'POST' });
-  }
-
   static async submitQuiz(explorePointId: string, answers: { questionId: string; selectedOptionId: string }[]) {
     return this.request<{
       isCorrect: boolean;
@@ -198,7 +206,7 @@ export class ApiClient {
   }
 
   static async getEvents() {
-    return this.request<DestinationEvent[]>('/events');
+    return this.request<DestinationEvent[]>(`/events?destinationId=${await this.destinationKey()}`);
   }
 
   static async participateEvent(eventId: string) {
@@ -209,15 +217,15 @@ export class ApiClient {
   }
 
   static async getRewards() {
-    return this.request<Reward[]>('/rewards');
+    return this.request<Reward[]>(`/rewards?destinationId=${await this.destinationKey()}`);
   }
 
-  static async redeemReward(rewardId: string) {
+  static async redeemReward(rewardId: string, requestId: string) {
     return this.request<{
       redemption: RewardRedemption;
       remainingBalance: number;
       message: string;
-    }>(`/rewards/${rewardId}/redeem`, { method: 'POST' });
+    }>(`/rewards/${rewardId}/redeem`, { method: 'POST', body: JSON.stringify({ requestId }) });
   }
 
   static async visitLocalDiscovery(partnerId: string) {

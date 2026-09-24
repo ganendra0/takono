@@ -13,13 +13,13 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Main Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10 mb-12">
+        <div className="grid grid-cols-2 md:grid-cols-12 gap-8 mb-10">
           
           {/* Brand Column with Authentic TAKONO Logo */}
-          <div className="md:col-span-5 space-y-4 pr-0 md:pr-6">
+          <div className="col-span-2 md:col-span-5 space-y-4 pr-0 md:pr-6">
             <button
               onClick={() => onNavigate('/')}
-              className="inline-flex items-center cursor-pointer focus:outline-hidden hover:opacity-95 transition-opacity"
+              className="inline-flex items-center rounded-xl bg-white px-3 py-2 cursor-pointer hover:opacity-95 transition-opacity"
             >
               <TakonoLogo variant="full" size="lg" theme="dark" />
             </button>
@@ -96,7 +96,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                   onClick={() => onNavigate('/manager')} 
                   className="hover:text-blue-400 transition-colors cursor-pointer text-left"
                 >
-                  Portal Pengelola KBS
+                  Portal Pengelola
                 </button>
               </li>
               <li>
@@ -127,7 +127,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
 
           {/* Nav Column 3: Trust & Inovasi */}
-          <div className="md:col-span-3 space-y-3">
+          <div className="col-span-2 md:col-span-3 space-y-3">
             <h4 className="text-xs font-bold text-white uppercase tracking-wider">Inovasi Pariwisata</h4>
             <p className="text-xs text-slate-400 leading-relaxed">
               Mengintegrasikan geolokasi interaktif, kurasi narasi terverifikasi, kuis wawasan, dan dampak ekonomi langsung ke UMKM lokal sekitar destinasi.
@@ -155,7 +155,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div className="flex items-center gap-2">
             <span>© {new Date().getFullYear()} TAKONO Digital Tourism Platform. Hak Cipta Dilindungi.</span>
           </div>
-          <div className="flex items-center gap-4 text-[11px]">
+          <div className="flex flex-wrap justify-center items-center gap-3 text-[11px] text-center">
             <span>Jagoan Hosting Innovation Competition 2026</span>
             <span aria-hidden="true">·</span>
             <span>OpenStreetMap & Leaflet</span>

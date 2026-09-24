@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
 import { ApiClient } from './lib/api.js';
 import { Destination, LocalDiscovery, ExplorePoint } from './types/index.js';
 
 // Top bars & Global UI
-import { RoleSwitcher } from './components/RoleSwitcher.js';
+import { AuthPage } from './pages/public/AuthPage.js';
+import { ScanPointPage } from './pages/traveler/ScanPointPage.js';
 import { Navbar } from './components/Navbar.js';
 import { Footer } from './components/Footer.js';
 import { ScanModal } from './components/ScanModal.js';
@@ -20,7 +21,7 @@ import { DestinationWelcomeScanPage } from './pages/public/DestinationWelcomeSca
 // Traveler Pages
 import { TravelerLayout } from './pages/traveler/TravelerLayout.js';
 import { TravelerHome } from './pages/traveler/TravelerHome.js';
-import { SmartGuidePage } from './pages/traveler/SmartGuidePage.js';
+const SmartGuidePage = lazy(() => import('./pages/traveler/SmartGuidePage.js').then(m=>({default:m.SmartGuidePage})));
 import { ExplorePointDetailPage } from './pages/traveler/ExplorePointDetailPage.js';
 import { EventsPage } from './pages/traveler/EventsPage.js';
 import { RewardsCatalogPage } from './pages/traveler/RewardsCatalogPage.js';
@@ -34,7 +35,7 @@ import { GovernmentDashboard } from './pages/government/GovernmentDashboard.js';
 import { AdminDashboard } from './pages/admin/AdminDashboard.js';
 
 const AppContent: React.FC = () => {
-  const { role } = useAuth();
+  const { role, user, isLoading, logout } = useAuth();
   
   // URL Hash routing state
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -45,6 +46,7 @@ const AppContent: React.FC = () => {
   // Global shared state
   const [destinations, setDestinations] = useState<Destination[]>([]);
   const [destinationDetails, setDestinationDetails] = useState<any>(null);
+  const [destinationError, setDestinationError] = useState('');
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [preselectedScanPoint, setPreselectedScanPoint] = useState<ExplorePoint | null>(null);
 
@@ -74,14 +76,19 @@ const AppContent: React.FC = () => {
         setDestinations(listRes.data);
       }
 
-      const detailRes = await ApiClient.getDestinationBySlug('kebun-binatang-surabaya');
+      const slug = currentPath.startsWith('/destinations/') ? currentPath.slice('/destinations/'.length) : undefined;
+      setDestinationDetails(null);
+      const detailRes = await ApiClient.getDestinationBySlug(slug);
       if (detailRes.success && detailRes.data) {
         setDestinationDetails(detailRes.data);
+        setDestinationError('');
+      } else {
+        setDestinationError(detailRes.message || 'Destinasi tidak tersedia.');
       }
     };
 
     fetchGlobalData();
-  }, []);
+  }, [currentPath, user?.id]);
 
   const handleOpenScan = (point?: ExplorePoint) => {
     setPreselectedScanPoint(point || null);
@@ -92,6 +99,13 @@ const AppContent: React.FC = () => {
   // ROUTE RESOLVER
   // ----------------------------------------------------
   const renderRoute = () => {
+    const privatePath = /^\/(app|manager|government|admin)(\/|$)/.test(currentPath);
+    if (isLoading && privatePath) return <p className="p-12 text-center">Memuat sesi…</p>;
+    if ((!user && privatePath) || currentPath === '/login') return <AuthPage onNavigate={navigate} returnTo={currentPath === '/login' ? '/app' : currentPath}/>;
+    const home = role === 'destination_manager' ? '/manager' : role === 'government' ? '/government' : role === 'super_admin' ? '/admin' : '/app';
+    if (privatePath && ((currentPath.startsWith('/manager') && !['destination_manager','super_admin'].includes(role)) || (currentPath.startsWith('/government') && !['government','super_admin'].includes(role)) || (currentPath.startsWith('/admin') && role !== 'super_admin') || (currentPath.startsWith('/app') && role !== 'traveler'))) {
+      return <div className="p-12 text-center space-y-4"><p>Halaman ini tidak tersedia untuk peran akun Anda.</p><button className="text-blue-600" onClick={()=>navigate(home)}>Buka dashboard saya</button></div>;
+    }
     // 1. Scan Destination Landing (/scan/:code)
     if (currentPath.startsWith('/scan/')) {
       const code = currentPath.replace('/scan/', '');
@@ -102,7 +116,9 @@ const AppContent: React.FC = () => {
     if (currentPath.startsWith('/app')) {
       let subView = <TravelerHome onNavigate={navigate} onOpenScanModal={() => handleOpenScan()} />;
 
-      if (currentPath === '/app/smart-guide') {
+      if (currentPath.startsWith('/app/scan/')) {
+        subView = <ScanPointPage token={decodeURIComponent(currentPath.slice('/app/scan/'.length))} onNavigate={navigate}/>;
+      } else if (currentPath === '/app/smart-guide') {
         subView = <SmartGuidePage onNavigate={navigate} onOpenScanModal={(pt) => handleOpenScan(pt)} />;
       } else if (currentPath.startsWith('/app/explore/')) {
         const slug = currentPath.replace('/app/explore/', '');
@@ -209,7 +225,7 @@ const AppContent: React.FC = () => {
               onOpenScanModal={() => handleOpenScan()}
             />
           ) : (
-            <div className="py-20 text-center text-xs text-slate-500">Memuat detail destinasi...</div>
+            <div className="py-20 text-center text-xs text-slate-500">{destinationError || 'Memuat detail destinasi...'}</div>
           )}
           <Footer onNavigate={navigate} />
         </div>
@@ -221,6 +237,7 @@ const AppContent: React.FC = () => {
       <div>
         <Navbar currentPath={currentPath} onNavigate={navigate} onOpenScanModal={() => handleOpenScan()} />
         <HomePage
+          explorePoints={destinationDetails?.explorePoints || []}
           destination={destinationDetails?.destination || null}
           localDiscoveries={destinationDetails?.localDiscoveries || []}
           onNavigate={navigate}
@@ -234,11 +251,11 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
       {/* Interactive Role Switcher Banner */}
-      <RoleSwitcher currentPath={currentPath} onNavigate={navigate} />
+      {user && <div className="bg-slate-900 text-white px-4 py-2 text-xs flex justify-between gap-3"><span>{user.name}</span><button onClick={async()=>{const r=await logout();if(r.success)navigate('/');else window.alert(r.message || 'Gagal keluar.');}}>Keluar</button></div>}
 
       {/* Primary Routed View */}
-      <div className="flex-1">
-        {renderRoute()}
+      <div className="flex-1" key={user?.id || 'guest'}>
+        <Suspense fallback={<p className="p-8 text-center">Memuat halaman…</p>}>{renderRoute()}</Suspense>
       </div>
 
       {/* Global QR Code Scan Modal */}

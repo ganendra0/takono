@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { ApiClient } from '../../lib/api.js';
 import { ExplorePoint, RewardRedemption } from '../../types/index.js';
-import { 
-  BookMarked, 
-  Award, 
-  Sparkles, 
-  CheckCircle2, 
-  MapPin, 
+import {
+  BookMarked,
+  Award,
+  Sparkles,
+  CheckCircle2,
+  MapPin,
   ChevronRight,
   Gift,
   Calendar
@@ -20,6 +20,7 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
     totalPointsEarned: number;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error,setError] = useState('');
 
   useEffect(() => {
     const fetchAlbum = async () => {
@@ -27,6 +28,8 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
       const res = await ApiClient.getMyAlbum();
       if (res.success && res.data) {
         setAlbumData(res.data);
+      } else {
+        setError(res.message || 'Gagal memuat album.');
       }
       setIsLoading(false);
     };
@@ -44,14 +47,15 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
   }
 
   const progress = albumData?.progress;
+  if (error) return <p role="alert" className="text-rose-700 p-6">{error}</p>;
   const completedPoints = albumData?.completedPoints || [];
-  const percent = progress 
-    ? Math.round((progress.completedExplorePoints / progress.totalExplorePoints) * 100) 
-    : 50;
+  const percent = progress
+    ? Math.round((progress.completedExplorePoints / Math.max(1,progress.totalExplorePoints)) * 100)
+    : 0;
 
   return (
     <div className="space-y-6 pb-12">
-      
+
       <div>
         <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
           <BookMarked className="w-5 h-5 text-blue-600" />
@@ -69,19 +73,19 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
             Album #1 · Pilot Destinasi
           </span>
           <span className="text-xs text-slate-300 font-mono">
-            {progress?.completedExplorePoints || 3} / {progress?.totalExplorePoints || 6} Titik
+            {progress?.completedExplorePoints ?? 0} / {progress?.totalExplorePoints ?? 0} Titik
           </span>
         </div>
 
         <div>
-          <h2 className="text-lg font-bold text-white">Kebun Binatang Surabaya</h2>
+          <h2 className="text-lg font-bold text-white">{progress?.destinationName || 'Destinasi'}</h2>
           <p className="text-xs text-slate-400">Warisan Konservasi & Rekreasi Edukasi Jawa Timur</p>
         </div>
 
         {/* Progress bar */}
         <div className="space-y-1.5">
           <div className="w-full bg-slate-700/60 rounded-full h-2.5 overflow-hidden">
-            <div 
+            <div
               className="bg-blue-500 h-2.5 rounded-full transition-all duration-500"
               style={{ width: `${percent}%` }}
             ></div>
@@ -105,7 +109,7 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
               🐾
             </div>
             <div className="text-[11px] font-bold text-slate-900 leading-snug">Sahabat Satwa</div>
-            <div className="text-[10px] text-emerald-600 font-semibold">Tercapai</div>
+            <div className="text-[10px] text-emerald-600 font-semibold">{completedPoints.some(p=>p.category==='Alam'||p.category==='Edukasi') ? 'Tercapai' : 'Belum tercapai'}</div>
           </div>
 
           <div className="p-3 bg-white rounded-2xl border border-slate-200 text-center space-y-1 shadow-xs">
@@ -113,15 +117,15 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
               🏛️
             </div>
             <div className="text-[11px] font-bold text-slate-900 leading-snug">Pecinta Sejarah</div>
-            <div className="text-[10px] text-emerald-600 font-semibold">Tercapai</div>
+            <div className="text-[10px] text-emerald-600 font-semibold">{completedPoints.some(p=>p.category==='Sejarah') ? 'Tercapai' : 'Belum tercapai'}</div>
           </div>
 
           <div className="p-3 bg-white rounded-2xl border border-dashed border-slate-200 text-center space-y-1 opacity-60">
             <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center font-bold mx-auto text-sm">
               🏆
             </div>
-            <div className="text-[11px] font-bold text-slate-500 leading-snug">Master KBS</div>
-            <div className="text-[10px] text-slate-400 font-medium">Kurang 3 Titik</div>
+            <div className="text-[11px] font-bold text-slate-500 leading-snug">Penjelajah Lengkap</div>
+            <div className="text-[10px] text-slate-400 font-medium">{Math.max(0,(progress?.totalExplorePoints??0)-(progress?.completedExplorePoints??0))} titik tersisa</div>
           </div>
         </div>
       </div>

@@ -25,6 +25,8 @@ import {
   X
 } from 'lucide-react';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 
 interface SmartGuidePageProps {
   onNavigate: (path: string) => void;
@@ -55,7 +57,14 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
   const [walkingRoute, setWalkingRoute] = useState<any>(null);
 
   // User simulated coordinate at KBS entrance
-  const [userLocation, setUserLocation] = useState<[number, number]>([-7.2940, 112.7364]);
+  const [userLocation, setUserLocation] = useState<[number, number]>([0, 0]);
+  const [hasLocation, setHasLocation] = useState(false);
+  const [error, setError] = useState('');
+  useEffect(() => {
+    if (!navigator.geolocation) return;
+    const id = navigator.geolocation.watchPosition(p => { setUserLocation([p.coords.latitude,p.coords.longitude]); setHasLocation(true); }, () => setError('Lokasi tidak tersedia. Rekomendasi tetap dapat digunakan tanpa jarak.'), {enableHighAccuracy:true});
+    return () => navigator.geolocation.clearWatch(id);
+  }, []);
 
   // Arrived popup alert
   const [arrivedPoint, setArrivedPoint] = useState<ExplorePoint | null>(null);
@@ -80,13 +89,16 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
   // 1. Initial Data Fetch
   useEffect(() => {
     const fetchData = async () => {
-      const destRes = await ApiClient.getDestinationBySlug('kebun-binatang-surabaya');
+      const destRes = await ApiClient.getDestinationBySlug();
       if (destRes.success && destRes.data) {
         setDestination(destRes.data.destination);
         setExplorePoints(destRes.data.explorePoints || []);
         setFacilities(destRes.data.destination.facilities || []);
         setEvents(destRes.data.events || []);
         setLocalDiscoveries(destRes.data.localDiscoveries || []);
+        mapInstanceRef.current?.setView([destRes.data.destination.latitude,destRes.data.destination.longitude],17);
+      } else {
+        setError(destRes.message || 'Destinasi tidak tersedia.');
       }
 
       // Fetch user completed points
@@ -103,10 +115,10 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
   useEffect(() => {
     const fetchRecommendations = async () => {
       const recRes = await ApiClient.getSmartGuideRecommendations({
-        destinationId: 'dest_kbs_01',
+        destinationId: destination?.id,
         preferences: preferences,
-        lat: userLocation[0],
-        lng: userLocation[1]
+        lat: hasLocation ? userLocation[0] : undefined,
+        lng: hasLocation ? userLocation[1] : undefined
       });
 
       if (recRes.success && recRes.data) {
@@ -117,7 +129,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
     };
 
     fetchRecommendations();
-  }, [preferences, userLocation, completedPointIds]);
+  }, [preferences, userLocation, completedPointIds, destination?.id, hasLocation]);
 
   // 3. Initialize Leaflet Map
   useEffect(() => {
@@ -125,7 +137,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
 
     // Create Map centered at KBS Surabaya
     const map = L.map(mapContainerRef.current, {
-      center: [-7.2961, 112.7368],
+      center: [0, 0],
       zoom: 17,
       zoomControl: false
     });
@@ -167,7 +179,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
         weight: 2,
         dashArray: '4, 6'
       }).addTo(map);
-      polygon.bindTooltip('Area Konservasi & Rekreasi KBS', { sticky: true });
+      polygon.bindTooltip(escapeHtml(destination.name), { sticky: true });
     }
 
     // Custom Icon Creators
@@ -225,13 +237,11 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
       iconAnchor: [12, 12]
     });
 
-    const userMarker = L.marker(userLocation, { icon: userIcon, draggable: true }).addTo(map);
-    userMarker.bindTooltip('Lokasi Kamu (Geser pin untuk simulasi rute)', { permanent: false, direction: 'top' });
-    userMarker.on('dragend', (e: any) => {
-      const newPos = e.target.getLatLng();
-      setUserLocation([newPos.lat, newPos.lng]);
-    });
-    userMarkerRef.current = userMarker;
+    if (hasLocation) {
+      const userMarker = L.marker(userLocation, { icon: userIcon }).addTo(map);
+      userMarker.bindTooltip('Lokasi perangkat', { direction: 'top' });
+      userMarkerRef.current = userMarker;
+    }
 
     // Explore Points Markers
     explorePoints.forEach(point => {
@@ -252,13 +262,13 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
             ${isCompleted ? '✓ Telah Dijelajahi' : `+${point.pointsReward} Jejak Points`}
           </div>
           <div style="font-size: 13px; font-weight: 700; color: #0f172a; margin-bottom: 4px; line-height: 1.3;">
-            ${point.name}
+            ${escapeHtml(point.name)}
           </div>
           <div style="font-size: 11px; color: #64748b; margin-bottom: 8px;">
-            Kategori: ${point.category} · ${point.estimatedDuration}
+            Kategori: ${escapeHtml(point.category)} · ${escapeHtml(point.estimatedDuration)}
           </div>
           <div style="display: flex; gap: 4px;">
-            <a href="#/app/explore/${point.slug}" id="btn-explore-${point.id}" style="
+            <a href="#/app/explore/${encodeURIComponent(point.slug)}" style="
               display: block;
               text-align: center;
               background: #2563eb;
@@ -303,7 +313,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
         });
 
         const m = L.marker([fac.latitude, fac.longitude], { icon: facIcon }).addTo(map);
-        m.bindTooltip(`Fasilitas: ${fac.name}`, { direction: 'top' });
+        m.bindTooltip(escapeHtml(`Fasilitas: ${fac.name}`), { direction: 'top' });
       });
     }
 
@@ -333,8 +343,8 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
           iconAnchor: [13, 13]
         });
 
-        const m = L.marker([-7.2965, 112.7372], { icon: evtIcon }).addTo(map);
-        m.bindTooltip(`Event: ${evt.title} (${evt.time})`, { direction: 'top' });
+        const m = L.marker([destination.latitude, destination.longitude], { icon: evtIcon }).addTo(map);
+        m.bindTooltip(escapeHtml(`Event: ${evt.title} — ${evt.location} (${evt.time}); pin lokasi destinasi`), { direction: 'top' });
       });
     }
 
@@ -349,11 +359,13 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
       routePolylineRef.current = polyline;
     }
 
-  }, [destination, explorePoints, facilities, events, completedPointIds, nextPoint, walkingRoute, showFacilities, showEvents, userLocation]);
+    if (showLocal) localDiscoveries.forEach(partner => {
+      L.marker([partner.latitude, partner.longitude], {icon:createCustomIcon('#b45309','L',false)}).addTo(map).bindTooltip(escapeHtml(partner.name));
+    });
+  }, [destination, explorePoints, facilities, events, completedPointIds, nextPoint, walkingRoute, showFacilities, showEvents, userLocation, hasLocation, showLocal, localDiscoveries]);
 
   // Handle Arrival Simulation
-  const simulateArrivalAtPoint = (point: ExplorePoint) => {
-    setUserLocation([point.latitude + 0.0001, point.longitude]);
+  const focusPoint = (point: ExplorePoint) => {
     setArrivedPoint(point);
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([point.latitude, point.longitude], 18);
@@ -378,7 +390,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
         <div>
           <h1 className="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
             <Compass className="w-5 h-5 text-blue-600" />
-            <span>Smart Guide KBS</span>
+            <span>Smart Guide</span>
           </h1>
           <p className="text-[11px] text-slate-500">
             Pemandu rute navigasi & penemuan titik jelajah
@@ -395,6 +407,8 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
       </div>
 
       {/* 2. Active Preferences Horizontal Chips */}
+      {error && <p role="status" className="text-xs text-amber-800">{error}</p>}
+      <p className="text-xs text-slate-500">{destination?.name} · Garis peta menunjukkan arah langsung; ikuti jalur resmi destinasi.</p>
       <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
         <span className="text-[11px] text-slate-400 font-medium whitespace-nowrap">Fokus Minat:</span>
         {preferences.map(p => (
@@ -439,7 +453,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
         {/* Floating Location Helper Tooltip */}
         <div className="absolute bottom-3 left-3 z-20 bg-slate-900/90 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-[10px] flex items-center gap-2 border border-slate-700">
           <Navigation className="w-3 h-3 text-blue-400 animate-pulse" />
-          <span>Pin biru adalah posisimu. Geser untuk simulasi langkah.</span>
+          <span>{hasLocation ? 'Pin biru: lokasi perangkat.' : 'Aktifkan lokasi untuk melihat jarak.'}</span>
         </div>
       </div>
 
@@ -474,11 +488,11 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
 
           <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
             <button
-              onClick={() => simulateArrivalAtPoint(nextPoint)}
+              onClick={() => focusPoint(nextPoint)}
               className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-98"
             >
               <Footprints className="w-4 h-4" />
-              <span>Simulasi Tiba di Titik Ini</span>
+              <span>Lihat Titik & Scan QR</span>
             </button>
 
             <button
@@ -492,9 +506,9 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
       ) : (
         <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-center space-y-2">
           <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
-          <h3 className="text-sm font-bold text-emerald-900">Seluruh Titik Telah Dijelajahi!</h3>
+          <h3 className="text-sm font-bold text-emerald-900">Tidak Ada Rekomendasi Baru</h3>
           <p className="text-xs text-emerald-700">
-            Selamat! Kamu telah menyelesaikan seluruh Explore Point di Kebun Binatang Surabaya.
+            {recommendationReason || 'Memuat rekomendasi atau belum ada titik tersedia.'}
           </p>
           <button
             onClick={() => onNavigate('/app/rewards')}
@@ -541,9 +555,9 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
 
                 <div className="flex items-center gap-1.5">
                   <button
-                    onClick={() => simulateArrivalAtPoint(point)}
+                    onClick={() => focusPoint(point)}
                     className="p-2 text-slate-400 hover:text-blue-600 transition-colors cursor-pointer"
-                    title="Simulasikan Tiba di Titik Ini"
+                    title="Lihat Titik"
                   >
                     <Navigation className="w-4 h-4" />
                   </button>
@@ -571,10 +585,10 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
 
             <div className="space-y-1">
               <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
-                Kedatangan Terdeteksi!
+                Titik Pilihan
               </span>
               <h3 className="text-lg font-extrabold text-slate-900 leading-tight">
-                Kamu sudah sampai di {arrivedPoint.name}!
+                {arrivedPoint.name}
               </h3>
               <p className="text-xs text-slate-600">
                 Pindai papan QR fisik titik ini untuk membuka cerita tersembunyi, kuis interaktif, dan Jejak Points.

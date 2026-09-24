@@ -19,6 +19,7 @@ export type LocalDiscoveryCategory =
   | 'Lainnya';
 
 export interface User {
+  active?: boolean;
   id: string;
   name: string;
   email: string;
@@ -119,7 +120,7 @@ export interface DestinationEvent {
   location: string;
   organizer: string;
   pointsReward: number;
-  status: 'published' | 'upcoming' | 'completed';
+  status: 'draft' | 'published' | 'upcoming' | 'completed';
 }
 
 export interface LocalDiscovery {
@@ -142,6 +143,7 @@ export interface LocalDiscovery {
 }
 
 export interface Reward {
+  validFrom?: string;
   id: string;
   destinationId: string;
   name: string;
@@ -155,10 +157,13 @@ export interface Reward {
   claimedCount: number;
   validUntil: string;
   terms: string[] | string;
-  status: 'active' | 'out_of_stock' | 'expired';
+  status: 'active' | 'inactive' | 'out_of_stock' | 'expired';
 }
 
 export interface RewardRedemption {
+  destinationId?: string;
+  terms?: string[] | string;
+  requestId?: string;
   id: string;
   userId: string;
   rewardId: string;

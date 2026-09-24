@@ -22,6 +22,8 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
   const [redemptionSuccess, setRedemptionSuccess] = useState<RewardRedemption | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const requestRef = React.useRef<{rewardId:string;id:string}|null>(null);
 
   useEffect(() => {
     const fetchRewards = async () => {
@@ -29,6 +31,8 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
       const res = await ApiClient.getRewards();
       if (res.success && res.data) {
         setRewards(res.data);
+      } else {
+        setErrorMessage(res.message || 'Gagal memuat reward.');
       }
       setIsLoading(false);
     };
@@ -37,18 +41,25 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
   }, []);
 
   const handleRedeem = async (reward: Reward) => {
+    if (busy) return;
     if (pointsBalance < reward.pointsRequired) {
       setErrorMessage(`Jejak Points kamu (${pointsBalance}) belum mencukupi untuk reward ini (${reward.pointsRequired} Pts).`);
       return;
     }
 
     setErrorMessage(null);
-    const res = await ApiClient.redeemReward(reward.id);
+    setBusy(true);
+    if (requestRef.current?.rewardId !== reward.id) requestRef.current = {rewardId:reward.id,id:crypto.randomUUID()};
+    const res = await ApiClient.redeemReward(reward.id, requestRef.current.id);
+    setBusy(false);
     if (res.success && res.data) {
       setRedemptionSuccess(res.data.redemption);
       setSelectedReward(null);
       confetti({ particleCount: 70, spread: 70 });
       await refreshUserData();
+      requestRef.current = null;
+      const fresh = await ApiClient.getRewards();
+      if (fresh.success && fresh.data) setRewards(fresh.data);
     } else {
       setErrorMessage(res.message || 'Gagal menukarkan reward.');
     }
@@ -107,6 +118,7 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
 
       {/* Rewards Grid */}
       <div className="space-y-4">
+        {isLoading ? <p>Memuat reward…</p> : !rewards.length && <p>Belum ada reward tersedia.</p>}
         {rewards.map(reward => {
           const canAfford = pointsBalance >= reward.pointsRequired;
           const currentStock = reward.stock ?? (reward.quota - reward.claimedCount);
@@ -191,6 +203,7 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
                 Batal
               </button>
               <button
+                disabled={busy}
                 onClick={() => handleRedeem(selectedReward)}
                 className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold cursor-pointer"
               >

@@ -1,27 +1,26 @@
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
 import { ApiClient } from '../../lib/api.js';
-import { 
-  Destination, 
-  ExplorePoint, 
-  DestinationEvent, 
-  LocalDiscovery, 
-  Reward 
+import {
+  Destination,
+  ExplorePoint,
+  DestinationEvent,
+  LocalDiscovery,
+  Reward
 } from '../../types/index.js';
-import { 
-  Compass, 
-  MapPin, 
-  ArrowRight, 
-  Calendar, 
-  Gift, 
-  Store, 
-  Sparkles, 
+import {
+  Compass,
+  MapPin,
+  ArrowRight,
+  Calendar,
+  Gift,
+  Store,
+  Sparkles,
   CheckCircle2,
   ChevronRight,
   Footprints,
   Clock
 } from 'lucide-react';
-import { DemoDataNotice } from '../../components/DemoDataNotice.js';
 
 interface TravelerHomeProps {
   onNavigate: (path: string) => void;
@@ -37,22 +36,25 @@ export const TravelerHome: React.FC<TravelerHomeProps> = ({ onNavigate, onOpenSc
   const [localDiscoveries, setLocalDiscoveries] = useState<LocalDiscovery[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const loadHomeData = async () => {
       setIsLoading(true);
       try {
         const [destRes, recRes, evtRes, locRes, rewRes] = await Promise.all([
-          ApiClient.getDestinationBySlug('kebun-binatang-surabaya'),
+          ApiClient.getDestinationBySlug(),
           ApiClient.getSmartGuideRecommendations(),
           ApiClient.getEvents(),
-          ApiClient.getDestinationBySlug('kebun-binatang-surabaya'),
+          ApiClient.getDestinationBySlug(),
           ApiClient.getRewards()
         ]);
 
         if (destRes.success && destRes.data) {
           setDestination(destRes.data.destination);
           setLocalDiscoveries(destRes.data.localDiscoveries || []);
+        } else {
+          setError(destRes.message || 'Destinasi tidak tersedia.');
         }
 
         if (recRes.success && recRes.data) {
@@ -77,13 +79,15 @@ export const TravelerHome: React.FC<TravelerHomeProps> = ({ onNavigate, onOpenSc
     loadHomeData();
   }, []);
 
-  const uncompletedCount = progress 
-    ? progress.totalExplorePoints - progress.completedExplorePoints 
-    : 3;
+  const uncompletedCount = progress
+    ? progress.totalExplorePoints - progress.completedExplorePoints
+    : 0;
+  if (isLoading) return <p className="p-6 text-center">Memuat destinasi…</p>;
+  if (error) return <div className="p-6 space-y-3"><p role="alert">{error}</p><button className="text-blue-600" onClick={()=>onNavigate('/destinations')}>Pilih destinasi</button></div>;
 
   return (
     <div className="space-y-5 pb-6">
-      
+
       {/* 1. GREETING & POINTS SUMMARY */}
       <div className="flex items-center justify-between">
         <div>
@@ -111,7 +115,7 @@ export const TravelerHome: React.FC<TravelerHomeProps> = ({ onNavigate, onOpenSc
         </button>
       </div>
 
-      <DemoDataNotice />
+
 
       {/* 2. ACTIVE DESTINATION BANNER & PROGRESS TRACKER */}
       <div className="rounded-2xl bg-gradient-to-br from-blue-700 to-blue-900 text-white p-5 shadow-sm space-y-4 relative overflow-hidden">
@@ -122,30 +126,30 @@ export const TravelerHome: React.FC<TravelerHomeProps> = ({ onNavigate, onOpenSc
               Destinasi Aktif
             </span>
             <span className="px-2 py-0.5 rounded bg-white/20 text-[10px] font-mono uppercase">
-              KBS Surabaya
+              {destination?.name || 'Pilih destinasi'}
             </span>
           </div>
 
           <h2 className="text-lg font-extrabold leading-tight">
-            Kebun Binatang Surabaya
+            {destination?.name || 'Belum ada destinasi'}
           </h2>
 
           <p className="text-xs text-blue-100">
-            {uncompletedCount > 0 
-              ? `Masih ada ${uncompletedCount} titik yang belum kamu jelajahi.` 
-              : 'Luar biasa! Kamu telah menemukan seluruh titik jelajah di KBS.'}
+            {uncompletedCount > 0
+              ? `Masih ada ${uncompletedCount} titik yang belum kamu jelajahi.`
+              : 'Luar biasa! Kamu telah menemukan seluruh titik jelajah di destinasi ini.'}
           </p>
 
           {/* Progress Bar */}
           <div className="space-y-1 pt-1">
             <div className="flex justify-between text-[11px] text-blue-200 font-mono">
               <span>Progres Penjelajahan</span>
-              <span>{progress?.completedExplorePoints || 3} / {progress?.totalExplorePoints || 6} Titik</span>
+              <span>{progress?.completedExplorePoints ?? 0} / {progress?.totalExplorePoints ?? 0} Titik</span>
             </div>
             <div className="w-full bg-blue-950/60 rounded-full h-2 overflow-hidden">
-              <div 
-                className="bg-white rounded-full h-2 transition-all duration-500" 
-                style={{ width: `${((progress?.completedExplorePoints || 3) / (progress?.totalExplorePoints || 6)) * 100}%` }}
+              <div
+                className="bg-white rounded-full h-2 transition-all duration-500"
+                style={{ width: `${((progress?.completedExplorePoints ?? 0) / Math.max(1,progress?.totalExplorePoints ?? 0)) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -185,13 +189,13 @@ export const TravelerHome: React.FC<TravelerHomeProps> = ({ onNavigate, onOpenSc
             </button>
           </div>
 
-          <div 
+          <div
             onClick={() => onNavigate(`/app/explore/${recommendation.slug}`)}
             className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs hover:border-blue-300 transition-all cursor-pointer flex gap-4 items-center"
           >
-            <img 
-              src={recommendation.image} 
-              alt={recommendation.name} 
+            <img
+              src={recommendation.image}
+              alt={recommendation.name}
               className="w-20 h-20 rounded-xl object-cover shrink-0"
               loading="lazy"
             />
@@ -230,13 +234,13 @@ export const TravelerHome: React.FC<TravelerHomeProps> = ({ onNavigate, onOpenSc
             </button>
           </div>
 
-          <div 
+          <div
             onClick={() => onNavigate('/app/events')}
             className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs hover:border-blue-300 transition-all cursor-pointer flex gap-4 items-center"
           >
-            <img 
-              src={events[0].image} 
-              alt={events[0].title} 
+            <img
+              src={events[0].image}
+              alt={events[0].title}
               className="w-16 h-16 rounded-xl object-cover shrink-0"
               loading="lazy"
             />
@@ -276,7 +280,7 @@ export const TravelerHome: React.FC<TravelerHomeProps> = ({ onNavigate, onOpenSc
 
           <div className="grid grid-cols-1 gap-3">
             {localDiscoveries.slice(0, 2).map(partner => (
-              <div 
+              <div
                 key={partner.id}
                 onClick={() => onNavigate('/app/local-discovery')}
                 className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-xs hover:border-blue-300 transition-colors cursor-pointer flex items-center justify-between gap-3"

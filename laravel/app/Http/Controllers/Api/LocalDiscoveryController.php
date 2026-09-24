@@ -1,35 +1,13 @@
 <?php
-
 namespace App\Http\Controllers\Api;
-
 use App\Http\Controllers\Controller;
-use App\Models\LocalDiscovery;
+use App\Services\{Catalog,PointService};
+use App\Support\Api;
 use Illuminate\Http\Request;
-
-class LocalDiscoveryController extends Controller
-{
-    public function index()
-    {
-        $partners = LocalDiscovery::where('status', 'published')->get();
-
-        return response()->json([
-            'success' => true,
-            'data' => $partners,
-        ]);
-    }
-
-    public function visit(Request $request, string $id)
-    {
-        $partner = LocalDiscovery::findOrFail($id);
-        $pointsAwarded = 20;
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'pointsAwarded' => $pointsAwarded,
-                'newBalance' => 105,
-                'message' => "Kunjungan ke mitra {$partner->name} tercatat (+{$pointsAwarded} Pts)! Tunjukkan voucher promo Anda saat transaksi.",
-            ],
-        ]);
+class LocalDiscoveryController extends Controller {
+    public function index(Request $r) { return Api::ok(Catalog::local()->when($r->query('destinationId'),fn($q,$id)=>$q->where('destination_id',$id))->get()); }
+    public function visit(Request $r,string $id) {
+        $e=Catalog::local()->findOrFail($id);
+        return Api::ok(PointService::award($r->user()->id,$e->destination_id,'local_discovery_visited',$e->id,$e->points_reward,"Local Discovery {$e->name}"));
     }
 }

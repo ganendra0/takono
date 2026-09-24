@@ -14,34 +14,41 @@ import {
   Download,
   AlertCircle
 } from 'lucide-react';
-import { DemoDataNotice } from '../../components/DemoDataNotice.js';
 
 export const GovernmentDashboard: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
   const { user } = useAuth();
   const [stats, setStats] = useState<TourismStats | null>(null);
   const [insights, setInsights] = useState<any[]>([]);
   const [transparency, setTransparency] = useState<any>(null);
+  const [error, setError] = useState('');
   const [reportSuccess, setReportSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [performance,setPerformance] = useState<{destination:Destination;stats:TourismStats}[]>([]);
 
   useEffect(() => {
     const fetchGovData = async () => {
       setIsLoading(true);
       const res = await ApiClient.getGovernmentDashboard();
+      const destinations = await ApiClient.getGovernmentDestinations();
+      if (destinations.success && destinations.data) setPerformance(destinations.data);
       if (res.success && res.data) {
         setStats(res.data.stats);
         setInsights(res.data.insights || []);
         setTransparency(res.data.dataTransparency);
       }
+      if (!res.success) setError(res.message || 'Gagal memuat data.');
       setIsLoading(false);
     };
 
     fetchGovData();
   }, []);
 
-  const handleDownloadReport = () => {
+  const handleDownloadReport = async () => {
+    const r = await ApiClient.getGovernmentReports();
+    if (!r.success) { setError(r.message || 'Gagal mengunduh laporan.'); return; }
+    const url = URL.createObjectURL(new Blob([JSON.stringify(r.data, null, 2)], {type:'application/json'}));
+    const a = document.createElement('a'); a.href=url; a.download='takono-aktivitas.json'; a.click(); URL.revokeObjectURL(url);
     setReportSuccess(true);
-    setTimeout(() => setReportSuccess(false), 3000);
   };
 
   return (
@@ -75,12 +82,12 @@ export const GovernmentDashboard: React.FC<{ onNavigate: (path: string) => void 
               className="px-4 py-2.5 bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-xs cursor-pointer"
             >
               <Download className="w-4 h-4" />
-              <span>{reportSuccess ? 'Laporan Diunduh!' : 'Unduh Laporan Agregat (PDF)'}</span>
+              <span>{reportSuccess ? 'Laporan Diunduh!' : 'Unduh Laporan Agregat (JSON)'}</span>
             </button>
           </div>
         </div>
 
-        <DemoDataNotice />
+        {isLoading && <p>Memuat aktivitas…</p>}{error && <p role="alert" className="text-rose-700">{error}</p>}{!isLoading && !stats?.totalPlatformActivities && <p>Belum ada data</p>}
 
         {/* DATA TRANSPARENCY & ETHICAL FRAMEWORK (Mandatory Section 32 & 33) */}
         <div className="p-5 bg-white rounded-3xl border border-indigo-100 shadow-xs space-y-3">
@@ -119,38 +126,44 @@ export const GovernmentDashboard: React.FC<{ onNavigate: (path: string) => void 
           <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-1">
             <span className="text-[11px] font-semibold text-slate-500 uppercase">Total Aktivitas Platform</span>
             <div className="text-2xl font-mono font-extrabold text-slate-900">
-              {stats?.totalPlatformActivities || 142}
+              {stats?.totalPlatformActivities ?? 0}
             </div>
-            <span className="text-[11px] text-emerald-600 font-medium">Bulan Berjalan (September)</span>
+            <span className="text-[11px] text-emerald-600 font-medium">Seluruh aktivitas tersimpan</span>
           </div>
 
           <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-1">
             <span className="text-[11px] font-semibold text-slate-500 uppercase">Titik Jelajah Ditemukan</span>
             <div className="text-2xl font-mono font-extrabold text-indigo-600">
-              {stats?.totalExplorePointsDiscovered || 78}
+              {stats?.totalExplorePointsDiscovered ?? 0}
             </div>
             <span className="text-[11px] text-slate-500">Scan QR Explore terverifikasi</span>
           </div>
 
           <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-1">
-            <span className="text-[11px] font-semibold text-slate-500 uppercase">Tingkat Minat Edukasi</span>
+            <span className="text-[11px] font-semibold text-slate-500 uppercase">Aktivitas Kuis</span>
             <div className="text-2xl font-mono font-extrabold text-blue-600">
-              74%
+              {stats?.totalQuizzesCompleted ?? 0}
             </div>
-            <span className="text-[11px] text-slate-500">Wisatawan memilih konten sejarah/alam</span>
+            <span className="text-[11px] text-slate-500">Penyelesaian kuis tercatat</span>
           </div>
 
           <div className="p-5 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-1">
-            <span className="text-[11px] font-semibold text-slate-500 uppercase">Dampak Ekonomi UMKM</span>
+            <span className="text-[11px] font-semibold text-slate-500 uppercase">Aktivitas Local Discovery</span>
             <div className="text-2xl font-mono font-extrabold text-amber-600">
-              Rp 12.8 Jt
+              {stats?.totalLocalDiscoveryVisits ?? 0}
             </div>
-            <span className="text-[11px] text-slate-500">Estimasi perputaran transaksi mitra</span>
+            <span className="text-[11px] text-slate-500">Kunjungan melalui TAKONO</span>
           </div>
 
         </div>
 
         {/* Category Trends & Recommendations Grid */}
+        <section className="bg-white rounded-3xl border border-slate-200 p-6 space-y-4">
+          <h2 className="font-bold">Performa Destinasi — Aktivitas Pengguna TAKONO</h2>
+          {!performance.length ? <p>Belum ada data</p> : <div className="overflow-x-auto"><table className="w-full text-xs text-left"><thead><tr>{['Destinasi','Explore Point','Kuis','Event','Reward','Local Discovery'].map(label=><th key={label} className="p-3">{label}</th>)}</tr></thead><tbody>{performance.map(({destination:d,stats:s})=><tr key={d.id} className="border-t"><td className="p-3">{d.name}</td>{[s.totalExplorePointsDiscovered,s.totalQuizzesCompleted,s.totalEventParticipations,s.totalRewardRedemptions,s.totalLocalDiscoveryVisits].map((n,i)=><td key={i} className="p-3">{n??0}</td>)}</tr>)}</tbody></table></div>}
+          <h3 className="text-sm font-semibold">Tren aktivitas 7 hari</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-7 gap-2">{stats?.activityTrendsByDay.map(day=><div key={day.date} className="bg-slate-50 rounded-xl p-3 text-xs"><p>{day.date}</p><p className="text-lg font-bold">{day.count}</p></div>)}</div>
+        </section>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
           {/* Category Trends */}
@@ -160,11 +173,11 @@ export const GovernmentDashboard: React.FC<{ onNavigate: (path: string) => void 
                 <BarChart3 className="w-4 h-4 text-indigo-600" />
                 <span>Distribusi Preferensi Minat Wisatawan</span>
               </h2>
-              <span className="text-xs text-slate-400 font-mono">Agregat KBS</span>
+              <span className="text-xs text-slate-400 font-mono">Agregat destinasi</span>
             </div>
 
             <p className="text-xs text-slate-500">
-              Berdasarkan pemilihan kategori pada Smart Guide dan penyelesaian rute jelajah.
+              Berdasarkan aktivitas Explore Point yang tercatat.
             </p>
 
             <div className="space-y-3 pt-2">
@@ -196,7 +209,7 @@ export const GovernmentDashboard: React.FC<{ onNavigate: (path: string) => void 
             </div>
 
             <p className="text-xs text-slate-500">
-              Rekomendasi kebijakan pariwisata yang disimpulkan dari pola jelajah nyata di lapangan.
+              Insight pariwisata berbasis aktivitas pengguna TAKONO.
             </p>
 
             <div className="space-y-3 pt-1">

@@ -26,7 +26,11 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ o
       const res = await ApiClient.getEvents();
       if (res.success && res.data) {
         setEvents(res.data);
+      } else {
+        setActiveMessage(res.message || 'Gagal memuat event.');
       }
+      const activities = await ApiClient.getMyActivities();
+      if (activities.success) setParticipatedIds((activities.data || []).filter(a=>a.type==='event_participated').map(a=>a.referenceId));
       setIsLoading(false);
     };
 
@@ -74,6 +78,7 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ o
         <div className="py-12 text-center text-xs text-slate-500">Memuat agenda event...</div>
       ) : (
         <div className="space-y-4">
+          {!events.length && <p className="text-slate-500">Belum ada event tersedia.</p>}
           {events.map(event => {
             const isRegistered = participatedIds.includes(event.id);
             return (

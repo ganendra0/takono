@@ -1,231 +1,49 @@
-import React, { useState } from 'react';
-import { ApiClient } from '../lib/api.js';
-import { ExplorePoint } from '../types/index.js';
-import { useAuth } from '../context/AuthContext.js';
-import { 
-  QrCode, 
-  X, 
-  Sparkles, 
-  CheckCircle2, 
-  ArrowRight, 
-  Camera, 
-  KeyRound,
-  AlertCircle 
-} from 'lucide-react';
-import confetti from 'canvas-confetti';
+import React,{useEffect,useRef,useState} from 'react';
+import {Camera,ImagePlus,QrCode,X} from 'lucide-react';
+import {ApiClient} from '../lib/api';
+import {parseTakonoQR} from '../lib/qr';
+import {ExplorePoint} from '../types';
+import {useAuth} from '../context/AuthContext';
 
-interface ScanModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onNavigate: (path: string) => void;
-  preselectedPoint?: ExplorePoint | null;
+export function ScanModal({isOpen,onClose,onNavigate}:{isOpen:boolean;onClose:()=>void;onNavigate:(p:string)=>void;preselectedPoint?:ExplorePoint|null}) {
+ const {user,refreshUserData}=useAuth();
+ const [code,setCode]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[camera,setCamera]=useState(false);
+ const video=useRef<HTMLVideoElement>(null),stream=useRef<MediaStream|null>(null),timer=useRef<number|undefined>(undefined),locked=useRef(false),generation=useRef(0);
+ const stop=()=>{generation.current++;stream.current?.getTracks().forEach(t=>t.stop());stream.current=null;window.clearTimeout(timer.current);setCamera(false);};
+ useEffect(()=>{if(!isOpen){stop();setMessage('');setCode('');}return()=>{generation.current++;stream.current?.getTracks().forEach(t=>t.stop());window.clearTimeout(timer.current);};},[isOpen]);
+ useEffect(()=>{if(!isOpen)return;const previous=document.activeElement as HTMLElement;const overflow=document.body.style.overflow;document.body.style.overflow='hidden';const key=(e:KeyboardEvent)=>{if(e.key==='Escape')onClose();};window.addEventListener('keydown',key);return()=>{document.body.style.overflow=overflow;window.removeEventListener('keydown',key);previous?.focus();};},[isOpen,onClose]);
+ async function open(raw:string){
+  if(locked.current)return;locked.current=true;setBusy(true);setMessage('');stop();
+  try{
+   const parsed=parseTakonoQR(raw);setCode(parsed.code);
+   if(parsed.kind!=='point'){
+    const welcome=await ApiClient.scanDestinationQR(parsed.code);
+    if(welcome.success&&welcome.data){ApiClient.selectDestination(welcome.data.destination.id);onClose();onNavigate('/scan/'+encodeURIComponent(welcome.data.destination.code));return;}
+    if(parsed.kind==='destination')throw new Error(welcome.message||'Destinasi tidak ditemukan.');
+   }
+   if(!user){onClose();onNavigate('/app/scan/'+encodeURIComponent(parsed.code));return;}
+   const result=await ApiClient.scanExplorePointToken(parsed.code);
+   if(!result.success||!result.data)throw new Error(result.message||'Kode tidak valid.');
+   ApiClient.selectDestination(result.data.destination.id);await refreshUserData();onClose();onNavigate('/app/explore/'+result.data.explorePoint.slug);
+  }catch(e){setMessage(e instanceof Error?e.message:'Tidak dapat membaca QR.');}finally{locked.current=false;setBusy(false);}
+ }
+ async function decode(source:CanvasImageSource,width:number,height:number){
+  const canvas=document.createElement('canvas'),scale=Math.min(1,1200/Math.max(width,height));canvas.width=Math.round(width*scale);canvas.height=Math.round(height*scale);
+  const context=canvas.getContext('2d',{willReadFrequently:true})!;context.drawImage(source,0,0,canvas.width,canvas.height);
+  const pixels=context.getImageData(0,0,canvas.width,canvas.height);const {default:jsQR}=await import('jsqr');return jsQR(pixels.data,pixels.width,pixels.height)?.data;
+ }
+ async function start(){
+  setMessage('');
+  if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){setMessage('Kamera langsung membutuhkan HTTPS. Pada alamat HTTP ini, pilih foto QR atau masukkan kode di bawah.');return;}
+  stop();const version=generation.current;
+  try{const media=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'}},audio:false});if(version!==generation.current){media.getTracks().forEach(t=>t.stop());return;}stream.current=media;setCamera(true);
+   const tick=async()=>{if(version!==generation.current)return;try{if(video.current){if(video.current.srcObject!==media){video.current.srcObject=media;await video.current.play();}if(video.current.readyState>=2){const result=await decode(video.current,video.current.videoWidth,video.current.videoHeight);if(version!==generation.current)return;if(result){void open(result);return;}}}timer.current=window.setTimeout(tick,200);}catch{stop();setMessage('Kamera tidak dapat dibaca. Gunakan foto QR.');}};void tick();
+  }catch{setMessage('Kamera tidak tersedia atau izinnya ditolak. Gunakan foto QR atau masukkan kode.');}
+ }
+ if(!isOpen)return null;
+ return <div className="fixed inset-0 z-[1000] bg-slate-950/60 backdrop-blur-sm p-3 sm:p-6 flex items-center justify-center" onClick={e=>{if(e.target===e.currentTarget)onClose();}}><section role="dialog" aria-modal="true" aria-label="Scan QR TAKONO" className="bg-white rounded-3xl p-5 sm:p-7 max-w-md w-full max-h-[90dvh] overflow-y-auto space-y-5 shadow-2xl">
+ <div className="flex justify-between items-center"><div><p className="text-xs text-blue-600 font-semibold mb-1">MULAI JELAJAH</p><h2 className="text-xl font-bold text-slate-900">Scan QR TAKONO</h2></div><button autoFocus className="p-3 rounded-full bg-slate-100" aria-label="Tutup" onClick={onClose}><X size={18}/></button></div>
+ <div className="rounded-2xl bg-blue-50 border border-blue-100 p-5 text-center">{camera?<video ref={video} muted playsInline className="w-full rounded-xl aspect-square object-cover"/>:<><QrCode className="mx-auto text-blue-600 mb-3" size={56}/><p className="text-sm text-slate-600">Pindai QR destinasi atau Explore Point untuk membuka informasi dan mulai menjelajah.</p></>}</div>
+ <div className="grid grid-cols-2 gap-3"><button disabled={busy} onClick={camera?stop:start} className="flex items-center justify-center gap-2 p-3 bg-blue-600 text-white rounded-xl text-sm font-semibold disabled:opacity-50"><Camera size={18}/>{camera?'Tutup kamera':'Kamera'}</button><label className={`flex items-center justify-center gap-2 p-3 border border-slate-200 rounded-xl text-sm font-semibold cursor-pointer ${busy?'opacity-50':''}`}><ImagePlus size={18}/>Foto QR<input type="file" accept="image/*" disabled={busy} className="sr-only" onChange={async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;stop();setMessage('');setBusy(true);const url=URL.createObjectURL(file);try{const img=new Image();img.src=url;await img.decode();const result=await decode(img,img.naturalWidth,img.naturalHeight);if(!result)throw new Error('QR belum terbaca. Pilih foto yang jelas dan tidak terpotong.');await open(result);}catch(err){setMessage(err instanceof Error?err.message:'Foto tidak dapat dibaca.');}finally{URL.revokeObjectURL(url);setBusy(false);}}}/></label></div>
+ <form className="space-y-3" onSubmit={e=>{e.preventDefault();void open(code);}}><label className="block text-sm font-medium text-slate-700">Atau masukkan kode / link QR<input required value={code} onChange={e=>setCode(e.target.value)} placeholder="Tempel link atau kode TAKONO" className="mt-2 block w-full p-3 border border-slate-200 rounded-xl text-base"/></label>{message&&<p role="alert" className="rounded-xl bg-amber-50 p-3 text-amber-900 text-sm">{message}</p>}<button disabled={busy} className="w-full py-3 bg-slate-900 text-white rounded-xl font-semibold disabled:opacity-50">{busy?'Memeriksa…':'Buka QR'}</button></form></section></div>;
 }
-
-export const ScanModal: React.FC<ScanModalProps> = ({
-  isOpen,
-  onClose,
-  onNavigate,
-  preselectedPoint
-}) => {
-  const { refreshUserData } = useAuth();
-  const [code, setCode] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [scanResult, setScanResult] = useState<{
-    success: boolean;
-    title: string;
-    message: string;
-    pointsAwarded?: number;
-    destinationSlug?: string;
-    pointSlug?: string;
-  } | null>(null);
-
-  if (!isOpen) return null;
-
-  const handleProcessCode = async (inputCode: string) => {
-    setIsProcessing(true);
-    setScanResult(null);
-
-    const clean = inputCode.trim();
-
-    // Check if destination code (e.g. KBS-SBY)
-    if (clean.toUpperCase() === 'KBS-SBY' || clean.toLowerCase() === 'kbs') {
-      const res = await ApiClient.scanDestinationQR('KBS-SBY');
-      if (res.success && res.data) {
-        setScanResult({
-          success: true,
-          title: res.data.welcomeTitle,
-          message: res.data.welcomeSubtitle,
-          destinationSlug: res.data.destination.slug
-        });
-      } else {
-        setScanResult({
-          success: false,
-          title: 'Kode Tidak Dikenali',
-          message: 'Destinasi tidak ditemukan dalam database platform.'
-        });
-      }
-      setIsProcessing(false);
-      return;
-    }
-
-    // Otherwise test explore point token
-    const res = await ApiClient.scanExplorePointToken(clean);
-    if (res.success && res.data) {
-      if (res.data.awardResult?.pointsAwarded) {
-        confetti({ particleCount: 70, spread: 60 });
-        await refreshUserData();
-      }
-      setScanResult({
-        success: true,
-        title: res.data.explorePoint.name,
-        message: res.data.message,
-        pointsAwarded: res.data.awardResult?.pointsAwarded || 0,
-        pointSlug: res.data.explorePoint.slug
-      });
-    } else {
-      setScanResult({
-        success: false,
-        title: 'Pemindaian Gagal',
-        message: res.message || 'Kode QR tidak cocok dengan titik jelajah aktif.'
-      });
-    }
-    setIsProcessing(false);
-  };
-
-  const quickSimulations = [
-    { label: '🐘 Papan Titik Konservasi Gajah', token: 'token_kbs_01_gajah' },
-    { label: '🦎 Papan Titik Habitat Komodo', token: 'token_kbs_02_komodo' },
-    { label: '🐠 Papan Titik Aquarium Bersejarah', token: 'token_kbs_03_aquarium' },
-    { label: '🦁 Papan Titik Singa Afrika', token: 'token_kbs_04_singa' },
-    { label: '🚪 Gerbang Utama KBS (Welcome)', token: 'KBS-SBY' }
-  ];
-
-  return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-2xl animate-in fade-in zoom-in duration-200">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
-              <QrCode className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-extrabold text-slate-900">Pemindai QR TAKONO</h3>
-              <p className="text-[10px] text-slate-500">Papan gerbang & Explore Point fisik</p>
-            </div>
-          </div>
-          <button 
-            onClick={onClose}
-            className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Camera simulation viewport */}
-        <div className="relative h-44 bg-slate-950 rounded-2xl overflow-hidden flex flex-col items-center justify-center text-center p-4 border border-slate-800">
-          <div className="w-36 h-36 border-2 border-dashed border-blue-400 rounded-xl relative flex items-center justify-center animate-pulse">
-            <Camera className="w-8 h-8 text-blue-400/80" />
-            <div className="absolute inset-x-2 top-1/2 h-0.5 bg-rose-500/80 shadow-xs animate-bounce"></div>
-          </div>
-          <span className="text-[10px] text-slate-400 mt-2 z-10">Arahkan kamera ke kode QR fisik</span>
-        </div>
-
-        {/* Input manual fallback */}
-        <div className="space-y-1.5">
-          <label className="text-[11px] font-semibold text-slate-700 block">
-            Atau masukkan kode / token manual:
-          </label>
-          <div className="flex gap-2">
-            <input
-              type="text"
-              value={code}
-              onChange={e => setCode(e.target.value)}
-              placeholder="Contoh: token_kbs_01_gajah atau KBS-SBY"
-              className="flex-1 px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:bg-white focus:outline-hidden focus:border-blue-500"
-            />
-            <button
-              onClick={() => handleProcessCode(code)}
-              disabled={isProcessing || !code.trim()}
-              className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-semibold cursor-pointer"
-            >
-              {isProcessing ? '...' : 'Cek'}
-            </button>
-          </div>
-        </div>
-
-        {/* Instant Simulation One-Tap Pills */}
-        <div className="space-y-1.5 pt-1">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-            Uji Coba Cepat (Simulasi 1-Klik):
-          </span>
-          <div className="space-y-1 max-h-32 overflow-y-auto pr-1">
-            {quickSimulations.map(sim => (
-              <button
-                key={sim.token}
-                onClick={() => handleProcessCode(sim.token)}
-                className="w-full text-left p-2 rounded-lg bg-slate-50 hover:bg-blue-50 border border-slate-200/70 hover:border-blue-200 text-[11px] text-slate-700 hover:text-blue-900 transition-colors flex items-center justify-between cursor-pointer"
-              >
-                <span>{sim.label}</span>
-                <span className="text-[10px] font-mono text-slate-400">Scan</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Result Feedback Banner */}
-        {scanResult && (
-          <div className={`p-3.5 rounded-xl text-xs space-y-2 border ${
-            scanResult.success 
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-950' 
-              : 'bg-rose-50 border-rose-200 text-rose-950'
-          }`}>
-            <div className="flex items-center gap-1.5 font-bold">
-              {scanResult.success ? (
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-              ) : (
-                <AlertCircle className="w-4 h-4 text-rose-600" />
-              )}
-              <span>{scanResult.title}</span>
-            </div>
-
-            <p className="text-[11px] leading-relaxed">{scanResult.message}</p>
-
-            {scanResult.pointsAwarded !== undefined && scanResult.pointsAwarded > 0 && (
-              <div className="font-mono font-bold text-emerald-700 text-xs">
-                +{scanResult.pointsAwarded} Jejak Points telah ditambahkan ke buku kas!
-              </div>
-            )}
-
-            <div className="pt-1 flex gap-2">
-              {scanResult.pointSlug && (
-                <button
-                  onClick={() => {
-                    onClose();
-                    onNavigate(`/app/explore/${scanResult.pointSlug}`);
-                  }}
-                  className="flex-1 py-1.5 bg-emerald-600 text-white rounded-lg font-semibold text-xs text-center cursor-pointer"
-                >
-                  Buka Detail Cerita & Kuis
-                </button>
-              )}
-              {scanResult.destinationSlug && (
-                <button
-                  onClick={() => {
-                    onClose();
-                    onNavigate('/app/smart-guide');
-                  }}
-                  className="flex-1 py-1.5 bg-blue-600 text-white rounded-lg font-semibold text-xs text-center cursor-pointer"
-                >
-                  Buka Smart Guide KBS
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-      </div>
-    </div>
-  );
-};

@@ -12,16 +12,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        $middleware->statefulApi();
-        
-        // CORS configuration for React frontend communication
-        $middleware->validateCsrfTokens(except: [
-            'api/*',
-        ]);
+        // Stateless Sanctum bearer tokens; no cookie authentication on these routes.
+        $middleware->alias(['role' => \App\Http\Middleware\Role::class]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         // Return structured JSON on validation and authorization failures
         $exceptions->shouldRenderJsonWhen(function ($request, $e) {
             return $request->is('api/*');
         });
-    })->create();
+    })->create()->dontMergeFrameworkConfiguration();

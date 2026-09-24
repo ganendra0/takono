@@ -1,0 +1,47 @@
+import React, { useState } from 'react';
+export type Field = { key:string; label:string; type?:string; options?:string[]; required?:boolean };
+const f=(key:string,label:string,type='text',options?:string[],required=true):Field=>({key,label,type,options,required});
+const location=[f('latitude','Latitude','number'),f('longitude','Longitude','number')];
+const status=f('status','Status','select',['draft','published']);
+const common=[f('name','Nama'),f('description','Deskripsi','textarea'),f('image','URL gambar','text',undefined,false)];
+export const schemas:Record<string,Field[]>={
+ destination:[f('name','Nama destinasi'),f('description','Deskripsi','textarea'),f('tagline','Tagline','text',undefined,false),f('heroImage','URL hero image','text',undefined,false),f('gallery','Gallery — satu URL per baris','lines',undefined,false),f('address','Alamat'),f('city','Kota'),f('province','Provinsi'),...location,f('operatingHours','Jam operasional','text',undefined,false),f('ticketInfo','Informasi tiket','text',undefined,false),f('contactPhone','Telepon','text',undefined,false),f('contactEmail','Email','email',undefined,false),f('facilities','Fasilitas','facilities',undefined,false),status],
+ 'explore-points':[...common,f('category','Kategori','select',['Edukasi','Sejarah','Budaya','Kuliner','Keluarga','Alam','Foto','Santai']),...location,f('story','Cerita','textarea',undefined,false),f('educationalContent','Materi edukasi','textarea',undefined,false),f('funFacts','Fakta — satu per baris','lines',undefined,false),f('estimatedDuration','Durasi'),f('difficulty','Kesulitan','select',['Mudah','Sedang','Menantang']),f('pointsReward','Jejak Points','number'),status,f('quiz','Mini Quiz','quiz',undefined,false)],
+ events:[f('title','Judul'),...common.slice(1),f('startDate','Tanggal mulai','date'),f('endDate','Tanggal selesai','date'),f('time','Jam'),f('location','Lokasi'),f('organizer','Penyelenggara','text',undefined,false),f('pointsReward','Jejak Points','number'),f('status','Status','select',['draft','published','upcoming','completed'])],
+ rewards:[...common,f('partner','Mitra'),f('pointsRequired','Poin penukaran','number'),f('quota','Kuota total','number'),f('validFrom','Berlaku mulai','date',undefined,false),f('validUntil','Berlaku hingga','date'),f('terms','Syarat — satu per baris','lines',undefined,false),f('status','Status','select',['inactive','active','expired','out_of_stock'])],
+ 'local-discoveries':[...common,f('category','Kategori','select',['Kuliner','Oleh-oleh','Produk Lokal','Lainnya']),f('address','Alamat'),...location,f('operatingHours','Jam buka','text',undefined,false),f('contact','Kontak','text',undefined,false),f('promotion','Promosi','text',undefined,false),f('rewardText','Informasi reward','text',undefined,false),f('pointsReward','Jejak Points','number'),status],
+ users:[f('name','Nama'),f('email','Email','email'),f('password','Password (kosongkan untuk mempertahankan)','password',undefined,false),f('role','Peran','select',['traveler','destination_manager','government','super_admin']),f('destinationId','ID destinasi penugasan','text',undefined,false),f('institution','Institusi','text',undefined,false),f('active','Akun aktif','checkbox',undefined,false)],
+};
+const input='w-full p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm';
+export function ContentEditor({kind,record,onSave,onClose}:{kind:string;record:any;onSave:(data:any)=>Promise<{success:boolean;message?:string}>;onClose:()=>void}) {
+ const [data,setData]=useState<any>(()=>Object.fromEntries(schemas[kind].map(field=>[field.key,record?.[field.key] ?? (field.type==='checkbox'?true:field.type==='number'?0:field.type==='facilities'?[]:field.type==='quiz'?null:field.options?.[0]||'')])));
+ const [busy,setBusy]=useState(false);const [error,setError]=useState('');
+ const set=(key:string,value:any)=>setData((prev:any)=>({...prev,[key]:value}));
+ return <div className="fixed inset-0 z-[1000] bg-black/60 flex items-center justify-center p-4" onKeyDown={e=>{if(e.key==='Escape'&&!busy)onClose();}}>
+ <section role="dialog" aria-modal="true" aria-label="Editor konten" className="bg-white rounded-3xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+ <div className="flex justify-between mb-5"><h2 className="font-bold text-lg">{record?.id?'Edit':'Tambah'} {kind}</h2><button type="button" disabled={busy} onClick={onClose} aria-label="Tutup">✕</button></div>
+ <form className="space-y-4" onSubmit={async e=>{e.preventDefault();setBusy(true);setError('');const payload={...data};for(const field of schemas[kind]){if(field.type==='lines')payload[field.key]=Array.isArray(payload[field.key])?payload[field.key]:String(payload[field.key]).split('\n').map(s=>s.trim()).filter(Boolean);if(payload[field.key]===''&&!field.required)payload[field.key]=null;}const r=await onSave(payload);setBusy(false);if(!r.success)setError(r.message||'Gagal menyimpan.');}}>
+ {schemas[kind].map(field=><div key={field.key}>
+ {field.type==='facilities'?<><span className="text-sm font-semibold">Fasilitas</span>{(data.facilities||[]).map((item:any,i:number)=><fieldset key={item.id} className="border p-3 rounded-xl space-y-2 my-2"><legend>Fasilitas {i+1}</legend>{['name','latitude','longitude','description'].map(key=><label key={key} className="block text-xs">{key}<input className={input} required={key!=='description'} type={['latitude','longitude'].includes(key)?'number':'text'} step="any" value={item[key]??''} onChange={e=>set('facilities',data.facilities.map((x:any,j:number)=>j===i?{...x,[key]:['latitude','longitude'].includes(key)?Number(e.target.value):e.target.value}:x))}/></label>)}<button type="button" className="text-rose-700 text-xs" onClick={()=>set('facilities',data.facilities.filter((_:any,j:number)=>j!==i))}>Hapus fasilitas</button></fieldset>)}<button type="button" className="text-blue-700 text-sm" onClick={()=>set('facilities',[...(data.facilities||[]),{id:crypto.randomUUID(),name:'',icon:'Info',latitude:0,longitude:0}])}>+ Fasilitas</button></>:
+ field.type==='quiz'?<QuizEditor quiz={data.quiz} setQuiz={q=>set('quiz',q)}/>:
+ <label className="block text-sm font-semibold space-y-1"><span>{field.label}</span>
+ {field.options?<select className={input} value={data[field.key]} onChange={e=>set(field.key,e.target.value)}>{field.options.map(o=><option key={o}>{o}</option>)}</select>:
+ ['textarea','lines'].includes(field.type||'')?<textarea className={input} required={field.required} rows={3} value={Array.isArray(data[field.key])?data[field.key].join('\n'):data[field.key]} onChange={e=>set(field.key,e.target.value)}/>:
+ <input className={field.type==='checkbox'?'ml-3':input} type={field.type||'text'} step="any" required={field.required} checked={field.type==='checkbox'?data[field.key]:undefined} value={field.type==='checkbox'?undefined:data[field.key]} onChange={e=>set(field.key,field.type==='checkbox'?e.target.checked:field.type==='number'?Number(e.target.value):e.target.value)}/>}
+ </label>}</div>)}
+ {error&&<p role="alert" className="text-rose-700 text-sm">{error}</p>}
+ <div className="flex gap-3"><button type="button" disabled={busy} onClick={onClose} className="flex-1 p-3 bg-slate-100 rounded-xl">Batal</button><button disabled={busy} className="flex-1 p-3 bg-blue-600 text-white rounded-xl disabled:opacity-50">{busy?'Menyimpan…':'Simpan'}</button></div>
+ </form></section></div>;
+}
+function QuizEditor({quiz,setQuiz}:{quiz:any;setQuiz:(q:any)=>void}) {
+ const fresh=()=>({id:crypto.randomUUID(),question:'',options:[{id:crypto.randomUUID(),text:''},{id:crypto.randomUUID(),text:''}],correctOptionId:'',explanation:'',points:15});
+ if(!quiz)return <button type="button" className="text-blue-700" onClick={()=>setQuiz({title:'Mini Quiz',questions:[fresh()]})}>+ Tambah Mini Quiz</button>;
+ const update=(i:number,key:string,value:any)=>setQuiz({...quiz,questions:quiz.questions.map((q:any,j:number)=>j===i?{...q,[key]:value}:q)});
+ return <fieldset className="border rounded-xl p-4 space-y-3"><legend>Mini Quiz</legend><label className="block text-sm">Judul<input required className={input} value={quiz.title} onChange={e=>setQuiz({...quiz,title:e.target.value})}/></label>
+ {quiz.questions.map((q:any,i:number)=><fieldset key={q.id} className="space-y-2 border-t pt-3"><legend>Pertanyaan {i+1}</legend><textarea required className={input} value={q.question} onChange={e=>update(i,'question',e.target.value)}/>
+ {q.options.map((o:any,j:number)=><label key={o.id} className="flex items-center gap-2 text-sm"><input type="radio" name={'correct-'+q.id} required checked={q.correctOptionId===o.id} onChange={()=>update(i,'correctOptionId',o.id)} aria-label="Jawaban benar"/><input required className={input} aria-label={'Pilihan '+(j+1)} value={o.text} onChange={e=>update(i,'options',q.options.map((x:any,k:number)=>k===j?{...x,text:e.target.value}:x))}/></label>)}
+ <button type="button" className="text-blue-700 text-xs" onClick={()=>update(i,'options',[...q.options,{id:crypto.randomUUID(),text:''}])}>+ Pilihan</button>
+ <label className="block text-sm">Penjelasan<textarea required className={input} value={q.explanation} onChange={e=>update(i,'explanation',e.target.value)}/></label>
+ <label className="block text-sm">Poin<input required className={input} type="number" min={0} max={1000} value={q.points} onChange={e=>update(i,'points',Number(e.target.value))}/></label>
+ </fieldset>)}<button type="button" className="text-blue-700" onClick={()=>setQuiz({...quiz,questions:[...quiz.questions,fresh()]})}>+ Pertanyaan</button></fieldset>;
+}

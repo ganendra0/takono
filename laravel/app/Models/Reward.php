@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Reward extends Model
 {
-    use HasFactory;
+    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes;
 
     protected $fillable = [
         'destination_id',
@@ -21,6 +21,7 @@ class Reward extends Model
         'stock',
         'claimed_count',
         'valid_until',
+        'valid_from',
         'terms',
         'status',
     ];

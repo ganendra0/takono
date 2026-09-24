@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Destination } from '../../types/index.js';
 import { ArrowLeft, MapPin, Compass, Search, Clock, ChevronRight } from 'lucide-react';
-import { DemoDataNotice } from '../../components/DemoDataNotice.js';
 
 interface DestinationsListPageProps {
   destinations: Destination[];
@@ -11,7 +10,7 @@ interface DestinationsListPageProps {
 export const DestinationsListPage: React.FC<DestinationsListPageProps> = ({ destinations, onNavigate }) => {
   const [search, setSearch] = useState('');
 
-  const filtered = destinations.filter(d => 
+  const filtered = destinations.filter(d =>
     d.name.toLowerCase().includes(search.toLowerCase()) ||
     d.city.toLowerCase().includes(search.toLowerCase()) ||
     d.tagline.toLowerCase().includes(search.toLowerCase())
@@ -20,7 +19,7 @@ export const DestinationsListPage: React.FC<DestinationsListPageProps> = ({ dest
   return (
     <div className="min-h-screen bg-white py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
+
         <button
           onClick={() => onNavigate('/')}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 cursor-pointer"
@@ -54,7 +53,7 @@ export const DestinationsListPage: React.FC<DestinationsListPageProps> = ({ dest
           </div>
         </div>
 
-        <DemoDataNotice />
+
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pt-2">
           {filtered.map(dest => (

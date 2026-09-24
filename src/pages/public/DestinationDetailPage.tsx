@@ -1,27 +1,27 @@
 import React from 'react';
-import { 
-  Destination, 
-  ExplorePoint, 
-  DestinationEvent, 
-  LocalDiscovery, 
-  Reward 
+import { ApiClient } from '../../lib/api';
+import {
+  Destination,
+  ExplorePoint,
+  DestinationEvent,
+  LocalDiscovery,
+  Reward
 } from '../../types/index.js';
-import { 
-  ArrowLeft, 
-  Compass, 
-  MapPin, 
-  Clock, 
-  Ticket, 
-  Phone, 
-  Mail, 
-  Calendar, 
-  Gift, 
-  Store, 
+import {
+  ArrowLeft,
+  Compass,
+  MapPin,
+  Clock,
+  Ticket,
+  Phone,
+  Mail,
+  Calendar,
+  Gift,
+  Store,
   QrCode,
   CheckCircle2,
-  ChevronRight 
+  ChevronRight
 } from 'lucide-react';
-import { DemoDataNotice } from '../../components/DemoDataNotice.js';
 
 interface DestinationDetailPageProps {
   destination: Destination;
@@ -42,10 +42,11 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
   onNavigate,
   onOpenScanModal
 }) => {
+  React.useEffect(() => { ApiClient.selectDestination(destination.id); }, [destination.id]);
   return (
     <div className="min-h-screen bg-slate-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-        
+
         <button
           onClick={() => onNavigate('/destinations')}
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 cursor-pointer"
@@ -102,21 +103,21 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
           </div>
         </div>
 
-        <DemoDataNotice />
+
 
         {/* Info Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
+
           {/* Main Column: Explore Points, Events, Facilities */}
           <div className="lg:col-span-2 space-y-8">
-            
+
             {/* Overview */}
             <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-4">
               <h2 className="text-lg font-bold text-slate-900">Tentang Destinasi</h2>
               <p className="text-sm text-slate-700 leading-relaxed">
                 {destination.description}
               </p>
-              
+
               <div className="pt-2 border-t border-slate-100">
                 <h3 className="text-xs font-semibold text-slate-800 uppercase tracking-wider mb-3">
                   Fasilitas Tersedia
@@ -155,17 +156,17 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {explorePoints.map(point => (
-                  <div 
+                  <div
                     key={point.id}
                     onClick={() => onNavigate(`/app/explore/${point.slug}`)}
                     className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs hover:border-blue-300 transition-all cursor-pointer flex flex-col justify-between"
                   >
                     <div className="space-y-2">
                       <div className="relative h-32 rounded-xl overflow-hidden">
-                        <img 
-                          src={point.image} 
+                        <img
+                          src={point.image}
                           alt={point.name}
-                          className="w-full h-full object-cover" 
+                          className="w-full h-full object-cover"
                           loading="lazy"
                         />
                         <div className="absolute top-2 left-2 px-2 py-0.5 bg-blue-600 text-white rounded text-[10px] font-semibold">
@@ -202,11 +203,11 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
               <div className="space-y-3">
                 {events.map(event => (
                   <div key={event.id} className="p-4 bg-white rounded-2xl border border-slate-200 flex flex-col sm:flex-row gap-4 items-center">
-                    <img 
-                      src={event.image} 
-                      alt={event.title} 
+                    <img
+                      src={event.image}
+                      alt={event.title}
                       className="w-full sm:w-28 h-20 rounded-xl object-cover"
-                      loading="lazy" 
+                      loading="lazy"
                     />
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2 text-[11px] text-blue-600 font-semibold">
@@ -233,11 +234,11 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
 
           {/* Right Sidebar: Key Metadata & Local Discovery */}
           <div className="space-y-6">
-            
+
             {/* Practical Visitor Info */}
             <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-4">
               <h3 className="text-base font-bold text-slate-900">Informasi Kunjungan</h3>
-              
+
               <div className="space-y-3 text-xs">
                 <div className="flex items-start gap-3">
                   <Clock className="w-4 h-4 text-blue-600 shrink-0 mt-0.5" />

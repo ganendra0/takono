@@ -18,10 +18,11 @@ import {
 } from 'lucide-react';
 
 export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
-  const { user, pointsBalance, logout, switchRole } = useAuth();
+  const { user, pointsBalance, logout } = useAuth();
   const [transactions, setTransactions] = useState<PointTransaction[]>([]);
   const [redemptions, setRedemptions] = useState<RewardRedemption[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
       if (albRes.success && albRes.data) {
         setRedemptions(albRes.data.redemptions || []);
       }
+      if(!ptRes.success) setError(ptRes.message || 'Gagal memuat transaksi.');
       setIsLoading(false);
     };
 
@@ -53,6 +55,7 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
 
   return (
     <div className="space-y-6 pb-12">
+      {isLoading && <p>Memuat profil…</p>}{error && <p role="alert" className="text-rose-700">{error}</p>}
       
       {/* Profile Card */}
       <div className="p-5 bg-white rounded-3xl border border-slate-200 shadow-xs flex items-center gap-4">
@@ -71,7 +74,7 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
           </div>
           <p className="text-xs text-slate-500 truncate">{user?.email}</p>
           <div className="text-[11px] text-slate-400">
-            Bergabung sejak September 2026
+            Bergabung sejak {user && new Date(user.createdAt).toLocaleDateString('id-ID')}
           </div>
         </div>
       </div>
@@ -110,7 +113,7 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
                 <div className="space-y-1">
                   <div className="text-xs font-bold text-slate-900">{r.rewardTitle || r.rewardName}</div>
                   <div className="text-[11px] font-mono text-blue-600 font-semibold">{r.voucherCode || r.redemptionCode}</div>
-                  <div className="text-[10px] text-slate-400">Berlaku s/d: {(r.expiresAt || '2026-12-31').substring(0, 10)}</div>
+                  <div className="text-[10px] text-slate-400">Berlaku s/d: {r.expiresAt?.substring(0,10) || 'Lihat ketentuan voucher'}</div>
                 </div>
 
                 <button

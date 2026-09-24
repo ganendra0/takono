@@ -10,6 +10,7 @@ class PointTransaction extends Model
     use HasFactory;
 
     protected $fillable = [
+        'claim_key',
         'user_id',
         'type',
         'source_type',

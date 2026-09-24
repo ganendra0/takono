@@ -12,6 +12,7 @@ class User extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
 
     protected $fillable = [
+        'active',
         'name',
         'email',
         'password',
@@ -32,6 +33,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'active' => 'boolean',
             'points_balance' => 'integer',
         ];
     }

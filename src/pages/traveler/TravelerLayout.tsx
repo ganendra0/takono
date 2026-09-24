@@ -57,7 +57,7 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
                 TAKONO
               </span>
               <span className="text-[10px] text-slate-500 font-medium leading-none">
-                Kebun Binatang Surabaya
+                Jelajah destinasi
               </span>
             </div>
           </div>
@@ -90,7 +90,7 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
         </main>
 
         {/* Fixed Bottom Tab Bar (Mobile Thumb Zone Anchor) */}
-        <nav aria-label="Navigasi aplikasi traveler" className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-center shadow-lg">
+        <nav aria-label="Navigasi aplikasi traveler" style={{paddingBottom:'env(safe-area-inset-bottom)'}} className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-center shadow-lg">
           <div className="w-full max-w-md md:max-w-2xl lg:max-w-4xl grid grid-cols-6 h-16">
             {tabs.map(tab => {
               const Icon = tab.icon;

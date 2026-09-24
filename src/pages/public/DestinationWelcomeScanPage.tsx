@@ -125,7 +125,7 @@ export const DestinationWelcomeScanPage: React.FC<DestinationWelcomeScanPageProp
           </div>
           <div className="p-3 bg-white/10 backdrop-blur-md rounded-xl border border-white/10 text-xs">
             <span className="text-slate-400 block mb-0.5">Tiket Masuk</span>
-            <span className="font-semibold text-white">Rp 15.000 (Non-tunai)</span>
+            <span className="font-semibold text-white">{destination.ticketInfo}</span>
           </div>
         </div>
 
@@ -144,7 +144,7 @@ export const DestinationWelcomeScanPage: React.FC<DestinationWelcomeScanPageProp
         {/* Primary CTA */}
         <div className="pt-2 max-w-md mx-auto space-y-3">
           <button
-            onClick={() => onNavigate('/app/smart-guide')}
+            onClick={() => { ApiClient.selectDestination(destination.id); onNavigate('/app/smart-guide'); }}
             className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98"
           >
             <Compass className="w-5 h-5" />
@@ -152,7 +152,7 @@ export const DestinationWelcomeScanPage: React.FC<DestinationWelcomeScanPageProp
           </button>
 
           <p className="text-[11px] text-slate-400">
-            {user ? `Terhubung sebagai: ${user.name} (${user.pointsBalance} Poin)` : 'Masuk otomatis sebagai penjelajah'}
+            {user ? `Terhubung sebagai: ${user.name} (${user.pointsBalance} Poin)` : 'Masuk atau daftar untuk mulai menjelajah'}
           </p>
         </div>
 
@@ -160,7 +160,7 @@ export const DestinationWelcomeScanPage: React.FC<DestinationWelcomeScanPageProp
 
       {/* Footer info */}
       <div className="relative z-10 p-6 text-center text-xs text-slate-500">
-        Demo/Prototype Experience · Kebun Binatang Surabaya · TAKONO Platform
+        {destination.name} · TAKONO
       </div>
 
     </div>

@@ -22,15 +22,18 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const categories = ['Semua', 'Kuliner Khas', 'Sentra Oleh-oleh', 'Minuman Tradisional'];
+  const categories = ['Semua', 'Kuliner', 'Oleh-oleh', 'Produk Lokal', 'Lainnya'];
 
   useEffect(() => {
     const fetchPartners = async () => {
       setIsLoading(true);
-      const res = await ApiClient.getDestinationBySlug('kebun-binatang-surabaya');
+      const res = await ApiClient.getDestinationBySlug();
       if (res.success && res.data) {
         setPartners(res.data.localDiscoveries || []);
       }
+      const activities = await ApiClient.getMyActivities();
+      if (activities.success) setVisitedIds((activities.data || []).filter(a=>a.type==='local_discovery_visited').map(a=>a.referenceId));
+      if(!res.success) setMessage(res.message || 'Gagal memuat mitra.');
       setIsLoading(false);
     };
 
@@ -46,7 +49,7 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
         confetti({ particleCount: 40, spread: 50 });
         await refreshUserData();
       }
-    }
+    } else { setMessage(res.message || 'Gagal mencatat kunjungan.'); }
   };
 
   const filtered = selectedCategory === 'Semua'
@@ -92,6 +95,7 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
 
       {/* Partners List */}
       <div className="space-y-4">
+        {isLoading ? <p>Memuat mitra…</p> : !filtered.length && <p>Belum ada mitra untuk kategori ini.</p>}
         {filtered.map(partner => {
           const isVisited = visitedIds.includes(partner.id);
           return (
@@ -135,7 +139,7 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
                   </div>
                   <div className="flex items-center gap-2">
                     <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{partner.phone}</span>
+                    <span>{partner.contact || partner.phone}</span>
                   </div>
                 </div>
 
@@ -157,7 +161,7 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
                     ) : (
                       <>
                         <Sparkles className="w-4 h-4" />
-                        <span>Catat Kunjungan (+10 Pts)</span>
+                        <span>Catat Kunjungan (+{partner.pointsReward ?? 0} Pts)</span>
                       </>
                     )}
                   </button>

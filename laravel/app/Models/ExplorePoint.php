@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExplorePoint extends Model
 {
-    use HasFactory;
+    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes;
 
     protected $fillable = [
         'destination_id',

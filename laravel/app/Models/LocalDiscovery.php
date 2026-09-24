@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class LocalDiscovery extends Model
 {
-    use HasFactory;
+    use HasFactory, \Illuminate\Database\Eloquent\SoftDeletes;
 
     protected $fillable = [
         'destination_id',

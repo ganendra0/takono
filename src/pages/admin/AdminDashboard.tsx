@@ -1,124 +1,19 @@
-import React from 'react';
-import { useAuth } from '../../context/AuthContext.js';
-import { db } from '../../server/database.js';
-import { ShieldCheck, Users, Database, Server, RefreshCw, CheckCircle2 } from 'lucide-react';
-import { UserRole } from '../../types/index.js';
-
-export const AdminDashboard: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
-  const { user, switchRole } = useAuth();
-
-  const userList = [
-    { id: 'usr_traveler_01', name: 'Budi Santoso', email: 'budi.santoso@example.com', role: 'traveler' },
-    { id: 'usr_mgr_kbs', name: 'Maya Indah (KBS)', email: 'maya.indah@kbs.id', role: 'destination_manager' },
-    { id: 'usr_gov_sby', name: 'Drs. Hendra Wijaya, M.Si', email: 'hendra.w@disbudpar.surabaya.go.id', role: 'government' },
-    { id: 'usr_admin_01', name: 'Super Admin TAKONO', email: 'admin@takono.id', role: 'super_admin' }
-  ];
-
-  return (
-    <div className="min-h-screen bg-slate-100 py-8">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-        
-        <div className="p-6 bg-white rounded-3xl border border-slate-200 shadow-xs flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-bold">
-              <ShieldCheck className="w-6 h-6" />
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
-                Super Admin Console
-              </h1>
-              <p className="text-xs text-slate-500">
-                Pusat Kontrol Sistem & Arsitektur Multi-Role TAKONO
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-semibold rounded-lg border border-emerald-200 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>API Gateway: Aktif (200 OK)</span>
-            </span>
-          </div>
-        </div>
-
-        {/* System Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-1">
-            <span className="text-[11px] text-slate-400 font-bold uppercase">Destinasi Pilot</span>
-            <div className="text-xl font-mono font-bold text-slate-900">1 Destinasi</div>
-            <div className="text-[11px] text-slate-500">KBS Surabaya (Aktif)</div>
-          </div>
-          <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-1">
-            <span className="text-[11px] text-slate-400 font-bold uppercase">Explore Points</span>
-            <div className="text-xl font-mono font-bold text-blue-600">6 Titik</div>
-            <div className="text-[11px] text-slate-500">100% Berisi Kuis & Token</div>
-          </div>
-          <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-1">
-            <span className="text-[11px] text-slate-400 font-bold uppercase">Mitra UMKM Terhubung</span>
-            <div className="text-xl font-mono font-bold text-amber-600">3 Mitra</div>
-            <div className="text-[11px] text-slate-500">Kuliner & Oleh-oleh</div>
-          </div>
-          <div className="p-4 bg-white rounded-2xl border border-slate-200 space-y-1">
-            <span className="text-[11px] text-slate-400 font-bold uppercase">Arsitektur DB</span>
-            <div className="text-xl font-mono font-bold text-emerald-600">REST API</div>
-            <div className="text-[11px] text-slate-500">In-Memory Store + Ledger</div>
-          </div>
-        </div>
-
-        {/* User Role Testing Table */}
-        <div className="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden">
-          <div className="p-6 border-b border-slate-100 flex items-center justify-between">
-            <div>
-              <h2 className="text-base font-extrabold text-slate-900">
-                Pengguna Terdaftar & Akses Role
-              </h2>
-              <p className="text-xs text-slate-500">
-                Uji coba otentikasi role-based access control (RBAC) dalam 1 ketukan.
-              </p>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-600">
-              <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
-                <tr>
-                  <th className="p-4">Nama Pengguna</th>
-                  <th className="p-4">Email</th>
-                  <th className="p-4">Hak Akses (Role)</th>
-                  <th className="p-4 text-right">Uji Coba Langsung</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {userList.map(u => (
-                  <tr key={u.id} className="hover:bg-slate-50">
-                    <td className="p-4 font-bold text-slate-900">{u.name}</td>
-                    <td className="p-4 font-mono text-[11px]">{u.email}</td>
-                    <td className="p-4">
-                      <span className="px-2.5 py-1 rounded-md bg-slate-100 text-slate-800 font-mono text-[11px] font-semibold">
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="p-4 text-right">
-                      <button
-                        onClick={async () => {
-                          await switchRole(u.role as UserRole);
-                          if (u.role === 'traveler') onNavigate('/app');
-                          else if (u.role === 'destination_manager') onNavigate('/manager');
-                          else if (u.role === 'government') onNavigate('/government');
-                        }}
-                        className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold text-xs transition-colors cursor-pointer"
-                      >
-                        Beralih ke Akun Ini
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
-};
+import React,{useEffect,useState} from 'react';
+import {ApiClient} from '../../lib/api';
+import {ContentEditor} from '../../components/ContentEditor';
+export function AdminDashboard({onNavigate}:{onNavigate:(path:string)=>void}) {
+ const [data,setData]=useState<any>(null);const [error,setError]=useState('');const [editor,setEditor]=useState<any>(undefined);const [kind,setKind]=useState('users');
+ const load=async()=>{const r=await ApiClient.request<any>('/admin/dashboard');if(r.success)setData(r.data);else setError(r.message||'Gagal memuat.');};
+ useEffect(()=>{load();},[]);
+ return <main className="min-h-screen bg-slate-100 py-8"><div className="max-w-7xl mx-auto px-4 space-y-6">
+ <header className="bg-white border rounded-3xl p-6"><h1 className="text-xl font-extrabold">Super Admin Console</h1><p className="text-sm text-slate-500">Pengguna, penugasan destinasi, dan audit aktivitas sistem.</p></header>
+ {error&&<p role="alert" className="text-rose-700">{error}</p>}{!data?<p>Memuat data…</p>:<>
+ <div className="bg-white border rounded-2xl p-5 text-sm"><p>{data.users.length} akun · {data.destinations.length} destinasi · {data.activityCount} aktivitas TAKONO</p><p className="mt-2">Peran: {data.roles.join(', ')}</p></div>
+ <section className="bg-white border rounded-3xl p-6"><div className="flex justify-between gap-3"><h2 className="font-bold">Pengguna & Penugasan</h2><button className="text-blue-700" onClick={()=>{setKind('users');setEditor({role:'traveler',active:true});}}>+ Pengguna</button></div>
+ <div className="overflow-x-auto"><table className="w-full text-sm text-left mt-4"><thead><tr>{['Nama','Email','Peran','Destinasi','Status','Aksi'].map(x=><th className="p-3" key={x}>{x}</th>)}</tr></thead><tbody>{data.users.map((u:any)=><tr key={u.id} className="border-t"><td className="p-3">{u.name}</td><td className="p-3">{u.email}</td><td className="p-3">{u.role}</td><td className="p-3">{data.destinations.find((d:any)=>d.id===u.destinationId)?.name||'—'}</td><td className="p-3">{u.active?'Aktif':'Nonaktif'}</td><td><button className="text-blue-700 p-3" onClick={()=>{setKind('users');setEditor(u);}}>Edit</button></td></tr>)}</tbody></table></div></section>
+ <section className="bg-white border rounded-3xl p-6 space-y-3"><div className="flex justify-between"><h2 className="font-bold">Destinasi</h2><button className="text-blue-700" onClick={()=>{setKind('destination');setEditor({status:'draft'});}}>+ Destinasi</button></div>{data.destinations.map((d:any)=><p key={d.id} className="text-sm">{d.id} — {d.name} ({d.status})</p>)}<button className="text-blue-700" onClick={()=>onNavigate('/manager')}>Kelola konten destinasi</button></section>
+ <section className="bg-white border rounded-3xl p-6 space-y-3"><h2 className="font-bold">Audit log (200 terbaru)</h2>{!data.auditLogs.length&&<p>Belum ada data</p>}{data.auditLogs.map((a:any)=><p key={a.id} className="text-xs border-t py-2">{a.createdAt} · Akun {a.userId} · {a.action} · {a.resource} #{a.resourceId}</p>)}</section>
+ </>}
+ {editor!==undefined&&<ContentEditor kind={kind} record={editor} onClose={()=>setEditor(undefined)} onSave={async payload=>{const path=kind==='destination'?'/admin/destinations':'/admin/users'+(editor.id?'/'+editor.id:'');const r=await ApiClient.request(path,{method:editor.id?'PUT':'POST',body:JSON.stringify(payload)});if(r.success){setEditor(undefined);await load();}return r;}}/>}
+ </div></main>;
+}
