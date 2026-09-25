@@ -11,6 +11,7 @@ class PlatformTest extends TestCase {
     private function token(User $u): array { return ['Authorization'=>'Bearer '.$u->createToken('test')->plainTextToken]; }
     private function pointData(): array { return ['name'=>'Point','description'=>'Description','category'=>'Edukasi','latitude'=>-7.2,'longitude'=>112.7,'estimatedDuration'=>'10 menit','difficulty'=>'Mudah','pointsReward'=>30,'status'=>'published','quiz'=>['title'=>'Quiz','questions'=>[['id'=>'q','question'=>'Question','options'=>[['id'=>'a','text'=>'A'],['id'=>'b','text'=>'B']],'correctOptionId'=>'a','explanation'=>'Because A','points'=>20]]]]; }
     public function test_authentication_and_roles(): void {
+        $this->getJson('/api/auth/google/config')->assertOk()->assertJsonPath('data.enabled', false);
         $this->getJson('/api/me/points')->assertUnauthorized();
         $email=Str::uuid().'@example.test';
         $r=$this->postJson('/api/auth/register',['name'=>'Traveler','email'=>$email,'password'=>'Password-test-123'])->assertCreated();

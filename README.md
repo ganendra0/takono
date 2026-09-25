@@ -165,6 +165,30 @@ php artisan optimize:clear
 
 Pada production, atur `VITE_API_URL` sebelum build dan gunakan HTTPS.
 
+## Login dengan Google
+
+Integrasi Google sudah disiapkan dengan Google Identity Services. Agar tombol Google aktif, buat **OAuth 2.0 Client ID untuk Web application** di [Google Cloud Console](https://console.cloud.google.com/apis/credentials), lalu isi Client ID tersebut (bukan Client Secret) di `laravel/.env`:
+
+```env
+GOOGLE_CLIENT_ID=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com
+```
+
+Pada konfigurasi Client ID, tambahkan seluruh alamat frontend ke **Authorized JavaScript origins**, misalnya:
+
+```text
+http://localhost:3000
+http://192.168.1.9:3000
+https://domain-takono-anda.id
+```
+
+Setelah menyimpan konfigurasi, jalankan berikut dari folder `laravel/` lalu restart backend dan frontend:
+
+```bash
+php artisan optimize:clear
+```
+
+Login Google membuat akun Traveler baru secara otomatis. Jika alamat email Google sudah dipakai oleh akun TAKONO berbasis password, masuklah dengan password lebih dulu; akun tidak otomatis disatukan hanya berdasarkan kecocokan email demi mencegah pengambilalihan akun.
+
 ## Pemeriksaan kualitas
 
 Frontend:

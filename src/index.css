@@ -16,11 +16,11 @@
  .welcome-container { @apply mx-auto w-full max-w-6xl px-5 sm:px-8; }
  .welcome-primary { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-800; }
  .welcome-secondary { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50; }
- .workspace { @apply max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6; }
- .panel { @apply bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 min-w-0; }
- .primary-button { @apply inline-flex items-center justify-center gap-2 bg-blue-600 text-white text-sm font-medium px-4 py-3 rounded-xl hover:bg-blue-700 disabled:opacity-50; }
- .secondary-button { @apply inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium px-4 py-3 rounded-xl hover:bg-slate-50 disabled:opacity-50; }
- .field { @apply w-full bg-white border border-slate-200 rounded-xl px-3 py-3 text-sm; }
+ .workspace { @apply mx-auto max-w-[1440px] space-y-7 px-4 py-7 sm:px-7 sm:py-9; }
+ .panel { @apply min-w-0 rounded-xl border border-slate-200 bg-white p-4 sm:p-6; }
+ .primary-button { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-3 text-sm font-medium text-white transition hover:bg-blue-800 disabled:opacity-50; }
+ .secondary-button { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:opacity-50; }
+ .field { @apply w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-2 focus:ring-blue-100; }
  .traveler-card { @apply bg-white border border-slate-200/90 rounded-2xl shadow-[0_1px_2px_rgba(15,23,42,.04)]; }
  .manager-card { @apply bg-white border border-slate-200 rounded-xl shadow-[0_1px_2px_rgba(15,23,42,.03)]; }
  .intelligence-card { @apply bg-white border border-slate-200 rounded-xl shadow-[0_1px_2px_rgba(15,23,42,.03)]; }
@@ -38,6 +38,9 @@
 .government-shell h1,
 .government-shell h2,
 .government-shell h3 { letter-spacing: -0.02em; }
+.portal-intro { max-width: 740px; }
+.admin-shell h1, .manager-shell h1, .government-shell h1 { font-weight: 650; }
+.admin-shell .panel, .manager-shell .panel, .government-shell .panel { box-shadow: 0 1px 2px rgba(15, 23, 42, .025); }
 
 /* Shared visual rhythm: readable content, restrained surfaces, clear actions. */
 .traveler-content > div { min-width: 0; }
