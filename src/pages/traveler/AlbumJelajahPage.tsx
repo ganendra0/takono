@@ -61,16 +61,16 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
           <BookMarked className="w-5 h-5 text-blue-600" />
           <span>Album Jelajah Destinasi</span>
         </h1>
-        <p className="text-xs text-slate-500">
-          Koleksi pencapaian, kenangan titik yang telah kamu temukan, dan lencana petualanganmu.
+        <p className="text-sm text-slate-500 mt-1">
+          Simpan titik yang sudah dikunjungi dan lihat perjalananmu di Taman Bungkul.
         </p>
       </div>
 
       {/* Destination Album Header Card */}
-      <div className="p-5 bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl space-y-4 shadow-md">
+      <div className="p-5 bg-slate-950 text-white rounded-2xl space-y-4">
         <div className="flex items-center justify-between">
-          <span className="px-2.5 py-1 bg-blue-600/30 text-blue-300 border border-blue-400/30 rounded-md text-[10px] font-mono uppercase tracking-wider">
-            Album #1 · Pilot Destinasi
+          <span className="text-xs font-semibold text-blue-300">
+            Album Taman Bungkul
           </span>
           <span className="text-xs text-slate-300 font-mono">
             {progress?.completedExplorePoints ?? 0} / {progress?.totalExplorePoints ?? 0} Titik
@@ -79,7 +79,7 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
 
         <div>
           <h2 className="text-lg font-bold text-white">{progress?.destinationName || 'Destinasi'}</h2>
-          <p className="text-xs text-slate-400">Warisan Konservasi & Rekreasi Edukasi Jawa Timur</p>
+          <p className="text-xs text-slate-400">Ruang kota, sejarah, aktivitas, dan kuliner Surabaya</p>
         </div>
 
         {/* Progress bar */}
@@ -106,9 +106,9 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
         <div className="grid grid-cols-3 gap-3">
           <div className="p-3 bg-white rounded-2xl border border-slate-200 text-center space-y-1 shadow-xs">
             <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold mx-auto text-sm">
-              🐾
+              🌿
             </div>
-            <div className="text-[11px] font-bold text-slate-900 leading-snug">Sahabat Satwa</div>
+            <div className="text-[11px] font-bold text-slate-900 leading-snug">Sahabat Taman</div>
             <div className="text-[10px] text-emerald-600 font-semibold">{completedPoints.some(p=>p.category==='Alam'||p.category==='Edukasi') ? 'Tercapai' : 'Belum tercapai'}</div>
           </div>
 

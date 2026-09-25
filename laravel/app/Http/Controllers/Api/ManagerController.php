@@ -25,18 +25,20 @@ class ManagerController extends Controller {
     public function index(Request $r,string $kind) {
         $d=$this->destination($r); $q=$this->model($kind)::where('destination_id',$d->id);
         if($kind==='explore-points') $q->with('quiz');
-        return Api::ok($q->latest('id')->get());
+        $items=$q->latest('id')->get(); if($kind==='events') $items->each->makeVisible('qr_token');
+        return Api::ok($items);
     }
     public function store(ContentRequest $r,string $kind) {
         return DB::transaction(function()use($r,$kind) {
             $d=$this->destination($r); $v=$r->validated(); $quiz=$v['quiz']??null; unset($v['quiz']);
             $v['destination_id']=$d->id;
             if(in_array($kind,['events','explore-points'])) $v['slug']=Str::slug($v['name']??$v['title']).'-'.Str::lower(Str::random(8));
+            if($kind==='events') $v['qr_token']=Str::random(48);
             if($kind==='explore-points') $v['secure_token']=Str::random(48);
             if($kind==='rewards') { $v['claimed_count']=0; $v['stock']=$v['quota']; }
             $m=$this->model($kind)::create($v);
             if($kind==='explore-points' && $quiz) $m->quiz()->create($quiz);
-            $this->audit($r,'create',$m); return Api::ok($kind==='explore-points'?$m->load('quiz'):$m,201);
+            $this->audit($r,'create',$m); if($kind==='events')$m->makeVisible('qr_token'); return Api::ok($kind==='explore-points'?$m->load('quiz'):$m,201);
         });
     }
     public function update(ContentRequest $r,string $kind,string $id) {
@@ -50,7 +52,7 @@ class ManagerController extends Controller {
                 if($quiz) $m->quiz()->updateOrCreate(['explore_point_id'=>$m->id],$quiz);
                 else abort_if($m->quiz,422,'Kuis yang sudah dibuat dipertahankan untuk menjaga riwayat poin.');
             }
-            $this->audit($r,'update',$m); return Api::ok($kind==='explore-points'?$m->load('quiz'):$m);
+            $this->audit($r,'update',$m); if($kind==='events')$m->makeVisible('qr_token'); return Api::ok($kind==='explore-points'?$m->load('quiz'):$m);
         });
     }
     public function destroy(Request $r,string $kind,string $id) {

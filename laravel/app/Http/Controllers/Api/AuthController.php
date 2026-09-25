@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\AuthRequest;
+use App\Http\Requests\{AuthRequest,ProfileRequest};
 use App\Models\{User, RewardRedemption, PointTransaction, UserActivity, ExplorePoint};
 use App\Services\Catalog;
 use App\Support\Api;
@@ -21,6 +21,15 @@ class AuthController extends Controller {
         return Api::ok(['user'=>$u,'token'=>$u->createToken('web',['*'],now()->addDays(7))->plainTextToken]);
     }
     public function me(Request $r) { return Api::ok($r->user()); }
+    public function updateProfile(ProfileRequest $r) {
+        $v=$r->validated();$user=$r->user();
+        if(!empty($v['password'])&&!Hash::check($v['currentPassword'],$user->password)) throw ValidationException::withMessages(['currentPassword'=>'Password saat ini salah.']);
+        $user->name=$v['name'];
+        if(!empty($v['password']))$user->password=$v['password'];
+        $user->save();
+        if(!empty($v['password'])){$tokenId=$user->currentAccessToken()->id;$user->tokens()->where('id','!=',$tokenId)->delete();}
+        return Api::ok($user);
+    }
     public function logout(Request $r) { $r->user()->currentAccessToken()->delete(); return Api::ok(['message'=>'Berhasil keluar.']); }
     public function points(Request $r) { return Api::ok(['balance'=>$r->user()->points_balance,'transactions'=>$r->user()->pointTransactions()->latest('id')->get()]); }
     public function activities(Request $r) { return Api::ok($r->user()->activities()->latest('id')->get()); }

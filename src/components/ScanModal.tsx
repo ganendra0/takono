@@ -16,6 +16,11 @@ export function ScanModal({isOpen,onClose,onNavigate}:{isOpen:boolean;onClose:()
   if(locked.current)return;locked.current=true;setBusy(true);setMessage('');stop();
   try{
    const parsed=parseTakonoQR(raw);setCode(parsed.code);
+   if(parsed.kind==='event'){
+    if(!user){onClose();onNavigate('/app/scan/event/'+encodeURIComponent(parsed.code));return;}
+    const result=await ApiClient.scanEventToken(parsed.code);if(!result.success||!result.data)throw new Error(result.message||'QR Event tidak valid.');
+    await refreshUserData();onClose();onNavigate('/app/events');return;
+   }
    if(parsed.kind!=='point'){
     const welcome=await ApiClient.scanDestinationQR(parsed.code);
     if(welcome.success&&welcome.data){ApiClient.selectDestination(welcome.data.destination.id);onClose();onNavigate('/scan/'+encodeURIComponent(welcome.data.destination.code));return;}

@@ -11,8 +11,6 @@ import {
   XCircle, 
   Clock, 
   Award, 
-  Volume2,
-  Share2,
   ChevronRight,
   AlertCircle
 } from 'lucide-react';
@@ -185,13 +183,7 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
             <BookOpen className="w-4 h-4 text-blue-600" />
             <span>Kisah & Sejarah Titik</span>
           </h3>
-          <button 
-            onClick={() => alert('Fitur Audio Guide interaktif ramah difabel sedang dalam tahap kurasi kurator.')}
-            className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 px-2 py-1 rounded-md border border-blue-100 cursor-pointer"
-          >
-            <Volume2 className="w-3.5 h-3.5" />
-            <span>Audio Guide</span>
-          </button>
+          {point.audioGuideUrl&&<audio controls className="max-w-40 h-8" src={point.audioGuideUrl}>Audio tidak didukung.</audio>}
         </div>
 
         <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
@@ -245,7 +237,8 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
             )}
           </div>
 
-          <div className="space-y-4 pt-1">
+          {!alreadyCompleted&&<div className="rounded-xl bg-amber-50 p-3 text-sm text-amber-900 flex items-center justify-between gap-3"><span>Scan QR di titik ini untuk membuka kuis.</span><button className="font-semibold underline" onClick={()=>onNavigate('/app/smart-guide')}>Buka peta</button></div>}
+          <div className={`space-y-4 pt-1 ${!alreadyCompleted?'opacity-50 pointer-events-none':''}`}>
             {quiz.questions.map((question, qIdx) => (
               <div key={question.id} className="space-y-3">
                 <p className="text-xs font-bold text-slate-800 leading-snug">
@@ -314,7 +307,7 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
           {(!quizResult || !quizResult.isCorrect) && (
             <button
               onClick={handleSubmitQuiz}
-              disabled={isSubmitting || Object.keys(selectedOptions).length === 0}
+              disabled={!alreadyCompleted || isSubmitting || Object.keys(selectedOptions).length !== quiz.questions.length}
               className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-xs active:scale-98"
             >
               {isSubmitting ? (

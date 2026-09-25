@@ -1,416 +1,369 @@
 {
   "destinations": [
     {
-      "id": "dest_kbs_01",
-      "name": "Kebun Binatang Surabaya (KBS)",
-      "code": "KBS",
-      "slug": "kebun-binatang-surabaya",
-      "tagline": "Lembaga Konservasi Ex-Situ & Cagar Budaya Sejarah Tertua di Asia Tenggara",
-      "description": "Kebun Binatang Surabaya (KBS) adalah salah satu kebun binatang tertua dan terlengkap di Asia Tenggara, berdiri sejak tahun 1916. Selain sebagai sarana rekreasi ramah keluarga, KBS berfungsi aktif sebagai benteng konservasi satwa langka Indonesia, riset hayati, dan edukasi lingkungan alam bagi generasi muda.",
-      "heroImage": "/src/assets/images/kbs_surabaya_zoo_1790168132396.jpg",
+      "id": "dest_bungkul",
+      "name": "Taman Bungkul",
+      "code": "BUNGKUL",
+      "slug": "taman-bungkul-surabaya",
+      "tagline": "Ruang hijau, aktivitas kota, dan cerita Surabaya dalam satu kawasan",
+      "description": "Taman Bungkul adalah ruang terbuka publik di Jalan Raya Darmo yang menjadi tempat warga berjalan santai, berolahraga, bermain, menikmati kuliner, dan bertemu komunitas. Di sisi taman terdapat Makam Mbah Bungkul, bagian dari jejak sejarah kawasan Bungkul.",
+      "heroImage": "https://asset.kompas.com/crops/Fbu_naVqiAg2qFDLiEYUEBcrXrw=/0x0:739x493/1200x900/data/photo/2020/05/14/5ebccba697975.jpg",
       "gallery": [
-        "/src/assets/images/kbs_elephant_exhibit_1790168144417.jpg",
-        "/src/assets/images/kbs_aquarium_building_1790168158103.jpg",
-        "/src/assets/images/hero_takono_tourism_1790168118274.jpg"
+        "https://asset.kompas.com/data/photo/2013/12/16/1703444taman-bungkull780x390.jpg",
+        "https://d34vm3j4h7f97z.cloudfront.net/optimized/4X/a/7/8/a788b14a4faa5174a69e9f60f7027832c1f62e6f_2_690x388.jpeg",
+        "https://aictsurabaya.files.wordpress.com/2017/04/path-5.jpg"
       ],
-      "address": "Jl. Setail No. 1, Darmo, Kec. Wonokromo, Surabaya, Jawa Timur 60241",
+      "address": "Jl. Taman Bungkul, Darmo, Kec. Wonokromo, Surabaya, Jawa Timur 60241",
       "city": "Surabaya",
       "province": "Jawa Timur",
-      "latitude": -7.2961,
-      "longitude": 112.7368,
+      "latitude": -7.29136,
+      "longitude": 112.73983,
       "boundaryCoordinates": [
         [
-          -7.2938,
-          112.735
-        ],
-        [
-          -7.2936,
-          112.7388
-        ],
-        [
-          -7.2982,
+          -7.29055,
           112.7391
         ],
         [
-          -7.2985,
-          112.7348
+          -7.29045,
+          112.74042
         ],
         [
-          -7.2938,
-          112.735
+          -7.2922,
+          112.74058
+        ],
+        [
+          -7.2923,
+          112.73908
+        ],
+        [
+          -7.29055,
+          112.7391
         ]
       ],
-      "operatingHours": "Setiap Hari: 08:00 – 16:00 WIB",
-      "ticketInfo": "Tiket Masuk Reguler: Rp 15.000 / orang (Non-tunai via QRIS / Brizzi)",
-      "contactPhone": "+62 31 5678211",
-      "contactEmail": "info@surabayazoo.co.id",
+      "operatingHours": "Ruang publik terbuka 24 jam",
+      "ticketInfo": "Gratis",
+      "contactPhone": null,
+      "contactEmail": null,
       "facilities": [
         {
-          "id": "fac_1",
-          "name": "Pusat Informasi & Tourism Care",
-          "icon": "Info",
-          "latitude": -7.2942,
-          "longitude": 112.7365,
-          "description": "Layanan informasi, peta cetak panduan, dan penitipan barang"
+          "id": "fac_play",
+          "name": "Area Bermain Anak",
+          "icon": "Baby",
+          "latitude": -7.29103,
+          "longitude": 112.74019,
+          "description": "Area bermain keluarga dengan jalur yang mudah diakses."
         },
         {
-          "id": "fac_2",
-          "name": "Musholla Al-Hikmah KBS",
-          "icon": "Moon",
-          "latitude": -7.2952,
-          "longitude": 112.7375,
-          "description": "Tempat ibadah bersih berpenyejuk udara dilengkapi mukena & sarung"
+          "id": "fac_skate",
+          "name": "Skate & BMX Area",
+          "icon": "Activity",
+          "latitude": -7.29086,
+          "longitude": 112.73946,
+          "description": "Ruang aktivitas skateboard dan BMX."
         },
         {
-          "id": "fac_3",
-          "name": "Toilet Sentral & Akses Difabel",
+          "id": "fac_toilet",
+          "name": "Toilet Umum",
           "icon": "Accessibility",
-          "latitude": -7.2946,
-          "longitude": 112.736,
-          "description": "Fasilitas sanitasi ramah anak, lansia, dan kursi roda"
+          "latitude": -7.29168,
+          "longitude": 112.73942,
+          "description": "Toilet umum di sisi taman."
         },
         {
-          "id": "fac_4",
-          "name": "Pos Medis & Pertolongan Pertama",
-          "icon": "HeartPulse",
-          "latitude": -7.2958,
-          "longitude": 112.7362,
-          "description": "Tim medis siaga dan perawat bersertifikasi"
+          "id": "fac_food",
+          "name": "Sentra Wisata Kuliner",
+          "icon": "Utensils",
+          "latitude": -7.29205,
+          "longitude": 112.73926,
+          "description": "Deretan tenant makanan dan minuman di kawasan taman."
         },
         {
-          "id": "fac_5",
-          "name": "Gazebo Istirahat Rindang",
-          "icon": "Coffee",
-          "latitude": -7.297,
-          "longitude": 112.7378,
-          "description": "Area teduh keluarga di bawah pohon beringin berusia 100+ tahun"
+          "id": "fac_prayer",
+          "name": "Area Makam dan Musala",
+          "icon": "Moon",
+          "latitude": -7.29202,
+          "longitude": 112.74018,
+          "description": "Area ziarah dan tempat ibadah di sisi selatan taman."
         }
       ],
-      "status": "published",
-      "isDemo": true
+      "status": "published"
     }
   ],
   "explorePoints": [
     {
-      "id": "exp_kbs_01",
-      "destinationId": "dest_kbs_01",
-      "name": "Aquarium Bersejarah & Biota Air Tawar",
-      "slug": "aquarium-bersejarah",
-      "category": "Sejarah",
-      "description": "Paviliun akuarium bersejarah bergaya arsitektur kolonial dengan koleksi ikan endemik sungai nusantara dan Arapaima raksasa.",
-      "story": "Dibangun pada masa awal berdirinya kebun binatang, terowongan akuarium ini merupakan salah satu fasilitas pameran air tertua di Indonesia. Desain lengkungan batu bata merah kunonya masih kokoh mempertahankan temperatur sejuk alami.",
-      "educationalContent": "Biota air tawar nusantara seperti Ikan Belida (Chitala lopis) dan Arwana Irian memainkan peran vital dalam rantai makanan sungai tropis. Belida kini berstatus dilindungi penuh karena kepunahan habitat alaminya di Pulau Jawa dan Sumatera.",
-      "funFacts": [
-        "Akuarium ini menampung Arapaima Gigas dari Sungai Amazon yang dapat tumbuh hingga panjang 3 meter.",
-        "Sistem sirkulasi filtrasi menggunakan gravitasi alami yang telah dimodernisasi sejak dekade 1970-an."
-      ],
-      "image": "/src/assets/images/kbs_aquarium_building_1790168158103.jpg",
-      "latitude": -7.2945,
-      "longitude": 112.7362,
-      "estimatedDuration": "15-20 menit",
-      "difficulty": "Mudah",
-      "secureToken": "token_aq_kbs_9812a",
-      "pointsReward": 10,
-      "status": "published",
-      "quiz": {
-        "id": "quiz_aq_01",
-        "explorePointId": "exp_kbs_01",
-        "title": "Kuis Biota Air & Sejarah Akuarium",
-        "questions": [
-          {
-            "id": "q_aq_1",
-            "question": "Ikan air tawar endemik Sumatera & Jawa yang berbentuk pipih dan kini dilindungi karena populasinya terancam adalah...",
-            "options": [
-              {
-                "id": "opt_1",
-                "text": "Ikan Belida (Chitala lopis)"
-              },
-              {
-                "id": "opt_2",
-                "text": "Ikan Lele Dumbo"
-              },
-              {
-                "id": "opt_3",
-                "text": "Ikan Mas Koki"
-              },
-              {
-                "id": "opt_4",
-                "text": "Ikan Nila Merah"
-              }
-            ],
-            "correctOptionId": "opt_1",
-            "explanation": "Tepat sekali! Ikan Belida (Chitala lopis) merupakan ikan khas yang kini dilindungi secara ketat oleh Kementerian Kelautan dan Perikanan Republik Indonesia.",
-            "points": 15
-          }
-        ]
-      }
-    },
-    {
-      "id": "exp_kbs_02",
-      "destinationId": "dest_kbs_01",
-      "name": "Konservasi Gajah Sumatera (Elephas maximus sumatranus)",
-      "slug": "gajah-sumatera",
-      "category": "Edukasi",
-      "description": "Habitat terbuka hijau tempat perlindungan dan perbanyakan gajah sumatera yang berstatus Kritis (Critically Endangered).",
-      "story": "Gajah Sumatera merupakan subspesies gajah Asia yang populasinya terus merosot akibat perambahan hutan dan konflik dengan perkebunan. Di KBS, program enrichment harian dirancang khusus untuk merangsang kecerdasan dan gerak motorik alami mereka.",
-      "educationalContent": "Seekor gajah dewasa mengonsumsi sekitar 150 kg hijauan dan 100 liter air setiap hari. Melalui kotorannya, gajah menjadi \"petani hutan\" ulung yang menyebarkan benih pohon-pohon besar di belantara Sumatera.",
-      "funFacts": [
-        "Gajah berkomunikasi menggunakan gelombang infrasonik frekuensi rendah yang merambat lewat tanah hingga jarak puluhan kilometer.",
-        "Belalai gajah memiliki lebih dari 40.000 otot mandiri tanpa tulang tunggal pun."
-      ],
-      "image": "/src/assets/images/kbs_elephant_exhibit_1790168144417.jpg",
-      "latitude": -7.2965,
-      "longitude": 112.7372,
-      "estimatedDuration": "20-25 menit",
-      "difficulty": "Mudah",
-      "secureToken": "token_gj_kbs_4571b",
-      "pointsReward": 10,
-      "status": "published",
-      "quiz": {
-        "id": "quiz_gj_01",
-        "explorePointId": "exp_kbs_02",
-        "title": "Tantangan Pengetahuan Satwa Payung Gajah Sumatera",
-        "questions": [
-          {
-            "id": "q_gj_1",
-            "question": "Mengapa gajah sumatera dijuluki sebagai \"spesies payung\" (umbrella species) dan \"petani hutan\"?",
-            "options": [
-              {
-                "id": "opt_gj_a",
-                "text": "Karena bentuk telinganya menyerupai payung saat kepanasan"
-              },
-              {
-                "id": "opt_gj_b",
-                "text": "Karena daya jelajahnya membantu menyebarkan biji tanaman dan membuka tajuk kanopi hutan bagi vegetasi bawah"
-              },
-              {
-                "id": "opt_gj_c",
-                "text": "Karena gajah bisa berteduh di bawah pohon rindang saat hujan"
-              },
-              {
-                "id": "opt_gj_d",
-                "text": "Karena gajah adalah hewan peliharaan raja-raja masa lalu"
-              }
-            ],
-            "correctOptionId": "opt_gj_b",
-            "explanation": "Luar biasa! Gajah membantu meregenerasi ekosistem hutan tropis dengan memakan buah hutan dan menyebarkan biji-bijian di sepanjang jalur jelajahnya.",
-            "points": 15
-          }
-        ]
-      }
-    },
-    {
-      "id": "exp_kbs_03",
-      "destinationId": "dest_kbs_01",
-      "name": "Dunia Reptil & Suaka Komodo Dragon",
-      "slug": "dunia-reptil-komodo",
-      "category": "Alam",
-      "description": "Zona ekosistem reptil prasejarah yang menampilkan kadal terbesar di bumi asal Nusa Tenggara Timur.",
-      "story": "KBS memiliki rekor sukses internasional dalam penangkaran ex-situ Komodo (Varanus komodoensis). Belasan anakan komodo berhasil ditetaskan secara alami di fasilitas inkubasi reptil KBS ini.",
-      "educationalContent": "Komodo mengandalkan organ Jacobson di langit-langit mulutnya bersama lidah bercabang untuk mencium aroma bangkai hingga jarak 9,5 kilometer dengan bantuan hembusan angin.",
-      "funFacts": [
-        "Gigi komodo bergerigi tajam layaknya hiu dan dapat berganti berkali-kali sepanjang hidupnya.",
-        "Kelenjar racun di rahang bawah komodo mengeluarkan protein antibeku darah yang melemahkan mangsanya."
-      ],
-      "image": "/src/assets/images/hero_takono_tourism_1790168118274.jpg",
-      "latitude": -7.2974,
-      "longitude": 112.7358,
-      "estimatedDuration": "15-20 menit",
-      "difficulty": "Sedang",
-      "secureToken": "token_rp_kbs_2309c",
-      "pointsReward": 10,
-      "status": "published",
-      "quiz": {
-        "id": "quiz_rp_01",
-        "explorePointId": "exp_kbs_03",
-        "title": "Kuis Ketangkasan Komodo Dragon",
-        "questions": [
-          {
-            "id": "q_rp_1",
-            "question": "Bagian tubuh manakah yang digunakan Komodo untuk mendeteksi bau mangsa dari jarak bermil-mil?",
-            "options": [
-              {
-                "id": "opt_rp_a",
-                "text": "Hidung luar"
-              },
-              {
-                "id": "opt_rp_b",
-                "text": "Lidah bercabang yang terhubung ke Organ Jacobson"
-              },
-              {
-                "id": "opt_rp_c",
-                "text": "Gendang telinga luar"
-              },
-              {
-                "id": "opt_rp_d",
-                "text": "Sisik pada bagian ekor"
-              }
-            ],
-            "correctOptionId": "opt_rp_b",
-            "explanation": "Benar! Lidah komodo menangkap partikel aroma di udara dan membawanya ke organ Jacobson di langit-langit mulut.",
-            "points": 15
-          }
-        ]
-      }
-    },
-    {
-      "id": "exp_kbs_04",
-      "destinationId": "dest_kbs_01",
-      "name": "Pusat Primata Bekantan & Orangutan",
-      "slug": "pusat-primata-bekantan",
+      "id": "point_plaza",
+      "destinationId": "dest_bungkul",
+      "name": "Plaza dan Amphitheater",
+      "slug": "plaza-amphitheater-bungkul",
       "category": "Budaya",
-      "description": "Kompleks pulau buatan berparit air yang mensimulasikan hutan mangrove Kalimantan bagi Bekantan berhidung panjang.",
-      "story": "Bekantan (Nasalis larvatus) adalah maskot fauna khas Pulau Kalimantan. KBS memelihara kelompok keluarga bekantan di pulau berpohon bakau buatan tanpa kandang teralis kawat, memungkinkan wisatawan mengamati interaksi sosial alaminya.",
-      "educationalContent": "Perut bekantan memiliki sistem pencernaan bersekat mirip sapi yang menampung bakteri pemecah selulosa, memungkinkan mereka mencerna daun mangrove yang berserat kasar dan beracun bagi primata lain.",
+      "description": "Ruang terbuka utama untuk berkumpul dan kegiatan komunitas.",
+      "story": "Plaza menjadi jantung aktivitas Taman Bungkul. Susunan ruang terbukanya memungkinkan pertunjukan kecil, pertemuan komunitas, dan tempat beristirahat tanpa memisahkan warga dari lanskap taman.",
+      "educationalContent": "Ruang publik yang baik memberi kesempatan bagi beragam kelompok untuk menggunakan tempat yang sama secara aman dan setara.",
       "funFacts": [
-        "Hidung jantan bekantan yang besar berfungsi sebagai pengeras suara alami untuk memanggil betina.",
-        "Bekantan memiliki selaput di antara jari-jari kakinya yang membuat mereka menjadi perenang andal."
+        "Plaza tetap aktif pada pagi, sore, dan malam hari.",
+        "Tempat duduk menghadap ruang tengah sehingga cocok untuk kegiatan komunitas."
       ],
-      "image": "/src/assets/images/kbs_surabaya_zoo_1790168132396.jpg",
-      "latitude": -7.2955,
-      "longitude": 112.738,
-      "estimatedDuration": "20 menit",
+      "image": "https://asset.kompas.com/data/photo/2013/12/16/1703444taman-bungkull780x390.jpg",
+      "latitude": -7.29137,
+      "longitude": 112.73987,
+      "estimatedDuration": "10 menit",
       "difficulty": "Mudah",
-      "secureToken": "token_pm_kbs_7734d",
       "pointsReward": 10,
       "status": "published",
       "quiz": {
-        "id": "quiz_pm_01",
-        "explorePointId": "exp_kbs_04",
-        "title": "Kuis Anatomi & Perilaku Bekantan",
+        "title": "Mengenal ruang publik",
         "questions": [
           {
-            "id": "q_pm_1",
-            "question": "Fungsi adaptasi fisik selaput pada kaki bekantan adalah untuk...",
+            "id": "plaza_q1",
+            "question": "Apa fungsi utama plaza di Taman Bungkul?",
             "options": [
               {
-                "id": "opt_pm_a",
-                "text": "Membantu berenang melintasi sungai mangrove"
+                "id": "a",
+                "text": "Ruang berkumpul dan kegiatan komunitas"
               },
               {
-                "id": "opt_pm_b",
-                "text": "Menghangatkan tubuh saat musim dingin"
+                "id": "b",
+                "text": "Area parkir kendaraan"
               },
               {
-                "id": "opt_pm_c",
-                "text": "Membuat suara tepukan di dahan pohon"
-              },
-              {
-                "id": "opt_pm_d",
-                "text": "Menggali lubang tanah tempat bertelur"
+                "id": "c",
+                "text": "Gudang peralatan"
               }
             ],
-            "correctOptionId": "opt_pm_a",
-            "explanation": "Tepat sekali! Bekantan adalah primata yang sangat menyukai air dan sering melompat ke sungai untuk menghindari predator.",
-            "points": 15
+            "correctOptionId": "a",
+            "explanation": "Plaza dirancang sebagai ruang bersama untuk beristirahat, bertemu, dan berkegiatan.",
+            "points": 10
           }
         ]
       }
     },
     {
-      "id": "exp_kbs_05",
-      "destinationId": "dest_kbs_01",
-      "name": "Kubah Aviary Burung Langka & Endemik",
-      "slug": "kubah-aviary-burung",
-      "category": "Foto",
-      "description": "Kubah raksasa jelajah burung tempat burung Jalak Bali dan Kakatua terbang bebas di atas pepohonan rindang.",
-      "story": "Kubah jelajah ini dirancang agar pengunjung berjalan langsung di tengah kepakan sayap burung tanpa kaca pembatas. Suara kicau Jalak Bali yang riuh mengedukasi wisatawan tentang kesuksesan program pelepasan liar satwa.",
-      "educationalContent": "Jalak Bali (Leucopsar rothschildi) hanya ditemukan di ujung barat Pulau Bali. Program penangkaran kolaboratif kebun binatang berhasil meningkatkan populasinya dari ancaman kepunahan total di alam bebas.",
+      "id": "point_heritage",
+      "destinationId": "dest_bungkul",
+      "name": "Makam Mbah Bungkul",
+      "slug": "makam-mbah-bungkul",
+      "category": "Sejarah",
+      "description": "Jejak sejarah kawasan yang menjadi asal nama Bungkul.",
+      "story": "Nama Bungkul berkaitan dengan Ki Ageng Supo, tokoh yang kemudian dikenal sebagai Mbah atau Sunan Bungkul. Kompleks makam di sisi taman menunjukkan bahwa kawasan ini memiliki lapisan sejarah jauh sebelum menjadi ruang publik modern.",
+      "educationalContent": "Pelestarian situs sejarah di tengah ruang kota membantu warga mengenali hubungan antara tempat, nama kawasan, dan perjalanan masyarakat Surabaya.",
       "funFacts": [
-        "Jalak Bali memiliki jambul putih elegan yang akan ditegakkan saat memikat pasangannya.",
-        "Kakatua Raja memiliki paruh sekuat tang baja yang mampu memecahkan tempurung kenari hutan."
+        "Situs Makam Sunan Bungkul tercatat sebagai situs bersejarah di kawasan Taman Bungkul.",
+        "Area makam berdampingan dengan taman kota modern."
       ],
-      "image": "/src/assets/images/hero_takono_tourism_1790168118274.jpg",
-      "latitude": -7.2949,
-      "longitude": 112.737,
+      "image": "https://asset.kompas.com/crops/Fbu_naVqiAg2qFDLiEYUEBcrXrw=/0x0:739x493/1200x900/data/photo/2020/05/14/5ebccba697975.jpg",
+      "latitude": -7.29202,
+      "longitude": 112.74018,
       "estimatedDuration": "15 menit",
       "difficulty": "Mudah",
-      "secureToken": "token_av_kbs_6129e",
-      "pointsReward": 10,
+      "pointsReward": 15,
       "status": "published",
       "quiz": {
-        "id": "quiz_av_01",
-        "explorePointId": "exp_kbs_05",
-        "title": "Kuis Konservasi Jalak Bali",
+        "title": "Jejak Bungkul",
         "questions": [
           {
-            "id": "q_av_1",
-            "question": "Warna kulit melingkar di sekitar mata burung Jalak Bali yang khas adalah...",
+            "id": "heritage_q1",
+            "question": "Dari mana nama kawasan Bungkul berasal?",
             "options": [
               {
-                "id": "opt_av_a",
-                "text": "Biru terang mencolok"
+                "id": "a",
+                "text": "Nama tokoh yang dikenal sebagai Mbah Bungkul"
               },
               {
-                "id": "opt_av_b",
-                "text": "Merah delima"
+                "id": "b",
+                "text": "Nama jenis pohon"
               },
               {
-                "id": "opt_av_c",
-                "text": "Kuning keemasan"
-              },
-              {
-                "id": "opt_av_d",
-                "text": "Hijau zamrud"
+                "id": "c",
+                "text": "Nama sungai"
               }
             ],
-            "correctOptionId": "opt_av_a",
-            "explanation": "Benar sekali! Ciri pembeda utama Jalak Bali yang eksotis adalah pelupuk mata telanjang berwarna biru terang berpadu bulu putih bersih.",
+            "correctOptionId": "a",
+            "explanation": "Nama Bungkul berkaitan dengan tokoh Ki Ageng Supo yang dikenal sebagai Mbah atau Sunan Bungkul.",
             "points": 15
           }
         ]
       }
     },
     {
-      "id": "exp_kbs_06",
-      "destinationId": "dest_kbs_01",
-      "name": "Area Edukasi Satwa & Hutan Botani Sejarah",
-      "slug": "area-edukasi-botani",
+      "id": "point_skate",
+      "destinationId": "dest_bungkul",
+      "name": "Skate & BMX Area",
+      "slug": "skate-bmx-taman-bungkul",
       "category": "Keluarga",
-      "description": "Taman botani dengan pohon-pohon peneduh raksasa berusia seabad, ruang workshop interaktif, dan sentra belajar daur ulang.",
-      "story": "KBS tidak hanya cagar satwa, melainkan juga paru-paru hijau Kota Surabaya. Ribuan spesimen pohon langka ditanam sejak 1920 untuk menciptakan iklim mikro sejuk di tengah hangatnya pesisir Jawa Timur.",
-      "educationalContent": "Pohon Baobab (Adansonia digitata) dan Beringin Bersejarah di area ini mampu menyerap hingga ratusan ton karbon dioksida per tahun dan menjadi habitat alami serangga dan burung liar Surabaya.",
+      "description": "Area olahraga roda untuk latihan dan pertemuan komunitas.",
+      "story": "Area skate menjadi salah satu ruang yang memberi karakter muda pada Taman Bungkul. Pengguna dengan tingkat kemampuan berbeda dapat berlatih sambil berbagi ruang dan belajar etika keselamatan.",
+      "educationalContent": "Olahraga ruang publik membutuhkan alat pelindung, perhatian pada giliran, dan kepedulian terhadap pengguna lain.",
       "funFacts": [
-        "Beberapa pohon trembesi di area ini telah berusia lebih dari 110 tahun.",
-        "Sisa pakan organik satwa diolah mandiri menjadi kompos pupuk organik untuk merawat seluruh taman kebun binatang."
+        "Area skate Taman Bungkul pernah masuk program revitalisasi Pemerintah Kota Surabaya."
       ],
-      "image": "/src/assets/images/kbs_surabaya_zoo_1790168132396.jpg",
-      "latitude": -7.2968,
-      "longitude": 112.7385,
-      "estimatedDuration": "20 menit",
+      "image": "https://asset.kompas.com/data/photo/2013/12/16/1703444taman-bungkull780x390.jpg",
+      "latitude": -7.29086,
+      "longitude": 112.73946,
+      "estimatedDuration": "10 menit",
       "difficulty": "Mudah",
-      "secureToken": "token_ed_kbs_5541f",
       "pointsReward": 10,
       "status": "published",
       "quiz": {
-        "id": "quiz_ed_01",
-        "explorePointId": "exp_kbs_06",
-        "title": "Kuis Kelestarian Alam & Hutan Kota",
+        "title": "Aman bermain bersama",
         "questions": [
           {
-            "id": "q_ed_1",
-            "question": "Bagaimana sisa pakan organik dan dedaunan di kebun binatang diolah secara berkelanjutan?",
+            "id": "skate_q1",
+            "question": "Apa hal utama sebelum menggunakan area skate?",
             "options": [
               {
-                "id": "opt_ed_a",
-                "text": "Dibuang ke sungai kota"
+                "id": "a",
+                "text": "Memakai pelindung dan memperhatikan pengguna lain"
               },
               {
-                "id": "opt_ed_b",
-                "text": "Difermentasi menjadi pupuk kompos organik penyubur tanaman"
+                "id": "b",
+                "text": "Berjalan di tengah lintasan"
               },
               {
-                "id": "opt_ed_c",
-                "text": "Dibakar di lapangan terbuka"
-              },
-              {
-                "id": "opt_ed_d",
-                "text": "Dibiarkan menumpuk tanpa perawatan"
+                "id": "c",
+                "text": "Meninggalkan sampah di tepi lintasan"
               }
             ],
-            "correctOptionId": "opt_ed_b",
-            "explanation": "Hebat! Pengolahan menjadi kompos organik merupakan wujud nyata ekonomi sirkular dan perlindungan lingkungan hidup di KBS.",
-            "points": 15
+            "correctOptionId": "a",
+            "explanation": "Perlengkapan pelindung dan kesadaran terhadap pengguna lain membantu menjaga keselamatan bersama.",
+            "points": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "point_play",
+      "destinationId": "dest_bungkul",
+      "name": "Area Bermain Inklusif",
+      "slug": "area-bermain-inklusif-bungkul",
+      "category": "Keluarga",
+      "description": "Ruang bermain anak di bawah naungan pepohonan taman.",
+      "story": "Area bermain merupakan bagian penting dari fungsi Taman Bungkul sebagai ruang keluarga. Fasilitas publik perlu dirawat agar aman, bersih, dan dapat digunakan anak dengan kebutuhan yang beragam.",
+      "educationalContent": "Ruang Bermain Ramah Anak menempatkan keamanan, kebersihan, aksesibilitas, dan pengawasan sebagai bagian dari pengalaman bermain.",
+      "funFacts": [
+        "Taman Bungkul mendapat pengakuan Ruang Bermain Ramah Anak pada 2026."
+      ],
+      "image": "https://d34vm3j4h7f97z.cloudfront.net/optimized/4X/a/7/8/a788b14a4faa5174a69e9f60f7027832c1f62e6f_2_690x388.jpeg",
+      "latitude": -7.29103,
+      "longitude": 112.74019,
+      "estimatedDuration": "10 menit",
+      "difficulty": "Mudah",
+      "pointsReward": 10,
+      "status": "published",
+      "quiz": {
+        "title": "Ruang bermain ramah anak",
+        "questions": [
+          {
+            "id": "play_q1",
+            "question": "Apa yang penting dalam ruang bermain publik?",
+            "options": [
+              {
+                "id": "a",
+                "text": "Keamanan, kebersihan, dan akses yang baik"
+              },
+              {
+                "id": "b",
+                "text": "Jalur yang tertutup untuk semua"
+              },
+              {
+                "id": "c",
+                "text": "Peralatan tanpa perawatan"
+              }
+            ],
+            "correctOptionId": "a",
+            "explanation": "Ruang bermain publik perlu aman, bersih, terawat, dan mudah diakses.",
+            "points": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "point_green",
+      "destinationId": "dest_bungkul",
+      "name": "Jalur Teduh dan Pepohonan",
+      "slug": "jalur-teduh-bungkul",
+      "category": "Alam",
+      "description": "Jalur pendek untuk berjalan santai di bawah kanopi pohon.",
+      "story": "Pepohonan matang membuat Taman Bungkul tetap nyaman sebagai ruang singgah di tengah kawasan kota yang padat. Naungan, tanah terbuka, dan tanaman membantu membentuk iklim mikro yang lebih sejuk.",
+      "educationalContent": "Ruang terbuka hijau membantu memberi naungan, menyerap air hujan, dan menyediakan habitat kecil bagi burung serta serangga kota.",
+      "funFacts": [
+        "Kanopi pohon mengurangi paparan matahari langsung pada jalur pejalan kaki."
+      ],
+      "image": "https://aictsurabaya.files.wordpress.com/2017/04/path-5.jpg",
+      "latitude": -7.29118,
+      "longitude": 112.74039,
+      "estimatedDuration": "15 menit",
+      "difficulty": "Mudah",
+      "pointsReward": 10,
+      "status": "published",
+      "quiz": {
+        "title": "Fungsi ruang hijau",
+        "questions": [
+          {
+            "id": "green_q1",
+            "question": "Apa manfaat kanopi pohon di taman kota?",
+            "options": [
+              {
+                "id": "a",
+                "text": "Memberi naungan dan membantu iklim mikro"
+              },
+              {
+                "id": "b",
+                "text": "Menambah panas permukaan"
+              },
+              {
+                "id": "c",
+                "text": "Menghalangi seluruh air hujan"
+              }
+            ],
+            "correctOptionId": "a",
+            "explanation": "Kanopi pohon memberi naungan dan membantu membuat lingkungan sekitar lebih nyaman.",
+            "points": 10
+          }
+        ]
+      }
+    },
+    {
+      "id": "point_food",
+      "destinationId": "dest_bungkul",
+      "name": "Sentra Wisata Kuliner",
+      "slug": "sentra-wisata-kuliner-bungkul",
+      "category": "Kuliner",
+      "description": "Kawasan tenant kuliner yang menjadi bagian dari pengalaman Taman Bungkul.",
+      "story": "Sentra kuliner mempertemukan ruang publik dengan ekonomi lokal. Pengunjung dapat mengenal makanan Surabaya sambil mendukung pedagang yang beraktivitas di sekitar taman.",
+      "educationalContent": "Memilih tenant lokal dan menjaga kebersihan setelah makan membantu ruang publik tetap hidup dan nyaman.",
+      "funFacts": [
+        "Data Pemerintah Kota mencatat puluhan pedagang aktif di SWK Taman Bungkul."
+      ],
+      "image": "https://asset.kompas.com/crops/Fbu_naVqiAg2qFDLiEYUEBcrXrw=/0x0:739x493/1200x900/data/photo/2020/05/14/5ebccba697975.jpg",
+      "latitude": -7.29205,
+      "longitude": 112.73926,
+      "estimatedDuration": "15 menit",
+      "difficulty": "Mudah",
+      "pointsReward": 10,
+      "status": "published",
+      "quiz": {
+        "title": "Kuliner dan ruang publik",
+        "questions": [
+          {
+            "id": "food_q1",
+            "question": "Bagaimana pengunjung membantu menjaga sentra kuliner?",
+            "options": [
+              {
+                "id": "a",
+                "text": "Membuang sampah pada tempatnya"
+              },
+              {
+                "id": "b",
+                "text": "Meninggalkan kemasan di meja"
+              },
+              {
+                "id": "c",
+                "text": "Menghalangi jalur pejalan kaki"
+              }
+            ],
+            "correctOptionId": "a",
+            "explanation": "Menjaga kebersihan membuat sentra kuliner dan taman nyaman untuk semua.",
+            "points": 10
           }
         ]
       }
@@ -418,190 +371,188 @@
   ],
   "events": [
     {
-      "id": "evt_kbs_01",
-      "destinationId": "dest_kbs_01",
-      "title": "Feeding Time Gajah Sumatera & Tanya Pawang",
-      "slug": "feeding-time-gajah",
-      "description": "Saksikan interaksi langsung para mahout (pawang gajah) memberikan santapan buah semangka dan tebu segar sembari mendengarkan penjelasan perilaku gajah.",
-      "image": "/src/assets/images/kbs_elephant_exhibit_1790168144417.jpg",
-      "startDate": "2026-09-24",
-      "endDate": "2026-10-31",
-      "time": "10:00 – 10:45 WIB",
-      "location": "Plaza Konservasi Gajah Sumatera",
-      "organizer": "Tim Edukasi & Mahout KBS",
-      "pointsReward": 20,
-      "status": "upcoming"
-    },
-    {
-      "id": "evt_kbs_02",
-      "destinationId": "dest_kbs_01",
-      "title": "Safari Jelajah Cerita Malam: Nocturnal Animals",
-      "slug": "safari-cerita-malam",
-      "description": "Pengalaman eksklusif mengamati pola hidup satwa malam (Kukang Jawa, Burung Hantu, dan Binturong) didampingi kurator biologi.",
-      "image": "/src/assets/images/kbs_aquarium_building_1790168158103.jpg",
-      "startDate": "2026-09-26",
-      "endDate": "2026-09-27",
-      "time": "18:30 – 20:30 WIB",
-      "location": "Gerbang Utama & Jalur Nokturnal",
-      "organizer": "Departemen Edukasi & Rekreasi KBS",
-      "pointsReward": 30,
-      "status": "upcoming"
-    },
-    {
-      "id": "evt_kbs_03",
-      "destinationId": "dest_kbs_01",
-      "title": "Workshop Dokter Hewan Cilik: Sahabat Satwa",
-      "slug": "workshop-vet-cilik",
-      "description": "Pelatihan dasar kepedulian satwa bagi anak dan keluarga, belajar memeriksa detak jantung mamalia dan meracik nutrisi satwa.",
-      "image": "/src/assets/images/hero_takono_tourism_1790168118274.jpg",
+      "id": "evt_cfd",
+      "destinationId": "dest_bungkul",
+      "title": "Minggu Bergerak di Bungkul",
+      "slug": "minggu-bergerak-bungkul",
+      "description": "Sesi peregangan dan jalan santai bersama komunitas pada Minggu pagi.",
+      "image": "https://asset.kompas.com/crops/Fbu_naVqiAg2qFDLiEYUEBcrXrw=/0x0:739x493/1200x900/data/photo/2020/05/14/5ebccba697975.jpg",
       "startDate": "2026-10-04",
-      "endDate": "2026-10-04",
-      "time": "09:00 – 11:30 WIB",
-      "location": "Aula Bale Edukasi Wonokromo",
-      "organizer": "Ikatan Dokter Hewan & Divisi Edukasi",
-      "pointsReward": 25,
-      "status": "upcoming"
+      "endDate": "2026-12-27",
+      "time": "06.30–08.00 WIB",
+      "location": "Plaza Taman Bungkul",
+      "organizer": "Komunitas Warga Bungkul",
+      "pointsReward": 10,
+      "status": "published"
+    },
+    {
+      "id": "evt_skate",
+      "destinationId": "dest_bungkul",
+      "title": "Kelas Dasar Skateboard",
+      "slug": "kelas-dasar-skateboard-bungkul",
+      "description": "Pengenalan sikap dasar, keselamatan, dan etika menggunakan arena bersama.",
+      "image": "https://asset.kompas.com/data/photo/2013/12/16/1703444taman-bungkull780x390.jpg",
+      "startDate": "2026-10-10",
+      "endDate": "2026-10-10",
+      "time": "15.30–17.00 WIB",
+      "location": "Skate & BMX Area",
+      "organizer": "Komunitas Skate Surabaya",
+      "pointsReward": 15,
+      "status": "published"
+    },
+    {
+      "id": "evt_library",
+      "destinationId": "dest_bungkul",
+      "title": "Baca Sore di Taman",
+      "slug": "baca-sore-taman-bungkul",
+      "description": "Sesi membaca keluarga bersama layanan perpustakaan bergerak.",
+      "image": "https://d34vm3j4h7f97z.cloudfront.net/optimized/4X/a/7/8/a788b14a4faa5174a69e9f60f7027832c1f62e6f_2_690x388.jpeg",
+      "startDate": "2026-10-17",
+      "endDate": "2026-10-17",
+      "time": "15.00–17.00 WIB",
+      "location": "Area Bermain Anak",
+      "organizer": "Komunitas Literasi Surabaya",
+      "pointsReward": 10,
+      "status": "published"
     }
   ],
   "localDiscoveries": [
     {
-      "id": "loc_kbs_01",
-      "destinationId": "dest_kbs_01",
-      "name": "Warung Rawon Sedap Pojok KBS",
+      "id": "local_swk",
+      "destinationId": "dest_bungkul",
+      "name": "Sentra Wisata Kuliner Taman Bungkul",
       "category": "Kuliner",
-      "description": "Sajian Rawon Daging Empuk khas Suroboyo dengan kuah kluwek hitam pekat otentik, sambal terasi, dan tempe mendol gurih.",
-      "image": "/src/assets/images/hero_takono_tourism_1790168118274.jpg",
-      "address": "Jl. Setail No. 12 (depan Gerbang Selatan KBS)",
-      "latitude": -7.2982,
-      "longitude": 112.736,
-      "operatingHours": "07:30 – 17:00 WIB",
-      "contact": "+62 812-3344-5511",
-      "promotion": "Diskon 15% untuk semua menu dengan menunjukkan aplikasi TAKONO",
-      "rewardText": "Dapatkan +10 Jejak Points saat berkunjung",
-      "pointsReward": 10,
+      "description": "Pilihan makanan dan minuman dari tenant lokal di sisi taman.",
+      "image": "https://asset.kompas.com/data/photo/2013/12/16/1703444taman-bungkull780x390.jpg",
+      "address": "Sisi barat Taman Bungkul, Jl. Raya Darmo",
+      "latitude": -7.29205,
+      "longitude": 112.73926,
+      "operatingHours": "10.00–23.00 WIB",
+      "contact": null,
+      "promotion": "Bawa wadah minum guna ulang untuk mengurangi sampah kemasan.",
+      "rewardText": "Reward berlaku pada tenant bertanda TAKONO.",
+      "pointsReward": 5,
       "status": "published"
     },
     {
-      "id": "loc_kbs_02",
-      "destinationId": "dest_kbs_01",
-      "name": "Sentra Oleh-oleh & Suvenir Khas Surabaya",
-      "category": "Oleh-oleh",
-      "description": "Pusat cenderamata UMKM Surabaya: Kaos Sablon Satwa KBS, Kerupuk Ikan Kenjeran, Almond Crispy, dan Spikoe Kuno Surabaya.",
-      "image": "/src/assets/images/kbs_surabaya_zoo_1790168132396.jpg",
-      "address": "Kompleks Ruko Darmo Point Blok C-4",
-      "latitude": -7.294,
-      "longitude": 112.7352,
-      "operatingHours": "08:00 – 20:00 WIB",
-      "contact": "+62 821-8899-7700",
-      "promotion": "Gratis tote bag edisi khusus setiap belanja di atas Rp 75.000",
-      "rewardText": "Dapatkan +10 Jejak Points saat belanja suvenir lokal",
-      "pointsReward": 10,
-      "status": "published"
-    },
-    {
-      "id": "loc_kbs_03",
-      "destinationId": "dest_kbs_01",
-      "name": "Kedai Es Degan Nusantara & Aneka Jamu Segar",
+      "id": "local_rawon",
+      "destinationId": "dest_bungkul",
+      "name": "Rawon Kalkulator",
       "category": "Kuliner",
-      "description": "Minuman kelapa muda murni penyejuk dahaga di tengah teriknya Surabaya, disajikan dengan sirup gula kelapa organik dan jeruk nipis segar.",
-      "image": "/src/assets/images/kbs_aquarium_building_1790168158103.jpg",
-      "address": "Selasar Pujasera KBS Pintu 2",
-      "latitude": -7.295,
-      "longitude": 112.7388,
-      "operatingHours": "08:30 – 16:30 WIB",
-      "contact": "+62 813-5566-2211",
-      "promotion": "Gratis topping selasih & nata de coco untuk wisatawan TAKONO",
-      "rewardText": "Dapatkan +10 Jejak Points saat mampir",
-      "pointsReward": 10,
+      "description": "Pilihan rawon dan menu rumahan di kawasan Taman Bungkul.",
+      "image": "https://asset.kompas.com/data/photo/2013/12/16/1703444taman-bungkull780x390.jpg",
+      "address": "Kawasan Jl. Taman Bungkul, Surabaya",
+      "latitude": -7.29222,
+      "longitude": 112.73902,
+      "operatingHours": "Jam layanan mengikuti operasional tenant",
+      "contact": null,
+      "promotion": null,
+      "rewardText": "Tanyakan ketersediaan promo TAKONO kepada tenant.",
+      "pointsReward": 5,
       "status": "published"
     },
     {
-      "id": "loc_kbs_04",
-      "destinationId": "dest_kbs_01",
-      "name": "Batik Mangrove & Kriya Daun Rungkut",
+      "id": "local_craft",
+      "destinationId": "dest_bungkul",
+      "name": "Kriya Darmo",
       "category": "Produk Lokal",
-      "description": "Karya kerajinan tangan tekstil bermotif satwa dan mangrove Jawa Timur karya kelompok perajin ibu-ibu binaan pariwisata.",
-      "image": "/src/assets/images/hero_takono_tourism_1790168118274.jpg",
-      "address": "Galeri Kriya Jawa Timur, Jl. Diponegoro No. 8",
-      "latitude": -7.2932,
-      "longitude": 112.7365,
-      "operatingHours": "09:00 – 17:00 WIB",
-      "contact": "+62 856-4433-2210",
-      "promotion": "Potongan harga Rp 20.000 untuk kain motif satwa",
-      "rewardText": "Dukungan ekonomi kreatif lokal",
-      "pointsReward": 10,
+      "description": "Produk kain, aksesori, dan kerajinan kecil buatan perajin Surabaya.",
+      "image": "https://aictsurabaya.files.wordpress.com/2017/04/path-5.jpg",
+      "address": "Area UMKM sekitar Taman Bungkul",
+      "latitude": -7.29181,
+      "longitude": 112.73898,
+      "operatingHours": "Akhir pekan 07.00–11.00 WIB",
+      "contact": null,
+      "promotion": "Produk pilihan tersedia saat kegiatan komunitas dan CFD.",
+      "rewardText": "Potongan pembelian produk pilihan.",
+      "pointsReward": 5,
+      "status": "published"
+    },
+    {
+      "id": "local_souvenir",
+      "destinationId": "dest_bungkul",
+      "name": "Oleh-oleh Surabaya Bungkul",
+      "category": "Oleh-oleh",
+      "description": "Pilihan camilan khas Surabaya dari pelaku usaha lokal.",
+      "image": "https://asset.kompas.com/crops/Fbu_naVqiAg2qFDLiEYUEBcrXrw=/0x0:739x493/1200x900/data/photo/2020/05/14/5ebccba697975.jpg",
+      "address": "Sentra Wisata Kuliner Taman Bungkul",
+      "latitude": -7.29208,
+      "longitude": 112.73934,
+      "operatingHours": "10.00–22.00 WIB",
+      "contact": null,
+      "promotion": null,
+      "rewardText": "Paket camilan untuk penukaran reward tertentu.",
+      "pointsReward": 5,
       "status": "published"
     }
   ],
   "rewards": [
     {
-      "id": "rew_kbs_01",
-      "destinationId": "dest_kbs_01",
-      "name": "Voucher Diskon 25% Tiket Kunjungan KBS",
-      "partner": "Manajemen Kebun Binatang Surabaya",
-      "description": "Gunakan potongan harga 25% pada kunjungan berikutnya bersama keluarga di loket khusus digital KBS.",
-      "image": "/src/assets/images/kbs_surabaya_zoo_1790168132396.jpg",
+      "id": "reward_drink",
+      "destinationId": "dest_bungkul",
+      "name": "Potongan Minuman Tenant Pilihan",
+      "description": "Potongan Rp5.000 untuk satu minuman pada tenant SWK bertanda TAKONO.",
+      "image": "https://asset.kompas.com/data/photo/2013/12/16/1703444taman-bungkull780x390.jpg",
+      "partner": "SWK Taman Bungkul",
       "pointsRequired": 40,
-      "quota": 150,
-      "claimedCount": 42,
+      "quota": 50,
+      "validFrom": "2026-09-01",
       "validUntil": "2026-12-31",
       "terms": [
-        "Berlaku untuk 1 tiket masuk reguler",
-        "Tunjukkan kode voucher pada loket layanan khusus digital",
-        "Tidak dapat diuangkan atau digabungkan dengan promo rombongan"
+        "Berlaku satu kali per kode",
+        "Tunjukkan kode sebelum pembayaran",
+        "Mengikuti jam operasional tenant"
       ],
       "status": "active"
     },
     {
-      "id": "rew_kbs_02",
-      "destinationId": "dest_kbs_01",
-      "name": "Voucher Kuliner Lokal Rp 20.000",
-      "partner": "Paguyuban Warung Sedap Pojok KBS",
-      "description": "Potongan belanja makanan & minuman di mitra Local Discovery bertanda khusus di sekitar destinasi.",
-      "image": "/src/assets/images/hero_takono_tourism_1790168118274.jpg",
-      "pointsRequired": 50,
-      "quota": 80,
-      "claimedCount": 31,
-      "validUntil": "2026-11-30",
-      "terms": [
-        "Minimum transaksi Rp 40.000",
-        "Berlaku di seluruh outlet mitra kuliner bertanda TAKONO Partner",
-        "Berlaku hingga 30 hari sejak tanggal penukaran"
-      ],
-      "status": "active"
-    },
-    {
-      "id": "rew_kbs_03",
-      "destinationId": "dest_kbs_01",
-      "name": "Merchandise Resmi Topi Rimba Penjelajah KBS",
-      "partner": "Sentra Suvenir Kreatif KBS",
-      "description": "Topi bucket rimba bahan katun kanvas berbordir logo konservasi KBS untuk teman berpetualang di bawah terik matahari.",
-      "image": "/src/assets/images/kbs_elephant_exhibit_1790168144417.jpg",
-      "pointsRequired": 75,
+      "id": "reward_food",
+      "destinationId": "dest_bungkul",
+      "name": "Voucher Kuliner Rp10.000",
+      "description": "Potongan pembelian makanan minimal Rp35.000 pada tenant pilihan.",
+      "image": "https://asset.kompas.com/data/photo/2013/12/16/1703444taman-bungkull780x390.jpg",
+      "partner": "Tenant Kuliner Bungkul",
+      "pointsRequired": 80,
       "quota": 30,
-      "claimedCount": 14,
-      "validUntil": "2026-12-15",
+      "validFrom": "2026-09-01",
+      "validUntil": "2026-12-31",
       "terms": [
-        "Ambil langsung di Pusat Informasi & Tourism Care KBS Pintu Utama",
-        "Tunjukkan bukti kode penukaran aktif di aplikasi"
+        "Tidak dapat digabung dengan promo lain",
+        "Berlaku pada tenant bertanda TAKONO"
       ],
       "status": "active"
     },
     {
-      "id": "rew_kbs_04",
-      "destinationId": "dest_kbs_01",
-      "name": "Akses VIP Sesi Foto Bersama Satwa Edukasi",
-      "partner": "Divisi Pelayanan Wisata KBS",
-      "description": "Kesempatan eksklusif berfoto bersama satwa jinak (Burung Makaw & Reptil Edukasi) dipandu pawang profesional tanpa antrean umum.",
-      "image": "/src/assets/images/kbs_aquarium_building_1790168158103.jpg",
-      "pointsRequired": 100,
+      "id": "reward_craft",
+      "destinationId": "dest_bungkul",
+      "name": "Gantungan Kunci Kriya Surabaya",
+      "description": "Satu gantungan kunci buatan perajin lokal, selama persediaan tersedia.",
+      "image": "https://aictsurabaya.files.wordpress.com/2017/04/path-5.jpg",
+      "partner": "Kriya Darmo",
+      "pointsRequired": 120,
       "quota": 20,
-      "claimedCount": 9,
-      "validUntil": "2026-10-31",
+      "validFrom": "2026-09-01",
+      "validUntil": "2026-12-31",
       "terms": [
-        "Berlaku untuk 1 keluarga (maksimal 4 orang)",
-        "Sesi berlangsung 10 menit di panggung interaksi satwa",
-        "Termasuk 1 cetak foto ukuran 4R dan softcopy resolusi tinggi"
+        "Ambil pada jadwal pop-up Kriya Darmo",
+        "Pilihan desain mengikuti stok"
+      ],
+      "status": "active"
+    },
+    {
+      "id": "reward_snack",
+      "destinationId": "dest_bungkul",
+      "name": "Paket Camilan Surabaya",
+      "description": "Paket camilan dari tenant oleh-oleh pilihan di kawasan Bungkul.",
+      "image": "https://asset.kompas.com/crops/Fbu_naVqiAg2qFDLiEYUEBcrXrw=/0x0:739x493/1200x900/data/photo/2020/05/14/5ebccba697975.jpg",
+      "partner": "Oleh-oleh Surabaya Bungkul",
+      "pointsRequired": 150,
+      "quota": 15,
+      "validFrom": "2026-09-01",
+      "validUntil": "2026-12-31",
+      "terms": [
+        "Satu paket per kode",
+        "Isi paket mengikuti ketersediaan"
       ],
       "status": "active"
     }

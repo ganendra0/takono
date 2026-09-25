@@ -1,20 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { ApiClient } from '../../lib/api.js';
 import { DestinationEvent } from '../../types/index.js';
-import { useAuth } from '../../context/AuthContext.js';
 import { 
   Calendar, 
   Clock, 
   MapPin, 
-  Sparkles, 
   CheckCircle2, 
-  UserCheck,
-  AlertCircle 
+  QrCode
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
 
 export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
-  const { refreshUserData } = useAuth();
   const [events, setEvents] = useState<DestinationEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [participatedIds, setParticipatedIds] = useState<string[]>([]);
@@ -37,18 +32,6 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ o
     fetchEvents();
   }, []);
 
-  const handleParticipate = async (eventId: string) => {
-    const res = await ApiClient.participateEvent(eventId);
-    if (res.success && res.data) {
-      setParticipatedIds([...participatedIds, eventId]);
-      setActiveMessage(res.data.message);
-      confetti({ particleCount: 50, spread: 60 });
-      await refreshUserData();
-    } else {
-      setActiveMessage(res.message || 'Gagal mendaftar event.');
-    }
-  };
-
   return (
     <div className="space-y-5 pb-8">
       
@@ -58,7 +41,7 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ o
           <span>Agenda & Event Destinasi</span>
         </h1>
         <p className="text-xs text-slate-500">
-          Ikuti jadwal edukasi dan sesi interaksi satwa langsung untuk mendapatkan Jejak Points ekstra.
+          Lihat jadwal, lalu scan QR di lokasi Event untuk mencatat partisipasi.
         </p>
       </div>
 
@@ -120,9 +103,7 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ o
                   </div>
 
                   <div className="pt-2">
-                    <button
-                      onClick={() => handleParticipate(event.id)}
-                      disabled={isRegistered}
+                    <div
                       className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                         isRegistered
                           ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
@@ -136,11 +117,11 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ o
                         </>
                       ) : (
                         <>
-                          <UserCheck className="w-4 h-4" />
-                          <span>Ikuti Event & Klaim +{event.pointsReward} Poin</span>
+                          <QrCode className="w-4 h-4" />
+                          <span>Scan QR di lokasi untuk klaim +{event.pointsReward} poin</span>
                         </>
                       )}
-                    </button>
+                    </div>
                   </div>
                 </div>
               </div>

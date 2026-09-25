@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+@layer components {
+ .workspace { @apply max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6; }
+ .panel { @apply bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 min-w-0; }
+ .primary-button { @apply inline-flex items-center justify-center gap-2 bg-blue-600 text-white text-sm font-medium px-4 py-3 rounded-xl hover:bg-blue-700 disabled:opacity-50; }
+ .secondary-button { @apply inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium px-4 py-3 rounded-xl hover:bg-slate-50 disabled:opacity-50; }
+ .field { @apply w-full bg-white border border-slate-200 rounded-xl px-3 py-3 text-sm; }
+}
+
 @layer base {
   html { -webkit-text-size-adjust: 100%; }
   body { margin: 0; min-width: 320px; }

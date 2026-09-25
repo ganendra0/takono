@@ -13,6 +13,7 @@ class DestinationEvent extends Model
         'destination_id',
         'title',
         'slug',
+        'qr_token',
         'description',
         'image',
         'start_date',
@@ -23,6 +24,8 @@ class DestinationEvent extends Model
         'points_reward',
         'status',
     ];
+
+    protected $hidden = ['qr_token'];
 
     protected $casts = [
         'points_reward' => 'integer',

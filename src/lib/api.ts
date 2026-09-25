@@ -59,7 +59,10 @@ export class ApiClient {
       });
 
       const json = await response.json();
-      if (!response.ok) return { success: false, message: Object.values(json.errors || {}).flat().join(' ') || json.message || 'Permintaan gagal.' };
+      if (!response.ok) {
+        if(response.status===401 && token && !endpoint.startsWith('/auth/login')) { this.removeToken(); window.dispatchEvent(new Event('takono:session-expired')); }
+        return { success: false, message: Object.values(json.errors || {}).flat().join(' ') || json.message || 'Permintaan gagal.' };
+      }
       return resolveImages(json);
     } catch (err: any) {
       return {
@@ -72,6 +75,10 @@ export class ApiClient {
   // --- Auth ---
   static async getCurrentUser() {
     return this.request<User>('/auth/me');
+  }
+
+  static async updateProfile(data:{name:string;currentPassword?:string;password?:string;passwordConfirmation?:string}) {
+    return this.request<User>('/auth/me',{method:'PATCH',body:JSON.stringify(data)});
   }
 
   static async login(email: string, password?: string) {
@@ -209,9 +216,9 @@ export class ApiClient {
     return this.request<DestinationEvent[]>(`/events?destinationId=${await this.destinationKey()}`);
   }
 
-  static async participateEvent(eventId: string) {
+  static async scanEventToken(token: string) {
     return this.request<{ event: DestinationEvent; pointsAwarded: number; message: string }>(
-      `/events/${eventId}/participate`,
+      `/scan/event/${encodeURIComponent(token)}`,
       { method: 'POST' }
     );
   }

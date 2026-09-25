@@ -13,14 +13,14 @@ Route::get('events',[EventController::class,'index']);
 Route::get('rewards',[RewardController::class,'index']);
 Route::get('local-discoveries',[LocalDiscoveryController::class,'index']);
 Route::middleware(['auth:sanctum','role:traveler,destination_manager,government,super_admin'])->group(function() {
-    Route::get('auth/me',[AuthController::class,'me']); Route::post('auth/logout',[AuthController::class,'logout']);
+    Route::get('auth/me',[AuthController::class,'me']); Route::patch('auth/me',[AuthController::class,'updateProfile']); Route::post('auth/logout',[AuthController::class,'logout']);
     Route::middleware('role:traveler')->group(function() {
         Route::get('me/points',[AuthController::class,'points']); Route::get('me/activities',[AuthController::class,'activities']); Route::get('me/album',[AuthController::class,'album']);
         Route::get('smart-guide/recommendations',[SmartGuideController::class,'recommendations']);
         Route::get('explore-points/{idOrSlug}',[ExplorePointController::class,'show']);
         Route::post('scan/explore/{token}',[ExplorePointController::class,'scanExplorePointToken'])->middleware('throttle:60,1');
         Route::post('explore-points/{id}/quiz/submit',[ExplorePointController::class,'submitQuiz'])->middleware('throttle:30,1');
-        Route::post('events/{id}/participate',[EventController::class,'participate']);
+        Route::post('scan/event/{token}',[EventController::class,'scan'])->middleware('throttle:30,1');
         Route::post('local-discoveries/{id}/visit',[LocalDiscoveryController::class,'visit']);
         Route::post('rewards/{id}/redeem',[RewardController::class,'redeem'])->middleware('throttle:30,1');
     });

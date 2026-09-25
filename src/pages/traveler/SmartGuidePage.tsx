@@ -56,7 +56,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
   const [recommendationReason, setRecommendationReason] = useState<string>('');
   const [walkingRoute, setWalkingRoute] = useState<any>(null);
 
-  // User simulated coordinate at KBS entrance
+  // Location is requested from the device; no destination coordinate is assumed.
   const [userLocation, setUserLocation] = useState<[number, number]>([0, 0]);
   const [hasLocation, setHasLocation] = useState(false);
   const [error, setError] = useState('');
@@ -135,7 +135,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
   useEffect(() => {
     if (!mapContainerRef.current || mapInstanceRef.current) return;
 
-    // Create Map centered at KBS Surabaya
+    // Create the map around the selected destination.
     const map = L.map(mapContainerRef.current, {
       center: [0, 0],
       zoom: 17,

@@ -11,7 +11,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{children:ReactNode}> = ({children}) => {
  const [user,setUser]=useState<User|null>(null); const [isLoading,setLoading]=useState(true);
- useEffect(()=>{ ApiClient.getCurrentUser().then(res=>{setUser(res.success?res.data || null:null);setLoading(false);}); },[]);
+ useEffect(()=>{const expired=()=>setUser(null);window.addEventListener('takono:session-expired',expired);ApiClient.getCurrentUser().then(res=>{setUser(res.success?res.data || null:null);setLoading(false);});return()=>window.removeEventListener('takono:session-expired',expired);},[]);
  const login=async(email:string,password:string)=>{const r=await ApiClient.login(email,password);if(r.success&&r.data)setUser(r.data.user);return {...r,role:r.data?.user.role};};
  const register=async(name:string,email:string,password:string)=>{const r=await ApiClient.register(name,email,password);if(r.success&&r.data)setUser(r.data.user);return r;};
  const logout=async()=>{const r=await ApiClient.logout();if(r.success){ApiClient.removeToken();setUser(null);}return r;};

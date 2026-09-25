@@ -18,6 +18,8 @@ class PlatformTest extends TestCase {
         $login=$this->postJson('/api/auth/login',['email'=>$email,'password'=>'Password-test-123'])->assertOk();
         $h=['Authorization'=>'Bearer '.$login->json('data.token')];
         $this->getJson('/api/auth/me',$h)->assertOk()->assertJsonPath('data.role','traveler');
+        $this->patchJson('/api/auth/me',['name'=>'Traveler Baru'], $h)->assertOk()->assertJsonPath('data.name','Traveler Baru');
+        $this->patchJson('/api/auth/me',['name'=>'Traveler Baru','currentPassword'=>'salah','password'=>'Password-baru-123','password_confirmation'=>'Password-baru-123'], $h)->assertUnprocessable();
         foreach(['/api/manager/dashboard','/api/government/dashboard','/api/admin/dashboard'] as $path) $this->getJson($path,$h)->assertForbidden();
         $this->postJson('/api/auth/register',['name'=>'Fake admin','email'=>Str::uuid().'@example.test','password'=>'Password-test-123','role'=>'super_admin'])->assertUnprocessable();
         $this->postJson('/api/auth/logout',[],$h)->assertOk();
@@ -45,9 +47,12 @@ class PlatformTest extends TestCase {
         $this->getJson('/api/smart-guide/recommendations?destinationId='.$d->id,$h)->assertOk()->assertJsonPath('data.nextRecommendation.point',null);
         $event=['title'=>'Event','description'=>'Test','startDate'=>today()->toDateString(),'endDate'=>today()->addDay()->toDateString(),'time'=>'10:00','location'=>'Gate','pointsReward'=>10,'status'=>'published'];
         $e=$this->postJson('/api/manager/events',$event,$mh)->assertCreated()->json('data');
-        $this->getJson('/api/events?destinationId='.$d->id)->assertOk()->assertJsonPath('data.0.id',$e['id']);
-        $this->postJson('/api/events/'.$e['id'].'/participate',[],$h)->assertOk()->assertJsonPath('data.pointsAwarded',10);
-        $this->postJson('/api/events/'.$e['id'].'/participate',[],$h)->assertOk()->assertJsonPath('data.pointsAwarded',0);
+        $this->assertNotEmpty($e['qrToken']);
+        $this->getJson('/api/events?destinationId='.$d->id)->assertOk()->assertJsonPath('data.0.id',$e['id'])->assertJsonMissingPath('data.0.qrToken');
+        $this->postJson('/api/events/'.$e['id'].'/participate',[],$h)->assertNotFound();
+        $this->postJson('/api/scan/event/invalid',[],$h)->assertNotFound();
+        $this->postJson('/api/scan/event/'.$e['qrToken'],[],$h)->assertOk()->assertJsonPath('data.pointsAwarded',10);
+        $this->postJson('/api/scan/event/'.$e['qrToken'],[],$h)->assertOk()->assertJsonPath('data.pointsAwarded',0);
         $local=['name'=>'Business','description'=>'Test','category'=>'Kuliner','address'=>'Street','latitude'=>-7.2,'longitude'=>112.7,'pointsReward'=>0,'status'=>'published'];
         $l=$this->postJson('/api/manager/local-discoveries',$local,$mh)->assertCreated()->json('data');
         $this->postJson('/api/local-discoveries/'.$l['id'].'/visit',[],$h)->assertOk()->assertJsonPath('data.pointsAwarded',0);

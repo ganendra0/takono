@@ -1,3 +1,4 @@
+import {copyText} from '../../lib/clipboard';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
 import { ApiClient } from '../../lib/api.js';
@@ -47,9 +48,9 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
     fetchUserData();
   }, []);
 
-  const handleCopy = (code: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(code);
+  const handleCopy = async (code: string) => {
+    const copied=await copyText(code);
+    if(copied)setCopiedCode(code);else setError('Salin kode voucher secara manual.');
     setTimeout(() => setCopiedCode(null), 2000);
   };
 

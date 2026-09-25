@@ -1,3 +1,5 @@
+import {copyText} from '../../lib/clipboard';
+import {createId} from '../../lib/uuid';
 import React, { useEffect, useState } from 'react';
 import { ApiClient } from '../../lib/api.js';
 import { Reward, RewardRedemption } from '../../types/index.js';
@@ -49,7 +51,7 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
 
     setErrorMessage(null);
     setBusy(true);
-    if (requestRef.current?.rewardId !== reward.id) requestRef.current = {rewardId:reward.id,id:crypto.randomUUID()};
+    if (requestRef.current?.rewardId !== reward.id) requestRef.current = {rewardId:reward.id,id:createId()};
     const res = await ApiClient.redeemReward(reward.id, requestRef.current.id);
     setBusy(false);
     if (res.success && res.data) {
@@ -65,9 +67,9 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
     }
   };
 
-  const handleCopyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    setCopiedCode(true);
+  const handleCopyCode = async (code: string) => {
+    const copied=await copyText(code);
+    setCopiedCode(copied);if(!copied)setErrorMessage('Salin kode voucher secara manual.');
     setTimeout(() => setCopiedCode(false), 2000);
   };
 
@@ -102,7 +104,7 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
           <span>Katalog Reward & Voucher</span>
         </h1>
         <p className="text-xs text-slate-500">
-          Tukarkan poinmu dengan diskon tiket, potongan makan UMKM, atau merchandise eksklusif.
+          Gunakan poin untuk reward yang tersedia dari pengelola dan mitra destinasi.
         </p>
       </div>
 
@@ -195,9 +197,9 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
               Poin akan didebit dari saldo akunmu secara langsung dan kamu akan mendapatkan kode voucher unik.
             </div>
 
-            <div className="flex gap-2 pt-2">
+            {errorMessage&&<p role="alert" className="text-sm text-rose-700">{errorMessage}</p>}<div className="flex gap-2 pt-2">
               <button
-                onClick={() => setSelectedReward(null)}
+                disabled={busy} onClick={() => setSelectedReward(null)}
                 className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold cursor-pointer"
               >
                 Batal
@@ -207,7 +209,7 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
                 onClick={() => handleRedeem(selectedReward)}
                 className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold cursor-pointer"
               >
-                Ya, Tukar Sekarang
+                {busy?'Menukar…':'Tukar reward'}
               </button>
             </div>
           </div>

@@ -97,7 +97,7 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
                 className="px-5 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white text-xs font-semibold rounded-xl flex items-center gap-2 transition-colors cursor-pointer border border-white/20"
               >
                 <QrCode className="w-4 h-4" />
-                <span>Simulasikan Scan QR Gerbang</span>
+                <span>Scan QR destinasi</span>
               </button>
             </div>
           </div>

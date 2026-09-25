@@ -3,28 +3,30 @@ namespace Database\Seeders;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
-use App\Models\{Destination,ExplorePoint,Quiz,DestinationEvent,LocalDiscovery,Reward};
+use App\Models\{Destination,ExplorePoint,DestinationEvent,LocalDiscovery,Reward};
 class DatabaseSeeder extends Seeder {
-    public function run(): void {
-        // Catalog only: no users, sessions, activity, balances or fabricated redemptions.
-        $catalog=json_decode(file_get_contents(database_path('data/catalog.json')),true,512,JSON_THROW_ON_ERROR);
-        DB::transaction(function()use($catalog) {
-            $ids=[];
-            foreach($catalog['destinations'] as $row) {
-                $old=$row['id'];unset($row['id']);
-                $v=[];foreach($row as $k=>$value)$v[Str::snake($k)]=$value;
-                $d=Destination::firstOrCreate(['code'=>$v['code']],$v);$ids[$old]=$d->id;
-            }
-            foreach(['explorePoints'=>ExplorePoint::class,'events'=>DestinationEvent::class,'localDiscoveries'=>LocalDiscovery::class,'rewards'=>Reward::class] as $key=>$model) {
-                foreach($catalog[$key] as $row) {
-                    $quiz=$row['quiz']??null;unset($row['id'],$row['quiz']);$row['destinationId']=$ids[$row['destinationId']];
-                    $v=[];foreach($row as $k=>$value)$v[Str::snake($k)]=$value;
-                    if($key==='rewards'){$v['claimed_count']=0;$v['stock']=$v['quota'];}
-                    if($key==='explorePoints')$v['secure_token']=Str::random(48);
-                    $m=$model::firstOrCreate(['destination_id'=>$v['destination_id'],isset($v['slug'])?'slug':'name'=>$v['slug']??$v['name']],$v);
-                    if($quiz){unset($quiz['id'],$quiz['explorePointId']);$m->quiz()->firstOrCreate(['explore_point_id'=>$m->id],$quiz);}
-                }
-            }
-        });
-    }
+ public function run():void {
+  $catalog=json_decode(file_get_contents(database_path('data/catalog.json')),true,512,JSON_THROW_ON_ERROR);
+  DB::transaction(function()use($catalog){
+   $ids=[];
+   foreach($catalog['destinations'] as $row){
+    $key=$row['id'];unset($row['id']);$v=$this->snake($row);
+    $destination=Destination::where('code',$v['code'])->first()??new Destination;
+    $destination->fill($v)->save();$ids[$key]=$destination->id;
+   }
+   $map=['explorePoints'=>ExplorePoint::class,'events'=>DestinationEvent::class,'localDiscoveries'=>LocalDiscovery::class,'rewards'=>Reward::class];
+   foreach($map as $key=>$model){foreach($catalog[$key] as $row){
+    $quiz=$row['quiz']??null;unset($row['id'],$row['quiz']);$row['destinationId']=$ids[$row['destinationId']];$v=$this->snake($row);
+    $query=$model::withTrashed()->where('destination_id',$v['destination_id']);
+    if(isset($v['slug']))$query->where('slug',$v['slug']); else $query->where('name',$v['name']);
+    $item=$query->first()??new $model;
+    if($key==='explorePoints'&&!$item->secure_token)$v['secure_token']=Str::random(48);
+    if($key==='events'&&!$item->qr_token)$v['qr_token']=Str::random(48);
+    if($key==='rewards'){$claimed=(int)($item->claimed_count??0);$v['quota']=max($v['quota'],$claimed);$v['claimed_count']=$claimed;$v['stock']=$v['quota']-$claimed;}
+    $item->fill($v);$item->save();if(method_exists($item,'restore')&&$item->trashed())$item->restore();
+    if($quiz){$item->quiz()->updateOrCreate(['explore_point_id'=>$item->id],['title'=>$quiz['title'],'questions'=>$quiz['questions']]);}
+   }}
+  });
+ }
+ private function snake(array $row):array {$out=[];foreach($row as $k=>$v)$out[Str::snake($k)]=$v;return $out;}
 }

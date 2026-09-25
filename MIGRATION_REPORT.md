@@ -12,7 +12,7 @@ Controller domain existing diganti implementasi MySQL; AdminController, Form Req
 
 Migration secure_platform sudah diterapkan: active users, foreign keys/indexes, Sanctum tokens, content soft deletes, status/validity, unique ledger claim keys, idempotency redemption, snapshot terms, audit logs. Seeder mengimpor katalog saja, tanpa aktivitas sintetis atau akun demo baru.
 
-Migration balance_ledger masih PENDING: menambahkan catatan selisih saldo lama dan ledger; tidak mengubah saldo. Eksekusinya ditolak pemeriksaan izin otomatis dan belum diulang. Tidak ada akun uji admin permanen yang dibuat.
+Migration balance_ledger sudah diterapkan: menambahkan catatan selisih saldo lama dan ledger tanpa mengubah saldo. Tidak ada akun uji admin permanen yang dibuat.
 
 ## React changes
 
@@ -29,7 +29,7 @@ Password hash verification, Sanctum, active-account checks, role middleware, des
 ## Executed tests
 
 - `php artisan route:list --path=api`: 35 routes.
-- `php artisan migrate:status`: 2 ran, balance_ledger pending.
+- `php artisan migrate:status`: seluruh migration berjalan, termasuk balance_ledger dan event QR token.
 - `php artisan test`: 6 passed, 129 assertions, MySQL nyata, termasuk dua redemption paralel untuk quota terakhir.
 - Cakupan API: auth/roles, Manager→Traveler content roundtrip, QR/quiz/ledger/album, events/local activities, reward validity/quota/idempotency/snapshots, cross-destination denial, government read-only/report, admin assignment/deactivation.
 - Pengulangan awal tes gagal koneksi MySQL karena sandbox (0 assertions); setelah izin koneksi lokal, seluruh tes di atas lolos.
@@ -41,7 +41,6 @@ Password hash verification, Sanctum, active-account checks, role middleware, des
 
 ## Remaining issues / boundaries
 
-- Rekonsiliasi ledger saldo lama memerlukan persetujuan; sebelum diterapkan, total history akun lama bisa berbeda dari saldo tersimpan.
 - Akun default lama dipertahankan: ganti password sebelum produksi. Assignment manager lama yang kosong perlu ditetapkan Admin.
 - QR kamera memakai kamera native perangkat atau input link/token; bukan scanner video tertanam. Belum diuji pada kamera fisik.
 - Smart Guide menampilkan arah garis langsung, bukan navigasi jalan tervalidasi.

@@ -9,6 +9,7 @@ import { ScanPointPage } from './pages/traveler/ScanPointPage.js';
 import { Navbar } from './components/Navbar.js';
 import { Footer } from './components/Footer.js';
 import { ScanModal } from './components/ScanModal.js';
+import { Workspace } from './components/Workspace.js';
 
 // Public Pages
 import { HomePage } from './pages/public/HomePage.js';
@@ -35,7 +36,7 @@ import { GovernmentDashboard } from './pages/government/GovernmentDashboard.js';
 import { AdminDashboard } from './pages/admin/AdminDashboard.js';
 
 const AppContent: React.FC = () => {
-  const { role, user, isLoading, logout } = useAuth();
+  const { role, user, isLoading } = useAuth();
   
   // URL Hash routing state
   const [currentPath, setCurrentPath] = useState<string>(() => {
@@ -68,7 +69,7 @@ const AppContent: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-  // Initial load KBS data
+  // Load the active destination catalog.
   useEffect(() => {
     const fetchGlobalData = async () => {
       const listRes = await ApiClient.getDestinations();
@@ -116,7 +117,9 @@ const AppContent: React.FC = () => {
     if (currentPath.startsWith('/app')) {
       let subView = <TravelerHome onNavigate={navigate} onOpenScanModal={() => handleOpenScan()} />;
 
-      if (currentPath.startsWith('/app/scan/')) {
+      if (currentPath.startsWith('/app/scan/event/')) {
+        subView = <ScanPointPage mode="event" token={decodeURIComponent(currentPath.slice('/app/scan/event/'.length))} onNavigate={navigate}/>;
+      } else if (currentPath.startsWith('/app/scan/')) {
         subView = <ScanPointPage token={decodeURIComponent(currentPath.slice('/app/scan/'.length))} onNavigate={navigate}/>;
       } else if (currentPath === '/app/smart-guide') {
         subView = <SmartGuidePage onNavigate={navigate} onOpenScanModal={(pt) => handleOpenScan(pt)} />;
@@ -148,35 +151,17 @@ const AppContent: React.FC = () => {
 
     // 3. Destination Manager Portal (/manager)
     if (currentPath.startsWith('/manager')) {
-      return (
-        <div>
-          <Navbar currentPath={currentPath} onNavigate={navigate} onOpenScanModal={() => handleOpenScan()} />
-          <ManagerDashboard onNavigate={navigate} />
-          <Footer onNavigate={navigate} />
-        </div>
-      );
+      return <Workspace onNavigate={navigate}><ManagerDashboard onNavigate={navigate} /></Workspace>;
     }
 
     // 4. Government Intelligence Portal (/government)
     if (currentPath.startsWith('/government')) {
-      return (
-        <div>
-          <Navbar currentPath={currentPath} onNavigate={navigate} onOpenScanModal={() => handleOpenScan()} />
-          <GovernmentDashboard onNavigate={navigate} />
-          <Footer onNavigate={navigate} />
-        </div>
-      );
+      return <Workspace onNavigate={navigate}><GovernmentDashboard onNavigate={navigate} /></Workspace>;
     }
 
     // 5. Super Admin Platform (/admin)
     if (currentPath.startsWith('/admin')) {
-      return (
-        <div>
-          <Navbar currentPath={currentPath} onNavigate={navigate} onOpenScanModal={() => handleOpenScan()} />
-          <AdminDashboard onNavigate={navigate} />
-          <Footer onNavigate={navigate} />
-        </div>
-      );
+      return <Workspace onNavigate={navigate}><AdminDashboard onNavigate={navigate} /></Workspace>;
     }
 
     // 6. Public Pages
@@ -250,9 +235,6 @@ const AppContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 font-sans flex flex-col">
-      {/* Interactive Role Switcher Banner */}
-      {user && <div className="bg-slate-900 text-white px-4 py-2 text-xs flex justify-between gap-3"><span>{user.name}</span><button onClick={async()=>{const r=await logout();if(r.success)navigate('/');else window.alert(r.message || 'Gagal keluar.');}}>Keluar</button></div>}
-
       {/* Primary Routed View */}
       <div className="flex-1" key={user?.id || 'guest'}>
         <Suspense fallback={<p className="p-8 text-center">Memuat halaman…</p>}>{renderRoute()}</Suspense>

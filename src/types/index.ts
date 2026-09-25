@@ -43,7 +43,7 @@ export interface DestinationFacility {
 export interface Destination {
   id: string;
   name: string;
-  code: string; // e.g., "KBS"
+  code: string;
   slug: string;
   tagline: string;
   description: string;
@@ -61,7 +61,6 @@ export interface Destination {
   contactEmail: string;
   facilities: DestinationFacility[];
   status: 'published' | 'draft';
-  isDemo: boolean;
 }
 
 export interface QuizOption {
@@ -108,6 +107,7 @@ export interface ExplorePoint {
 }
 
 export interface DestinationEvent {
+  qrToken?: string;
   id: string;
   destinationId: string;
   title: string;
