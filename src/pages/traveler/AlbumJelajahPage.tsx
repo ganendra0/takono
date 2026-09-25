@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ApiClient } from '../../lib/api.js';
 import { ExplorePoint, RewardRedemption } from '../../types/index.js';
 import {
-  BookMarked,
+  BookMarked, Leaf, Landmark, Trophy,
   Award,
   Sparkles,
   CheckCircle2,
@@ -54,7 +54,7 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
     : 0;
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="mx-auto max-w-3xl space-y-6 pb-12">
 
       <div>
         <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
@@ -106,7 +106,7 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
         <div className="grid grid-cols-3 gap-3">
           <div className="p-3 bg-white rounded-2xl border border-slate-200 text-center space-y-1 shadow-xs">
             <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold mx-auto text-sm">
-              🌿
+              <Leaf size={20} />
             </div>
             <div className="text-[11px] font-bold text-slate-900 leading-snug">Sahabat Taman</div>
             <div className="text-[10px] text-emerald-600 font-semibold">{completedPoints.some(p=>p.category==='Alam'||p.category==='Edukasi') ? 'Tercapai' : 'Belum tercapai'}</div>
@@ -114,7 +114,7 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
 
           <div className="p-3 bg-white rounded-2xl border border-slate-200 text-center space-y-1 shadow-xs">
             <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold mx-auto text-sm">
-              🏛️
+              <Landmark size={20} />
             </div>
             <div className="text-[11px] font-bold text-slate-900 leading-snug">Pecinta Sejarah</div>
             <div className="text-[10px] text-emerald-600 font-semibold">{completedPoints.some(p=>p.category==='Sejarah') ? 'Tercapai' : 'Belum tercapai'}</div>
@@ -122,7 +122,7 @@ export const AlbumJelajahPage: React.FC<{ onNavigate: (path: string) => void }> 
 
           <div className="p-3 bg-white rounded-2xl border border-dashed border-slate-200 text-center space-y-1 opacity-60">
             <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-400 flex items-center justify-center font-bold mx-auto text-sm">
-              🏆
+              <Trophy size={20} />
             </div>
             <div className="text-[11px] font-bold text-slate-500 leading-snug">Penjelajah Lengkap</div>
             <div className="text-[10px] text-slate-400 font-medium">{Math.max(0,(progress?.totalExplorePoints??0)-(progress?.completedExplorePoints??0))} titik tersisa</div>

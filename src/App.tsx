@@ -127,7 +127,7 @@ const AppContent: React.FC = () => {
         const slug = currentPath.replace('/app/explore/', '');
         subView = <ExplorePointDetailPage slug={slug} onNavigate={navigate} />;
       } else if (currentPath === '/app/events') {
-        subView = <EventsPage onNavigate={navigate} />;
+        subView = <EventsPage onNavigate={navigate} onOpenScanModal={() => handleOpenScan()} />;
       } else if (currentPath === '/app/rewards') {
         subView = <RewardsCatalogPage onNavigate={navigate} />;
       } else if (currentPath === '/app/local-discovery') {

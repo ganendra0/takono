@@ -7,6 +7,8 @@ await fs.mkdir(output,{recursive:true});
 const results=[];
 const tokenFile=process.env.TAKONO_TEST_TOKEN_FILE;
 const roleTokens=tokenFile?JSON.parse(await fs.readFile(tokenFile,'utf8')):{};
+const roleWidth=Number(process.env.TAKONO_AUDIT_ROLE_WIDTH||375);
+const requestedRoles=(process.env.TAKONO_AUDIT_ROLES||'').split(',').map(role=>role.trim()).filter(Boolean);
 const brokenImages=page=>page.locator('img').evaluateAll(images=>images.filter(image=>image.complete&&image.naturalWidth===0).map(image=>image.currentSrc||image.src));
 try {
  for(const width of [375,768,1440]){
@@ -24,14 +26,15 @@ try {
   for(const [role,email,paths] of [
    ['traveler','traveler@takono.id',['/app','/app/smart-guide','/app/events','/app/rewards','/app/local-discovery','/app/album','/app/profile']],
    ['manager','manager@bungkul.id',['/manager']],['government','dinas@surabaya.go.id',['/government']],['admin','admin@takono.id',['/admin','/manager','/government']]]){
-   const context=await browser.newContext({viewport:{width:375,height:812}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+   if(requestedRoles.length&&!requestedRoles.includes(role))continue;
+   const context=await browser.newContext({viewport:{width:roleWidth,height:900}});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
    if(roleTokens[role]){
     await page.addInitScript(token=>localStorage.setItem('takono_token',token),roleTokens[role]);
    }else{
     await page.goto(base+'/#/login');await page.getByLabel('Email',{exact:true}).fill(email);await page.getByLabel('Password',{exact:true}).fill(process.env.TAKONO_TEST_PASSWORD);await page.getByRole('button',{name:'Masuk',exact:true}).click();await page.waitForTimeout(1000);
     if(await page.getByRole('alert').count())throw new Error(`Login audit gagal untuk ${role}`);
    }
-   for(const path of paths){await page.goto(base+'/#'+path);await page.waitForTimeout(1400);results.push({role,path,width:375,overflow:await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),errors:[...errors],alerts:await page.getByRole('alert').allTextContents(),brokenImages:await brokenImages(page)});await page.screenshot({path:`${output}/${role}-${path.replaceAll('/','_')}.png`,fullPage:true});}
+   for(const path of paths){await page.goto(base+'/#'+path);await page.waitForTimeout(1400);results.push({role,path,width:roleWidth,overflow:await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+1),errors:[...errors],alerts:await page.getByRole('alert').allTextContents(),brokenImages:await brokenImages(page)});await page.screenshot({path:`${output}/${role}-${roleWidth}-${path.replaceAll('/','_')}.png`,fullPage:true});}
    if(role==='manager'){
     await page.getByRole('button',{name:'Explore Points'}).click();await page.getByRole('button',{name:'Tambah',exact:true}).click();
     await page.getByRole('button',{name:'+ Tambah Mini Quiz'}).click();

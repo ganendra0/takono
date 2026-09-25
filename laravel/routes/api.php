@@ -3,6 +3,8 @@ use Illuminate\Support\Facades\{Route,Gate};
 use App\Http\Controllers\Api\{AuthController,DestinationController,ExplorePointController,SmartGuideController,EventController,LocalDiscoveryController,RewardController,ManagerController,GovernmentController,AdminController};
 Gate::define('manage-destination',[\App\Policies\DestinationPolicy::class,'manage']);
 Route::middleware('throttle:10,1')->group(function() {
+    Route::get('auth/google/config',[\App\Http\Controllers\Api\GoogleAuthController::class,'configuration']);
+    Route::post('auth/google',[\App\Http\Controllers\Api\GoogleAuthController::class,'login']);
     Route::post('auth/login',[AuthController::class,'login']);
     Route::post('auth/register',[AuthController::class,'register']);
 });

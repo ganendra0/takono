@@ -1,11 +1,67 @@
 @import "tailwindcss";
+@theme {
+ --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+}
 
 @layer components {
+ .auth-input { @apply mt-2 block min-h-12 w-full rounded-lg border border-slate-200 bg-white px-4 py-3 text-sm font-normal text-slate-900 placeholder:text-slate-400 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-100; }
+ .portal-eyebrow { @apply mb-3 text-xs font-semibold tracking-wide text-blue-700; }
+ .portal-totals { @apply grid grid-cols-1 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white sm:grid-cols-3 sm:divide-x sm:divide-y-0; }
+ .portal-totals > div { @apply flex items-center gap-3 p-5 text-slate-500; }
+ .portal-totals strong { @apply text-2xl font-semibold text-slate-900; }
+ .portal-totals span { @apply text-xs; }
+ .portal-tabs { @apply flex gap-6 overflow-x-auto border-b border-slate-200; }
+ .portal-tabs button { @apply whitespace-nowrap border-b-2 border-transparent pb-3 pt-2 text-sm text-slate-500; }
+ .portal-tabs button[aria-current] { @apply border-blue-700 font-semibold text-blue-700; }
+ .welcome-container { @apply mx-auto w-full max-w-6xl px-5 sm:px-8; }
+ .welcome-primary { @apply inline-flex items-center justify-center gap-2 rounded-lg bg-blue-700 px-5 py-3 text-sm font-medium text-white transition hover:bg-blue-800; }
+ .welcome-secondary { @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50; }
  .workspace { @apply max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6; }
  .panel { @apply bg-white border border-slate-200 rounded-2xl p-4 sm:p-6 min-w-0; }
  .primary-button { @apply inline-flex items-center justify-center gap-2 bg-blue-600 text-white text-sm font-medium px-4 py-3 rounded-xl hover:bg-blue-700 disabled:opacity-50; }
  .secondary-button { @apply inline-flex items-center justify-center gap-2 bg-white border border-slate-200 text-slate-700 text-sm font-medium px-4 py-3 rounded-xl hover:bg-slate-50 disabled:opacity-50; }
  .field { @apply w-full bg-white border border-slate-200 rounded-xl px-3 py-3 text-sm; }
+ .traveler-card { @apply bg-white border border-slate-200/90 rounded-2xl shadow-[0_1px_2px_rgba(15,23,42,.04)]; }
+ .manager-card { @apply bg-white border border-slate-200 rounded-xl shadow-[0_1px_2px_rgba(15,23,42,.03)]; }
+ .intelligence-card { @apply bg-white border border-slate-200 rounded-xl shadow-[0_1px_2px_rgba(15,23,42,.03)]; }
+}
+
+.traveler-shell main h1,
+.traveler-shell main h2,
+.traveler-shell main h3 { letter-spacing: -0.025em; }
+.traveler-shell main { color: #172033; }
+.footer-links > :first-child { grid-column: 1 / -1; }
+@media (min-width: 768px) { .footer-links > :first-child { grid-column: auto; } }
+.manager-shell h1,
+.manager-shell h2,
+.manager-shell h3 { letter-spacing: -0.02em; }
+.government-shell h1,
+.government-shell h2,
+.government-shell h3 { letter-spacing: -0.02em; }
+
+/* Shared visual rhythm: readable content, restrained surfaces, clear actions. */
+.traveler-content > div { min-width: 0; }
+.traveler-content h1 { font-size: clamp(1.4rem, 2.5vw, 1.9rem); font-weight: 650; line-height: 1.3; }
+.traveler-content .home-hero h1 { font-size: clamp(1.9rem, 4vw, 2.8rem); }
+.traveler-content .text-xs { font-size: .8125rem; line-height: 1.65; }
+.traveler-content .text-\[10px\], .traveler-content .text-\[11px\] { font-size: .75rem; line-height: 1.5; }
+.traveler-content .font-extrabold { font-weight: 650; }
+.traveler-content .rounded-3xl { border-radius: 16px; }
+.traveler-content .shadow-xs, .traveler-content .shadow-md { box-shadow: none; }
+.traveler-content button { min-height: 36px; }
+.traveler-content .travel-catalog { align-items: stretch; }
+.travel-catalog > div { min-width: 0; box-shadow: none; }
+.travel-catalog img { aspect-ratio: 16 / 10; height: auto; object-fit: cover; }
+.manager-shell .text-\[10px\], .government-shell .text-\[10px\],
+.manager-shell .text-\[11px\], .government-shell .text-\[11px\] { font-size: .75rem; line-height: 1.6; }
+.manager-shell .text-xs, .government-shell .text-xs { font-size: .8125rem; }
+.manager-shell button, .government-shell button { min-height: 40px; }
+@media (min-width: 1024px) {
+  .traveler-home { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; }
+  .traveler-home > * { margin: 0 !important; min-width: 0; }
+  .traveler-home .home-hero { grid-column: 1 / -1; }
+  .traveler-home .home-intro { grid-row: span 2; }
+  .traveler-home .home-progress { align-self: start; }
 }
 
 @layer base {

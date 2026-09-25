@@ -37,13 +37,13 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
   ];
 
   return (
-    <div className="min-h-screen bg-slate-100 flex flex-col items-center">
+    <div className="traveler-shell min-h-screen bg-[#f6f8fa] flex flex-col items-center">
       
       {/* Mobile-first viewport container (desktop centers as modern phone/tablet frame or fluid) */}
-      <div className="w-full max-w-md md:max-w-2xl lg:max-w-4xl min-h-screen bg-slate-50 flex flex-col shadow-sm border-x border-slate-200/80 pb-20 relative">
+      <div className="traveler-frame w-full max-w-6xl min-h-screen flex flex-col pb-24 relative">
         
         {/* Top App Bar */}
-        <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-4 py-3 flex items-center justify-between">
+        <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/80 px-3.5 py-2.5 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <button 
               onClick={() => onSelectTab('/')} 
@@ -57,7 +57,7 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
                 TAKONO
               </span>
               <span className="text-[10px] text-slate-500 font-medium leading-none">
-                Jelajah destinasi
+                Surabaya
               </span>
             </div>
           </div>
@@ -66,7 +66,7 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
             {onOpenScanModal && (
               <button
                 onClick={onOpenScanModal}
-                className="p-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-700 transition-colors cursor-pointer border border-slate-200/60"
+                className="p-2 bg-sky-50 hover:bg-sky-100 rounded-lg text-blue-700 transition-colors cursor-pointer"
                 title="Pindai QR Titik Jelajah"
               >
                 <QrCode className="w-4 h-4 text-blue-600" />
@@ -75,36 +75,38 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
 
             <button
               onClick={() => onSelectTab('/app/profile')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-xl text-blue-900 text-xs font-semibold hover:bg-blue-100 transition-colors cursor-pointer shadow-xs"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 rounded-lg text-white text-xs font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
             >
-              <Sparkles className="w-3.5 h-3.5 text-blue-600" />
+              <Sparkles className="w-3.5 h-3.5" />
               <span className="font-mono font-bold tabular-nums">{pointsBalance}</span>
-              <span className="text-[10px] text-blue-700">Pts</span>
+              <span className="text-[10px] text-blue-100">Pts</span>
             </button>
           </div>
         </header>
 
         {/* Dynamic Content Frame */}
-        <main className="flex-1 p-4">
+        <main className="traveler-content flex-1 p-4 sm:p-6 lg:p-8 lg:order-2">
           {children}
         </main>
 
         {/* Fixed Bottom Tab Bar (Mobile Thumb Zone Anchor) */}
-        <nav aria-label="Navigasi aplikasi traveler" style={{paddingBottom:'env(safe-area-inset-bottom)'}} className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-center shadow-lg">
-          <div className="w-full max-w-md md:max-w-2xl lg:max-w-4xl grid grid-cols-6 h-16">
+        <nav aria-label="Navigasi aplikasi traveler" style={{paddingBottom:'env(safe-area-inset-bottom)'}} className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-center shadow-[0_-4px_18px_rgba(15,23,42,.06)] lg:static lg:order-1 lg:shadow-none lg:border-t-0 lg:border-b lg:justify-start">
+          <div className="w-full max-w-3xl grid grid-cols-6 h-[68px]">
             {tabs.map(tab => {
               const Icon = tab.icon;
-              const isActive = currentTab === tab.id || (tab.id === '/app' && currentTab === '/app');
+              const isActive = currentTab === tab.id
+                || (tab.id === '/app/smart-guide' && (currentTab.startsWith('/app/explore/') || (currentTab.startsWith('/app/scan/') && !currentTab.startsWith('/app/scan/event/'))))
+                || (tab.id === '/app/events' && currentTab.startsWith('/app/scan/event/'));
               return (
                 <button
                   key={tab.id}
                   onClick={() => onSelectTab(tab.id)}
                   className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${
-                    isActive ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'
+                    isActive ? 'text-blue-700' : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
-                  <span className={`text-[10px] tracking-tight mt-1 ${isActive ? 'font-bold' : 'font-medium'}`}>
+                  <span className={`grid h-8 w-10 place-items-center rounded-lg ${isActive ? 'bg-blue-50' : ''}`}><Icon className={`w-[18px] h-[18px] ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} /></span>
+                  <span className={`text-[11px] tracking-tight ${isActive ? 'font-bold' : 'font-medium'}`}>
                     {tab.label}
                   </span>
                 </button>

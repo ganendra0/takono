@@ -143,7 +143,7 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
         <img
           src={point.image}
           alt={point.name}
-          className="w-full h-56 sm:h-64 object-cover"
+          className="w-full h-64 sm:h-80 object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 
@@ -160,7 +160,7 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
       </div>
 
       {/* Status Bar */}
-      <div className="p-3.5 bg-white rounded-xl border border-slate-200 flex items-center justify-between text-xs">
+      <div className="p-3.5 bg-white rounded-xl border border-slate-200 flex flex-wrap gap-3 items-center justify-between text-xs">
         <div className="flex items-center gap-2">
           {alreadyCompleted ? (
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -168,7 +168,7 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
             <Sparkles className="w-4 h-4 text-blue-600" />
           )}
           <span className="font-semibold text-slate-900">
-            {alreadyCompleted ? 'Titik ini sudah pernah kamu temukan' : 'Belum pernah diklaim'}
+            {alreadyCompleted ? 'Sudah dijelajahi' : 'Siap untuk dijelajahi'}
           </span>
         </div>
         <span className="text-slate-500 font-mono text-[11px]">

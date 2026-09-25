@@ -86,7 +86,7 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
             {pointsBalance} <span className="text-xs font-sans font-semibold text-blue-600">Points</span>
           </div>
           <p className="text-[11px] text-slate-500 mt-0.5">
-            Kumpulkan lebih banyak dengan menaklukkan kuis di Smart Guide.
+            Jelajahi destinasi dan jawab kuis untuk mengumpulkan poin.
           </p>
         </div>
 
@@ -101,7 +101,7 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
       <div>
         <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
           <Gift className="w-5 h-5 text-blue-600" />
-          <span>Katalog Reward & Voucher</span>
+          <span>Reward untuk perjalananmu</span>
         </h1>
         <p className="text-xs text-slate-500">
           Gunakan poin untuk reward yang tersedia dari pengelola dan mitra destinasi.
@@ -119,7 +119,7 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
       )}
 
       {/* Rewards Grid */}
-      <div className="space-y-4">
+      <div className="travel-catalog grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {isLoading ? <p>Memuat reward…</p> : !rewards.length && <p>Belum ada reward tersedia.</p>}
         {rewards.map(reward => {
           const canAfford = pointsBalance >= reward.pointsRequired;

@@ -13,7 +13,7 @@ Vite meneruskan `/api` ke Laravel port 8000. Seeder hanya mengimpor katalog dest
 
 Untuk instalasi baru, buat admin melalui `php artisan takono:admin email@example.com --name="Admin TAKONO"`. Password diminta secara tersembunyi. Admin dapat membuat manager/government dan menetapkan destinasi manager. Registrasi publik hanya membuat traveler. Akun lama tidak dihapus; ganti password default lama sebelum produksi.
 
-Seeder sengaja tidak membuat pengguna atau password bawaan. Alur awal yang aman adalah:
+Seeder utama sengaja tidak membuat pengguna atau password bawaan. Untuk lingkungan demo lokal tersedia seeder opsional `DemoAccountSeeder`; lihat README pada root project. Alur awal production yang aman adalah:
 
 1. Jalankan `php artisan db:seed` untuk mengisi katalog awal.
 2. Buat satu Admin menggunakan `php artisan takono:admin`.

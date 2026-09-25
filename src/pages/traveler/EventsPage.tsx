@@ -9,7 +9,7 @@ import {
   QrCode
 } from 'lucide-react';
 
-export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
+export const EventsPage: React.FC<{ onNavigate: (path: string) => void; onOpenScanModal: () => void }> = ({ onNavigate, onOpenScanModal }) => {
   const [events, setEvents] = useState<DestinationEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [participatedIds, setParticipatedIds] = useState<string[]>([]);
@@ -38,7 +38,7 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ o
       <div>
         <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
           <Calendar className="w-5 h-5 text-blue-600" />
-          <span>Agenda & Event Destinasi</span>
+          <span>Agenda di destinasi</span>
         </h1>
         <p className="text-xs text-slate-500">
           Lihat jadwal, lalu scan QR di lokasi Event untuk mencatat partisipasi.
@@ -60,7 +60,7 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ o
       {isLoading ? (
         <div className="py-12 text-center text-xs text-slate-500">Memuat agenda event...</div>
       ) : (
-        <div className="space-y-4">
+        <div className="travel-catalog grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {!events.length && <p className="text-slate-500">Belum ada event tersedia.</p>}
           {events.map(event => {
             const isRegistered = participatedIds.includes(event.id);
@@ -103,7 +103,10 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ o
                   </div>
 
                   <div className="pt-2">
-                    <div
+                    <button
+                      type="button"
+                      disabled={isRegistered}
+                      onClick={onOpenScanModal}
                       className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                         isRegistered
                           ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
@@ -121,7 +124,7 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void }> = ({ o
                           <span>Scan QR di lokasi untuk klaim +{event.pointsReward} poin</span>
                         </>
                       )}
-                    </div>
+                    </button>
                   </div>
                 </div>
               </div>

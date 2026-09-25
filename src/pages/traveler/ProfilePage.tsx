@@ -55,7 +55,7 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="mx-auto max-w-3xl space-y-6 pb-12">
       {isLoading && <p>Memuat profil…</p>}{error && <p role="alert" className="text-rose-700">{error}</p>}
       
       {/* Profile Card */}
@@ -81,15 +81,15 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
       </div>
 
       {/* Points Ledger Summary Card */}
-      <div className="p-5 bg-gradient-to-br from-blue-700 to-blue-900 text-white rounded-3xl space-y-3 shadow-md">
+      <div className="p-6 bg-blue-700 text-white rounded-2xl space-y-3">
         <span className="text-[11px] font-medium text-blue-200 block uppercase tracking-wider">
-          Buku Kas Jejak Points
+          Jejak Points kamu
         </span>
         <div className="text-3xl font-mono font-extrabold text-white">
           {pointsBalance} <span className="text-sm font-sans font-normal text-blue-200">Points Aktif</span>
         </div>
         <p className="text-xs text-blue-100">
-          Sistem poin berbasis buku kas transaksi (immutable ledger) dengan pemeriksaan idempotensi ganda.
+          Gunakan poin dari perjalananmu untuk menukar reward yang tersedia.
         </p>
       </div>
 

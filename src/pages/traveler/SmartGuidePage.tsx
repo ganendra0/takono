@@ -393,7 +393,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
             <span>Smart Guide</span>
           </h1>
           <p className="text-[11px] text-slate-500">
-            Pemandu rute navigasi & penemuan titik jelajah
+            Temukan tempat berikutnya sesuai minatmu.
           </p>
         </div>
 
@@ -436,7 +436,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
               showFacilities ? 'bg-slate-100 text-slate-900 font-bold' : 'text-slate-500'
             }`}
           >
-            <span>⚲</span>
+            <MapPin size={13} />
             <span>Fasilitas</span>
           </button>
           <button
@@ -445,7 +445,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
               showEvents ? 'bg-amber-50 text-amber-900 font-bold' : 'text-slate-500'
             }`}
           >
-            <span>★</span>
+            <Compass size={13} />
             <span>Event</span>
           </button>
         </div>

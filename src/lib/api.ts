@@ -73,6 +73,11 @@ export class ApiClient {
   }
 
   // --- Auth ---
+  static async loginGoogle(credential: string, nonce: string) {
+    const result = await this.request<{ user: User; token: string }>('/auth/google', { method: 'POST', body: JSON.stringify({ credential, nonce }) });
+    if (result.success && result.data?.token) this.setToken(result.data.token);
+    return result;
+  }
   static async getCurrentUser() {
     return this.request<User>('/auth/me');
   }

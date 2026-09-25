@@ -62,10 +62,10 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
       <div>
         <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
           <Store className="w-5 h-5 text-amber-600" />
-          <span>Local Discovery</span>
+          <span>Singgah di sekitar</span>
         </h1>
         <p className="text-xs text-slate-500">
-          Dukung UMKM dan kuliner khas Surabaya di sekitar destinasi. Tunjukkan aplikasi TAKONO untuk promo spesial.
+          Temukan kuliner, oleh-oleh, dan usaha lokal di sekitar destinasi.
         </p>
       </div>
 
@@ -94,7 +94,7 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
       </div>
 
       {/* Partners List */}
-      <div className="space-y-4">
+      <div className="travel-catalog grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {isLoading ? <p>Memuat mitra…</p> : !filtered.length && <p>Belum ada mitra untuk kategori ini.</p>}
         {filtered.map(partner => {
           const isVisited = visitedIds.includes(partner.id);
