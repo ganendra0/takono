@@ -12,9 +12,44 @@ import {
   Clock, 
   Award, 
   ChevronRight,
-  AlertCircle
+  AlertCircle,
+  Pause,
+  Play,
+  Square
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
+import { useSpeech } from 'react-text-to-speech';
+
+const SpeechControls: React.FC<{ text: string }> = ({ text }) => {
+  const { speechStatus, start, pause, stop } = useSpeech({
+    text,
+    lang: 'id-ID',
+    stableText: true,
+  });
+  const supported = typeof window !== 'undefined' && 'speechSynthesis' in window;
+
+  if (!text.trim()) return null;
+
+  return (
+    <div className="flex shrink-0 items-center gap-1" aria-label="Kontrol text to speech">
+      {speechStatus === 'started' ? (
+        <button type="button" onClick={pause} disabled={!supported} className="secondary-button py-1.5 px-2 text-xs" aria-label="Jeda narasi">
+          <Pause className="w-3.5 h-3.5" /> Jeda
+        </button>
+      ) : (
+        <button type="button" onClick={start} disabled={!supported} className="secondary-button py-1.5 px-2 text-xs" aria-label={speechStatus === 'paused' ? 'Lanjutkan narasi' : 'Dengarkan narasi'}>
+          <Play className="w-3.5 h-3.5" /> {speechStatus === 'paused' ? 'Lanjutkan' : 'Dengarkan'}
+        </button>
+      )}
+      {speechStatus !== 'stopped' && (
+        <button type="button" onClick={stop} disabled={!supported} className="secondary-button py-1.5 px-2 text-xs" aria-label="Hentikan narasi">
+          <Square className="w-3.5 h-3.5" /> Berhenti
+        </button>
+      )}
+      {!supported && <span className="text-[11px] text-slate-500">Browser tidak mendukung audio narasi.</span>}
+    </div>
+  );
+};
 
 interface ExplorePointDetailPageProps {
   slug: string;
@@ -178,7 +213,7 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
 
       {/* Story & Historical Narration */}
       <div className="p-5 bg-white rounded-2xl border border-slate-200 space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
             <BookOpen className="w-4 h-4 text-blue-600" />
             <span>Kisah & Sejarah Titik</span>
@@ -186,17 +221,22 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
           {point.audioGuideUrl&&<audio controls className="max-w-40 h-8" src={point.audioGuideUrl}>Audio tidak didukung.</audio>}
         </div>
 
+        <SpeechControls text={point.story || point.description || ''} />
+
         <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
-          {point.story}
+          {point.story || point.description}
         </p>
       </div>
 
       {/* Educational Content */}
       <div className="p-5 bg-white rounded-2xl border border-slate-200 space-y-3">
-        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-blue-600" />
-          <span>Wawasan & Edukasi Hayati</span>
-        </h3>
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-blue-600" />
+            <span>Wawasan & Edukasi Hayati</span>
+          </h3>
+          <SpeechControls text={point.educationalContent || ''} />
+        </div>
         <p className="text-xs sm:text-sm text-slate-700 leading-relaxed">
           {point.educationalContent}
         </p>
