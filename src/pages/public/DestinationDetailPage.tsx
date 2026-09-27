@@ -22,6 +22,7 @@ import {
   CheckCircle2,
   ChevronRight
 } from 'lucide-react';
+import { TextToSpeechControls } from '../../components/TextToSpeechControls.js';
 
 interface DestinationDetailPageProps {
   destination: Destination;
@@ -113,7 +114,10 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
 
             {/* Overview */}
             <div className="p-6 bg-white rounded-2xl border border-slate-200 shadow-xs space-y-4">
-              <h2 className="text-lg font-bold text-slate-900">Tentang Destinasi</h2>
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-lg font-bold text-slate-900">Tentang Destinasi</h2>
+                <TextToSpeechControls text={destination.description || ''} />
+              </div>
               <p className="text-sm text-slate-700 leading-relaxed">
                 {destination.description}
               </p>

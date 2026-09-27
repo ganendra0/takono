@@ -3,6 +3,7 @@ import { CalendarDays, Compass, Gift, Map, MapPin, QrCode, Store, ArrowRight } f
 import { ApiClient } from '../../lib/api';
 import { Destination, DestinationEvent, ExplorePoint, LocalDiscovery, Reward } from '../../types';
 import { useAuth } from '../../context/AuthContext';
+import { TextToSpeechControls } from '../../components/TextToSpeechControls.js';
 
 export function TravelerHome({ onNavigate, onOpenScanModal }: { onNavigate: (path: string) => void; onOpenScanModal: () => void }) {
   const { user, pointsBalance } = useAuth();
@@ -63,7 +64,10 @@ export function TravelerHome({ onNavigate, onOpenScanModal }: { onNavigate: (pat
         <div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hai, {user?.name.split(' ')[0]}</p><p className="mt-1 text-sm font-semibold text-slate-900">Siap menjelajah hari ini?</p></div>
         <button onClick={() => onNavigate('/app/profile')} className="text-right"><strong className="block text-lg text-blue-700">{pointsBalance}</strong><span className="text-[10px] text-slate-500">Jejak Points</span></button>
       </div>
-      <p className="mt-4 text-sm leading-6 text-slate-600 line-clamp-3">{destination?.description}</p>
+      <div className="mt-4 space-y-2">
+        <TextToSpeechControls text={destination?.description || ''} />
+        <p className="text-sm leading-6 text-slate-600 line-clamp-3">{destination?.description}</p>
+      </div>
       <div className="mt-4 grid grid-cols-4 gap-2">
         {menu.map(({ label, icon: Icon, path }) => <button key={label} onClick={() => onNavigate(path)} className="group flex min-w-0 flex-col items-center gap-2 text-center">
           <span className="grid h-11 w-11 place-items-center rounded-xl bg-sky-50 text-blue-600 transition group-active:scale-95"><Icon size={19} /></span>
