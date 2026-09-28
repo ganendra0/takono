@@ -112,7 +112,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
 
           {!user ? <button onClick={()=>handleNav('/login')} className="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 sm:px-4 sm:py-2.5" title="Masuk untuk Pengelola, Pemerintah, atau Super Admin"><LogIn className="h-4 w-4" /><span>Masuk Portal</span></button> : role === 'traveler' ? (
             <button
-              onClick={() => handleNav('/scan')}
+              onClick={() => handleNav('/app')}
               className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-sm active:scale-98 whitespace-nowrap cursor-pointer"
             >
               <span>Buka Aplikasi</span>
@@ -160,7 +160,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="xl:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-2 shadow-lg animate-in slide-in-from-top-2">
-          <button onClick={()=>handleNav(!user?'/login':role==='traveler'?'/scan':role==='destination_manager'?'/manager':role==='government'?'/government':'/admin')} className="w-full p-3 text-left rounded-xl bg-blue-600 text-white font-semibold">{user?'Buka aplikasi':'Masuk Portal'}</button>
+          <button onClick={()=>handleNav(!user?'/login':role==='traveler'?'/app':role==='destination_manager'?'/manager':role==='government'?'/government':'/admin')} className="w-full p-3 text-left rounded-xl bg-blue-600 text-white font-semibold">{user?'Buka aplikasi':'Masuk Portal'}</button>
           <button
             onClick={() => handleNav('/')}
             className="w-full text-left px-3 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 cursor-pointer"

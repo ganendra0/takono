@@ -119,6 +119,11 @@ const AppContent: React.FC = () => {
 
   const destinationNavigate = (path: string) => {
     if (!path.startsWith('/app')) { navigate(path); return; }
+    // Leaving a visit must never be re-scoped back into its active destination.
+    if (['/app', '/app/album', '/app/points', '/app/profile'].includes(path)) {
+      navigate(path);
+      return;
+    }
     const destinationSlug = travelerDestinationSlug(currentPath) || localStorage.getItem('takono_destination_slug');
     navigate(destinationSlug ? scopedTravelerPath(destinationSlug, path) : path);
   };
