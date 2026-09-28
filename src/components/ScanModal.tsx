@@ -14,22 +14,21 @@ export function ScanModal({isOpen,onClose,onNavigate,autoStartCamera=false}:{isO
  useEffect(()=>{if(!isOpen)return;const previous=document.activeElement as HTMLElement;const overflow=document.body.style.overflow;document.body.style.overflow='hidden';const key=(e:KeyboardEvent)=>{if(e.key==='Escape')onClose();};window.addEventListener('keydown',key);return()=>{document.body.style.overflow=overflow;window.removeEventListener('keydown',key);previous?.focus();};},[isOpen,onClose]);
  async function open(raw:string){
   if(locked.current)return;locked.current=true;setBusy(true);setMessage('');stop();
-  try{
+ try{
    const parsed=parseTakonoQR(raw);setCode(parsed.code);
+   if(!user){onClose();onNavigate('/login');return;}
    if(parsed.kind==='event'){
-    if(!user){onClose();onNavigate('/app/scan/event/'+encodeURIComponent(parsed.code));return;}
     const result=await ApiClient.scanEventToken(parsed.code);if(!result.success||!result.data)throw new Error(result.message||'QR Event tidak valid.');
-    await refreshUserData();onClose();onNavigate('/app/events');return;
+    const destination=result.data.destination;ApiClient.selectDestination(destination.id,destination.slug);await refreshUserData();onClose();onNavigate(`/app/${destination.slug}/events`);return;
    }
    if(parsed.kind!=='point'){
     const welcome=await ApiClient.scanDestinationQR(parsed.code);
-    if(welcome.success&&welcome.data){ApiClient.selectDestination(welcome.data.destination.id);onClose();onNavigate('/app');return;}
+    if(welcome.success&&welcome.data){onClose();onNavigate('/scan/'+encodeURIComponent(parsed.code));return;}
     if(parsed.kind==='destination')throw new Error(welcome.message||'Destinasi tidak ditemukan.');
    }
-   if(!user){onClose();onNavigate('/app/scan/'+encodeURIComponent(parsed.code));return;}
    const result=await ApiClient.scanExplorePointToken(parsed.code);
    if(!result.success||!result.data)throw new Error(result.message||'Kode tidak valid.');
-   ApiClient.selectDestination(result.data.destination.id);await refreshUserData();onClose();onNavigate('/app/explore/'+result.data.explorePoint.slug);
+   ApiClient.selectDestination(result.data.destination.id,result.data.destination.slug);await refreshUserData();onClose();onNavigate(`/app/${result.data.destination.slug}/explore/${result.data.explorePoint.slug}`);
   }catch(e){setMessage(e instanceof Error?e.message:'Tidak dapat membaca QR.');}finally{locked.current=false;setBusy(false);}
  }
  async function decode(source:CanvasImageSource,width:number,height:number){

@@ -43,7 +43,7 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
   onNavigate,
   onOpenScanModal
 }) => {
-  React.useEffect(() => { ApiClient.selectDestination(destination.id); }, [destination.id]);
+  React.useEffect(() => { ApiClient.selectDestination(destination.id, destination.slug); }, [destination.id, destination.slug]);
   return (
     <div className="min-h-screen bg-slate-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -86,11 +86,11 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
-                onClick={() => onNavigate('/app/smart-guide')}
+                onClick={onOpenScanModal}
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl flex items-center gap-2 transition-colors cursor-pointer shadow-sm"
               >
                 <Compass className="w-4 h-4" />
-                <span>Buka Smart Guide & Peta Navigasi</span>
+                <span>Scan QR untuk Mulai Jelajah</span>
               </button>
 
               <button
@@ -150,10 +150,10 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
                   <p className="text-xs text-slate-500">Titik fisik penjelajahan yang menyimpan narasi edukasi dan mini quiz</p>
                 </div>
                 <button
-                  onClick={() => onNavigate('/app/smart-guide')}
+                  onClick={onOpenScanModal}
                   className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer"
                 >
-                  <span>Peta Smart Guide</span>
+                  <span>Scan untuk buka peta</span>
                   <ChevronRight className="w-3.5 h-3.5" />
                 </button>
               </div>
@@ -162,7 +162,7 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
                 {explorePoints.map(point => (
                   <div
                     key={point.id}
-                    onClick={() => onNavigate(`/app/explore/${point.slug}`)}
+                    onClick={onOpenScanModal}
                     className="p-4 bg-white rounded-2xl border border-slate-200 shadow-xs hover:border-blue-300 transition-all cursor-pointer flex flex-col justify-between"
                   >
                     <div className="space-y-2">
@@ -224,7 +224,7 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
                       <p className="text-xs text-slate-600 line-clamp-1">{event.description}</p>
                     </div>
                     <button
-                      onClick={() => onNavigate('/app/events')}
+                      onClick={onOpenScanModal}
                       className="px-3.5 py-1.5 bg-slate-100 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-semibold text-slate-800 transition-colors whitespace-nowrap cursor-pointer"
                     >
                       Detail Event
@@ -279,11 +279,11 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
 
               <div className="pt-2">
                 <button
-                  onClick={() => onNavigate('/app/smart-guide')}
+                  onClick={onOpenScanModal}
                   className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
                 >
                   <Compass className="w-4 h-4" />
-                  <span>Mulai Navigasi Smart Guide</span>
+                  <span>Scan QR untuk Mulai Navigasi</span>
                 </button>
               </div>
             </div>
@@ -296,7 +296,7 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
                   <span>Mitra Kuliner Terdekat</span>
                 </h3>
                 <button
-                  onClick={() => onNavigate('/app/local-discovery')}
+                  onClick={onOpenScanModal}
                   className="text-xs text-blue-600 font-semibold hover:underline cursor-pointer"
                 >
                   Lihat Semua
@@ -324,7 +324,7 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
                   <span>Reward Penukaran Poin</span>
                 </h3>
                 <button
-                  onClick={() => onNavigate('/app/rewards')}
+                  onClick={onOpenScanModal}
                   className="text-xs text-blue-600 font-semibold hover:underline cursor-pointer"
                 >
                   Katalog

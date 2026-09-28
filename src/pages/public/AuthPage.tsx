@@ -6,7 +6,7 @@ import { GoogleSignIn } from '../../components/GoogleSignIn';
 import { ApiClient } from '../../lib/api';
 import { Destination } from '../../types';
 
-export function AuthPage({ onNavigate, returnTo = '/app' }: { onNavigate: (path: string) => void; returnTo?: string }) {
+export function AuthPage({ onNavigate, returnTo = '/scan' }: { onNavigate: (path: string) => void; returnTo?: string }) {
   const { login, register, loginGoogle } = useAuth();
   const [creating, setCreating] = useState(false);
   const [busy, setBusy] = useState(false);

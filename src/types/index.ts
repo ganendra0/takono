@@ -179,6 +179,8 @@ export interface RewardRedemption {
 }
 
 export type ActivityType = 
+  | 'destination_checked_in'
+  | 'destination_completed'
   | 'explore_point_discovered'
   | 'quiz_completed'
   | 'event_participated'
@@ -215,6 +217,18 @@ export interface UserDestinationProgress {
   completedExplorePoints: number;
   completedPointIds: string[];
   lastVisitedAt: string;
+}
+
+export interface UserDestinationJourney {
+  id: string;
+  userId: string;
+  destinationId: string;
+  status: 'active' | 'completed';
+  startedAt: string;
+  completedAt?: string;
+  explorePointsTotal?: number;
+  explorePointsCompleted?: number;
+  destination: Destination;
 }
 
 export interface TourismStats {

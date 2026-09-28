@@ -1,7 +1,7 @@
 <?php
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
-use App\Services\{Catalog,PointService};
+use App\Services\{Catalog,JourneyService,PointService};
 use App\Support\Api;
 use Illuminate\Http\Request;
 class ExplorePointController extends Controller {
@@ -12,6 +12,7 @@ class ExplorePointController extends Controller {
     }
     public function scanExplorePointToken(Request $r,string $token) {
         $p=Catalog::points()->where('secure_token',$token)->firstOrFail();
+        abort_unless(JourneyService::isActive($r->user()->id, $p->destination_id), 422, 'Pindai QR pintu masuk destinasi sebelum menjelajahi titik ini.');
         $award=PointService::award($r->user()->id,$p->destination_id,'explore_point_discovered',$p->id,$p->points_reward,"Menjelajahi {$p->name}");
         return Api::ok(['explorePoint'=>Api::point($p),'destination'=>$p->destination,'awardResult'=>$award,'alreadyCompleted'=>$award['alreadyCompleted'],'message'=>$award['message']]);
     }

@@ -60,6 +60,7 @@
 .manager-shell .text-xs, .government-shell .text-xs { font-size: .8125rem; }
 .manager-shell button, .government-shell button { min-height: 40px; }
 @media (min-width: 1024px) {
+  .traveler-shell { align-items: stretch; }
   .traveler-home { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 24px; }
   .traveler-home > * { margin: 0 !important; min-width: 0; }
   .traveler-home .home-hero { grid-column: 1 / -1; }

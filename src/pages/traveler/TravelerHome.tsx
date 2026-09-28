@@ -13,14 +13,17 @@ export function TravelerHome({ onNavigate, onOpenScanModal }: { onNavigate: (pat
   const [events, setEvents] = useState<DestinationEvent[]>([]);
   const [local, setLocal] = useState<LocalDiscovery[]>([]);
   const [rewards, setRewards] = useState<Reward[]>([]);
+  const [hasActiveJourney, setHasActiveJourney] = useState(false);
+  const [isEndingJourney, setIsEndingJourney] = useState(false);
+  const [journeyError, setJourneyError] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     (async () => {
       setLoading(true);
-      const [destinationResult, guideResult, eventResult, rewardResult] = await Promise.all([
-        ApiClient.getDestinationBySlug(), ApiClient.getSmartGuideRecommendations(), ApiClient.getEvents(), ApiClient.getRewards()
+      const [destinationResult, guideResult, eventResult, rewardResult, albumResult] = await Promise.all([
+        ApiClient.getDestinationBySlug(), ApiClient.getSmartGuideRecommendations(), ApiClient.getEvents(), ApiClient.getRewards(), ApiClient.getMyAlbum()
       ]);
       if (destinationResult.success && destinationResult.data) {
         setDestination(destinationResult.data.destination);
@@ -32,6 +35,7 @@ export function TravelerHome({ onNavigate, onOpenScanModal }: { onNavigate: (pat
       }
       if (eventResult.success) setEvents(eventResult.data || []);
       if (rewardResult.success) setRewards(rewardResult.data || []);
+      if (albumResult.success) setHasActiveJourney(Boolean(albumResult.data?.activeJourney));
       setLoading(false);
     })();
   }, []);
@@ -41,6 +45,15 @@ export function TravelerHome({ onNavigate, onOpenScanModal }: { onNavigate: (pat
 
   const completed = progress?.completedExplorePoints || 0;
   const total = progress?.totalExplorePoints || 0;
+  const canEndJourney = hasActiveJourney;
+  const completeJourney = async () => {
+    if (!destination) return;
+    setIsEndingJourney(true); setJourneyError('');
+    const result = await ApiClient.completeDestinationJourney(destination.id);
+    setIsEndingJourney(false);
+    if (result.success) onNavigate('/app/album');
+    else setJourneyError(result.message || 'Perjalanan belum dapat diakhiri.');
+  };
   const menu = [
     { label: 'Peta', icon: Map, path: '/app/smart-guide' },
     { label: 'Explore Point', icon: Compass, path: '/app/smart-guide' },
@@ -81,12 +94,14 @@ export function TravelerHome({ onNavigate, onOpenScanModal }: { onNavigate: (pat
       <div className="p-4">
         <div className="flex items-center justify-between"><div><p className="text-[10px] font-bold uppercase tracking-wider text-teal-600">Lanjutkan perjalanan</p><h2 className="mt-1 font-bold">{next?.name || 'Perjalanan selesai'}</h2></div><span className="text-xs font-bold text-blue-700">{completed}/{total}</span></div>
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100"><div className="h-full rounded-full bg-teal-500" style={{ width: `${total ? (completed / total) * 100 : 0}%` }} /></div>
-        <p className="mt-3 text-xs leading-5 text-slate-500 line-clamp-2">{next?.description || 'Semua titik sudah dikunjungi. Lihat kembali koleksimu di Album.'}</p>
+        <p className="mt-3 text-xs leading-5 text-slate-500 line-clamp-2">{next?.description || (canEndJourney ? 'Kamu dapat mengakhiri perjalanan kapan saja. Progres titik yang sudah dikunjungi tetap tersimpan di Album Jelajah.' : 'Semua titik sudah dikunjungi. Lihat kembali koleksimu di Album.')}</p>
+        {journeyError && <p role="alert" className="mt-3 text-xs text-rose-700">{journeyError}</p>}
       </div>
       <div className="grid grid-cols-2 border-t border-slate-100">
         <button onClick={() => onNavigate('/app/smart-guide')} className="py-3 text-xs font-bold text-blue-700">Lihat rute</button>
         <button onClick={onOpenScanModal} className="flex items-center justify-center gap-1 border-l border-slate-100 py-3 text-xs font-bold text-blue-700"><QrCode size={14} /> Scan QR</button>
       </div>
+      {canEndJourney && <button disabled={isEndingJourney} onClick={completeJourney} className="primary-button m-4 mt-0 w-[calc(100%-2rem)] !py-2.5">{isEndingJourney ? 'Menyimpan perjalanan…' : 'Akhiri perjalanan & simpan ke Album'}</button>}
     </section>
 
     <section>

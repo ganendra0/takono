@@ -58,4 +58,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(RewardRedemption::class);
     }
+
+    public function destinationJourneys()
+    {
+        return $this->hasMany(UserDestinationJourney::class);
+    }
 }

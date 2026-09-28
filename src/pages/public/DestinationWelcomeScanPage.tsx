@@ -29,6 +29,7 @@ export const DestinationWelcomeScanPage: React.FC<DestinationWelcomeScanPageProp
   const [welcomeTitle, setWelcomeTitle] = useState('');
   const [welcomeSubtitle, setWelcomeSubtitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isStarting, setIsStarting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -78,6 +79,18 @@ export const DestinationWelcomeScanPage: React.FC<DestinationWelcomeScanPageProp
       </div>
     );
   }
+
+  const startJourney = async () => {
+    if (!user) { onNavigate('/login'); return; }
+    setIsStarting(true);
+    setError('');
+    const result = await ApiClient.startDestinationJourney(destinationCode);
+    setIsStarting(false);
+    if (!result.success || !result.data) { setError(result.message || 'Perjalanan tidak dapat dimulai.'); return; }
+    const base = `/app/${encodeURIComponent(result.data.destination.slug)}`;
+    ApiClient.selectDestination(result.data.destination.id, result.data.destination.slug);
+    onNavigate(result.data.journey.status === 'completed' ? `${base}/album` : base);
+  };
 
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col justify-between relative overflow-hidden">
@@ -144,11 +157,12 @@ export const DestinationWelcomeScanPage: React.FC<DestinationWelcomeScanPageProp
         {/* Primary CTA */}
         <div className="pt-2 max-w-md mx-auto space-y-3">
           <button
-            onClick={() => { ApiClient.selectDestination(destination.id); onNavigate('/app/smart-guide'); }}
+            onClick={startJourney}
+            disabled={isStarting}
             className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg active:scale-98"
           >
             <Compass className="w-5 h-5" />
-            <span>Mulai Jelajah Destinasi</span>
+            <span>{isStarting ? 'Memulai perjalanan…' : 'Mulai Jelajah Destinasi'}</span>
           </button>
 
           <p className="text-[11px] text-slate-400">

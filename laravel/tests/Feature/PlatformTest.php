@@ -35,6 +35,8 @@ class PlatformTest extends TestCase {
         $user=$this->user();$h=$this->token($user);
         $this->getJson('/api/destinations/'.$d->slug)->assertOk()->assertJsonPath('data.explorePoints.0.id',$p['id'])->assertJsonMissingPath('data.explorePoints.0.secureToken')->assertJsonMissingPath('data.explorePoints.0.quiz.questions.0.correctOptionId');
         $this->getJson('/api/scan/'.$d->code)->assertOk();
+        $this->postJson('/api/scan/explore/'.$p['secureToken'],[],$h)->assertUnprocessable();
+        $this->postJson('/api/scan/'.$d->code.'/journey',[],$h)->assertOk()->assertJsonPath('data.journey.status','active');
         $this->getJson('/api/smart-guide/recommendations?destinationId='.$d->id.'&preferences=Edukasi&lat=-7.2&lng=112.7',$h)->assertOk()->assertJsonPath('data.nextRecommendation.point.id',$p['id']);
         $this->postJson('/api/scan/explore/invalid',[],$h)->assertNotFound();
         $this->postJson('/api/scan/explore/'.$p['secureToken'],['pointsReward'=>999999],$h)->assertOk()->assertJsonPath('data.awardResult.pointsAwarded',30);
@@ -45,6 +47,8 @@ class PlatformTest extends TestCase {
         $this->postJson('/api/explore-points/'.$p['id'].'/quiz/submit',$answer,$h)->assertOk()->assertJsonPath('data.pointsAwarded',0);
         $this->getJson('/api/me/points',$h)->assertOk()->assertJsonPath('data.balance',50);
         $this->getJson('/api/me/album?destinationId='.$d->id,$h)->assertOk()->assertJsonPath('data.progress.completedExplorePoints',1);
+        $this->postJson('/api/journeys/'.$d->id.'/complete',[],$h)->assertOk()->assertJsonPath('data.journey.status','completed');
+        $this->getJson('/api/me/album?destinationId='.$d->id,$h)->assertOk()->assertJsonCount(1,'data.journeys');
         $this->getJson('/api/smart-guide/recommendations?destinationId='.$d->id,$h)->assertOk()->assertJsonPath('data.nextRecommendation.point',null);
         $event=['title'=>'Event','description'=>'Test','startDate'=>today()->toDateString(),'endDate'=>today()->addDay()->toDateString(),'time'=>'10:00','location'=>'Gate','pointsReward'=>10,'status'=>'published'];
         $e=$this->postJson('/api/manager/events',$event,$mh)->assertCreated()->json('data');
@@ -117,10 +121,29 @@ class PlatformTest extends TestCase {
         $this->putJson('/api/manager/destination',array_merge($profile,['status'=>'published']),$ma)->assertOk();
         $this->getJson('/api/destinations/'.$a->slug)->assertOk()->assertJsonPath('data.destination.facilities.0.name','Toilet');
     }
+    public function test_album_collects_each_completed_destination(): void {
+        $first=$this->destination(); $second=$this->destination();
+        $firstManager=$this->token($this->user('destination_manager',$first));
+        $secondManager=$this->token($this->user('destination_manager',$second));
+        $firstPoint=$this->postJson('/api/manager/explore-points',$this->pointData(),$firstManager)->assertCreated()->json('data');
+        $this->postJson('/api/manager/explore-points',array_merge($this->pointData(), ['name' => 'Titik Tambahan', 'quiz' => null]),$firstManager)->assertCreated();
+        $secondPoint=$this->postJson('/api/manager/explore-points',$this->pointData(),$secondManager)->assertCreated()->json('data');
+        $user=$this->user(); $header=$this->token($user);
+        foreach ([[$first,$firstPoint],[$second,$secondPoint]] as [$destination,$point]) {
+            $this->postJson('/api/scan/'.$destination->code.'/journey',[],$header)->assertOk()->assertJsonPath('data.journey.status','active');
+            $this->postJson('/api/scan/explore/'.$point['secureToken'],[],$header)->assertOk();
+            $completion=$this->postJson('/api/journeys/'.$destination->id.'/complete',[],$header)->assertOk()->assertJsonPath('data.journey.status','completed');
+            if ($destination->is($first)) $completion->assertJsonPath('data.journey.explorePointsTotal',2)->assertJsonPath('data.journey.explorePointsCompleted',1);
+        }
+        $this->getJson('/api/me/album?destinationId='.$second->id,$header)->assertOk()->assertJsonCount(2,'data.journeys')
+            ->assertJsonFragment(['name'=>$first->name])->assertJsonFragment(['name'=>$second->name]);
+        $this->postJson('/api/scan/explore/'.$firstPoint['secureToken'],[],$header)->assertUnprocessable();
+    }
     public function test_reward_and_legacy_point_guards(): void {
         $d=$this->destination();$mh=$this->token($this->user('destination_manager',$d));$u=$this->user();$h=$this->token($u);
         $p=$this->postJson('/api/manager/explore-points',$this->pointData(),$mh)->assertCreated()->json('data');
         UserActivity::create(['user_id'=>$u->id,'destination_id'=>$d->id,'type'=>'explore_point_discovered','reference_id'=>$p['id'],'title'=>'Legacy visit','points_earned'=>30]);
+        $this->postJson('/api/scan/'.$d->code.'/journey',[],$h)->assertOk();
         $this->postJson('/api/scan/explore/'.$p['secureToken'],[],$h)->assertOk()->assertJsonPath('data.awardResult.pointsAwarded',0);
         $reward=['name'=>'Test','description'=>'Test','partner'=>'Test','quota'=>1,'pointsRequired'=>20,'validUntil'=>today()->addDay()->toDateString(),'status'=>'active'];
         $rw=$this->postJson('/api/manager/rewards',$reward,$mh)->assertCreated()->json('data');

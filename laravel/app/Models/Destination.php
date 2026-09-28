@@ -60,4 +60,9 @@ class Destination extends Model
     {
         return $this->hasMany(Reward::class);
     }
+
+    public function journeys()
+    {
+        return $this->hasMany(UserDestinationJourney::class);
+    }
 }

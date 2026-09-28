@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext.js';
-import { Compass, QrCode, Sparkles, MapPin, Menu, X, ArrowUpRight } from 'lucide-react';
+import { Compass, QrCode, Sparkles, Menu, X, LogIn } from 'lucide-react';
 import { TakonoLogo } from './TakonoLogo.js';
 
 interface NavbarProps {
@@ -79,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
           </button>
 
           <button
-            onClick={() => handleNav('/app/smart-guide')}
+            onClick={() => handleNav('/scan')}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-blue-600 bg-blue-50/80 hover:bg-blue-100 font-semibold text-xs transition-colors cursor-pointer border border-blue-100"
           >
             <Compass className="w-3.5 h-3.5 text-blue-600" />
@@ -110,9 +110,9 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
             </button>
           )}
 
-          {!isHome && (!user ? <button onClick={()=>handleNav('/app')} className="hidden sm:block px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl">Masuk</button> : role === 'traveler' ? (
+          {!user ? <button onClick={()=>handleNav('/login')} className="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 sm:px-4 sm:py-2.5" title="Masuk untuk Pengelola, Pemerintah, atau Super Admin"><LogIn className="h-4 w-4" /><span>Masuk Portal</span></button> : role === 'traveler' ? (
             <button
-              onClick={() => handleNav('/app')}
+              onClick={() => handleNav('/scan')}
               className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-sm active:scale-98 whitespace-nowrap cursor-pointer"
             >
               <span>Buka Aplikasi</span>
@@ -141,7 +141,8 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
             >
               <span>Admin Platform</span>
             </button>
-          ))}
+          )}
+          {!user && <button onClick={() => handleNav('/login')} className="grid h-10 w-10 place-items-center rounded-xl border border-slate-200 text-slate-700 sm:hidden" aria-label="Masuk Portal"><LogIn className="h-4 w-4" /></button>}
 
           {/* Mobile Menu Toggle */}
           {!isHome && <button
@@ -159,7 +160,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="xl:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-2 shadow-lg animate-in slide-in-from-top-2">
-          <button onClick={()=>handleNav(!user||role==='traveler'?'/app':role==='destination_manager'?'/manager':role==='government'?'/government':'/admin')} className="w-full p-3 text-left rounded-xl bg-blue-600 text-white font-semibold">{user?'Buka aplikasi':'Masuk / Daftar'}</button>
+          <button onClick={()=>handleNav(!user?'/login':role==='traveler'?'/scan':role==='destination_manager'?'/manager':role==='government'?'/government':'/admin')} className="w-full p-3 text-left rounded-xl bg-blue-600 text-white font-semibold">{user?'Buka aplikasi':'Masuk Portal'}</button>
           <button
             onClick={() => handleNav('/')}
             className="w-full text-left px-3 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 cursor-pointer"
@@ -185,7 +186,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
             Tentang Kami
           </button>
           <button
-            onClick={() => handleNav('/app/smart-guide')}
+            onClick={() => handleNav('/scan')}
             className="w-full text-left px-3 py-2 text-sm font-semibold rounded-lg text-blue-600 bg-blue-50 cursor-pointer flex items-center justify-between"
           >
             <span>Smart Guide Interaktif</span>

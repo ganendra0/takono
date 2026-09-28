@@ -112,13 +112,17 @@ export class ApiClient {
     return this.request('/auth/logout', { method: 'POST' });
   }
 
-  static selectDestination(id: string) { localStorage.setItem('takono_destination', id); }
+  static selectDestination(id: string, slug?: string) {
+    localStorage.setItem('takono_destination', id);
+    if (slug) localStorage.setItem('takono_destination_slug', slug);
+  }
   static async destinationKey(): Promise<string> {
     const selected = localStorage.getItem('takono_destination');
     const res = await this.getDestinations();
     if (selected && res.data?.some(d=>d.id===selected || d.slug===selected)) return selected;
-    const id = res.data?.[0]?.id;
-    if (id) this.selectDestination(id);
+    const first = res.data?.[0];
+    const id = first?.id;
+    if (id) this.selectDestination(id, first.slug);
     if (!id) localStorage.removeItem('takono_destination');
     return id || '';
   }
@@ -146,6 +150,18 @@ export class ApiClient {
     );
   }
 
+  static async startDestinationJourney(code: string) {
+    return this.request<{ destination: Destination; journey: any; progress: any; message: string }>(
+      `/scan/${encodeURIComponent(code)}/journey`, { method: 'POST' }
+    );
+  }
+
+  static async completeDestinationJourney(idOrSlug: string) {
+    return this.request<{ journey: any; progress: any; message: string }>(
+      `/journeys/${encodeURIComponent(idOrSlug)}/complete`, { method: 'POST' }
+    );
+  }
+
   static async scanExplorePointToken(secureToken: string) {
     return this.request<{
       explorePoint: ExplorePoint;
@@ -168,6 +184,8 @@ export class ApiClient {
   static async getMyAlbum() {
     return this.request<{
       progress: any;
+      activeJourney: any;
+      journeys: import('../types/index.js').UserDestinationJourney[];
       completedPoints: ExplorePoint[];
       redemptions: RewardRedemption[];
       totalPointsEarned: number;
@@ -222,7 +240,7 @@ export class ApiClient {
   }
 
   static async scanEventToken(token: string) {
-    return this.request<{ event: DestinationEvent; pointsAwarded: number; message: string }>(
+    return this.request<{ event: DestinationEvent; destination: Destination; pointsAwarded: number; message: string }>(
       `/scan/event/${encodeURIComponent(token)}`,
       { method: 'POST' }
     );

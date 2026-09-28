@@ -1,6 +1,7 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext.js';
 import { ApiClient } from './lib/api.js';
+import { scopedTravelerPath, travelerDestinationSlug } from './lib/travelerRoute.js';
 import { Destination, LocalDiscovery, ExplorePoint } from './types/index.js';
 
 // Top bars & Global UI
@@ -51,6 +52,7 @@ const AppContent: React.FC = () => {
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [preselectedScanPoint, setPreselectedScanPoint] = useState<ExplorePoint | null>(null);
   const [autoStartScanCamera, setAutoStartScanCamera] = useState(false);
+  const scopedDestinationSlug = travelerDestinationSlug(currentPath);
 
   // Sync hash routing
   useEffect(() => {
@@ -78,10 +80,12 @@ const AppContent: React.FC = () => {
         setDestinations(listRes.data);
       }
 
-      const slug = currentPath.startsWith('/destinations/') ? currentPath.slice('/destinations/'.length) : undefined;
+      const publicSlug = currentPath.startsWith('/destinations/') ? currentPath.slice('/destinations/'.length) : undefined;
+      const slug = publicSlug || travelerDestinationSlug(currentPath) || undefined;
       setDestinationDetails(null);
       const detailRes = await ApiClient.getDestinationBySlug(slug);
       if (detailRes.success && detailRes.data) {
+        if (slug) ApiClient.selectDestination(detailRes.data.destination.id, detailRes.data.destination.slug);
         setDestinationDetails(detailRes.data);
         setDestinationError('');
       } else {
@@ -92,10 +96,38 @@ const AppContent: React.FC = () => {
     fetchGlobalData();
   }, [currentPath, user?.id]);
 
+  useEffect(() => {
+    if (user && currentPath === '/app') navigate('/scan');
+    if (user && currentPath === '/scan') {
+      setPreselectedScanPoint(null);
+      setAutoStartScanCamera(true);
+      setIsScanModalOpen(true);
+    }
+  }, [currentPath, user?.id]);
+
   const handleOpenScan = (point?: ExplorePoint, autoStartCamera = false) => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     setPreselectedScanPoint(point || null);
     setAutoStartScanCamera(autoStartCamera);
     setIsScanModalOpen(true);
+  };
+
+  const travelerNavigate = (path: string) => {
+    if (!path.startsWith('/app')) { navigate(path); return; }
+    const destinationSlug = travelerDestinationSlug(currentPath) || localStorage.getItem('takono_destination_slug');
+    navigate(destinationSlug ? scopedTravelerPath(destinationSlug, path) : path);
+  };
+
+  const destinationNavigate = (destination: Destination, path: string) => {
+    if (path.startsWith('/app')) {
+      ApiClient.selectDestination(destination.id, destination.slug);
+      navigate(scopedTravelerPath(destination.slug, path));
+      return;
+    }
+    navigate(path);
   };
 
   // ----------------------------------------------------
@@ -103,10 +135,10 @@ const AppContent: React.FC = () => {
   // ----------------------------------------------------
   const renderRoute = () => {
     const privatePath = /^\/(app|manager|government|admin)(\/|$)/.test(currentPath);
+    const scanPath = currentPath === '/scan' || currentPath.startsWith('/scan/');
     if (isLoading && privatePath) return <p className="p-12 text-center">Memuat sesi…</p>;
-    // Let guests view the traveler landing page and available destination; protected traveler actions still require login.
-    if ((!user && privatePath && currentPath !== '/app') || currentPath === '/login') return <AuthPage onNavigate={navigate} returnTo={currentPath === '/login' ? '/app' : currentPath}/>;
-    const home = role === 'destination_manager' ? '/manager' : role === 'government' ? '/government' : role === 'super_admin' ? '/admin' : '/app';
+    if ((!user && (privatePath || scanPath)) || currentPath === '/login') return <AuthPage onNavigate={navigate} returnTo={currentPath === '/login' ? '/scan' : currentPath}/>;
+    const home = role === 'destination_manager' ? '/manager' : role === 'government' ? '/government' : role === 'super_admin' ? '/admin' : '/scan';
     if (privatePath && ((currentPath.startsWith('/manager') && !['destination_manager','super_admin'].includes(role)) || (currentPath.startsWith('/government') && !['government','super_admin'].includes(role)) || (currentPath.startsWith('/admin') && role !== 'super_admin') || (currentPath.startsWith('/app') && role !== 'traveler'))) {
       return <div className="p-12 text-center space-y-4"><p>Halaman ini tidak tersedia untuk peran akun Anda.</p><button className="text-blue-600" onClick={()=>navigate(home)}>Buka dashboard saya</button></div>;
     }
@@ -118,33 +150,37 @@ const AppContent: React.FC = () => {
 
     // 2. Traveler Application Routes (/app/*)
     if (currentPath.startsWith('/app')) {
-      let subView = <TravelerHome onNavigate={navigate} onOpenScanModal={() => handleOpenScan()} />;
+      if (scopedDestinationSlug && (!destinationDetails || destinationDetails.destination?.slug !== scopedDestinationSlug)) return <p className="p-12 text-center text-sm text-slate-500">Memuat destinasi…</p>;
+      const prefix = scopedDestinationSlug ? `/app/${encodeURIComponent(scopedDestinationSlug)}` : '/app';
+      const travelerPath = currentPath.slice(prefix.length) || '/';
+      let subView = <TravelerHome onNavigate={travelerNavigate} onOpenScanModal={() => handleOpenScan()} />;
 
-      if (currentPath.startsWith('/app/scan/event/')) {
-        subView = <ScanPointPage mode="event" token={decodeURIComponent(currentPath.slice('/app/scan/event/'.length))} onNavigate={navigate}/>;
-      } else if (currentPath.startsWith('/app/scan/')) {
-        subView = <ScanPointPage token={decodeURIComponent(currentPath.slice('/app/scan/'.length))} onNavigate={navigate}/>;
-      } else if (currentPath === '/app/smart-guide') {
-        subView = <SmartGuidePage onNavigate={navigate} />;
-      } else if (currentPath.startsWith('/app/explore/')) {
-        const slug = currentPath.replace('/app/explore/', '');
-        subView = <ExplorePointDetailPage slug={slug} onNavigate={navigate} />;
-      } else if (currentPath === '/app/events') {
-        subView = <EventsPage onNavigate={navigate} onOpenScanModal={() => handleOpenScan()} />;
-      } else if (currentPath === '/app/rewards') {
-        subView = <RewardsCatalogPage onNavigate={navigate} />;
-      } else if (currentPath === '/app/local-discovery') {
-        subView = <LocalDiscoveryPage onNavigate={navigate} />;
-      } else if (currentPath === '/app/album') {
-        subView = <AlbumJelajahPage onNavigate={navigate} />;
-      } else if (currentPath === '/app/profile') {
-        subView = <ProfilePage onNavigate={navigate} />;
+      if (travelerPath.startsWith('/scan/event/')) {
+        subView = <ScanPointPage mode="event" token={decodeURIComponent(travelerPath.slice('/scan/event/'.length))} onNavigate={travelerNavigate}/>;
+      } else if (travelerPath.startsWith('/scan/')) {
+        subView = <ScanPointPage token={decodeURIComponent(travelerPath.slice('/scan/'.length))} onNavigate={travelerNavigate}/>;
+      } else if (travelerPath === '/smart-guide') {
+        subView = <SmartGuidePage onNavigate={travelerNavigate} />;
+      } else if (travelerPath.startsWith('/explore/')) {
+        const slug = travelerPath.slice('/explore/'.length);
+        subView = <ExplorePointDetailPage slug={slug} onNavigate={travelerNavigate} />;
+      } else if (travelerPath === '/events') {
+        subView = <EventsPage onNavigate={travelerNavigate} onOpenScanModal={() => handleOpenScan()} />;
+      } else if (travelerPath === '/rewards') {
+        subView = <RewardsCatalogPage onNavigate={travelerNavigate} />;
+      } else if (travelerPath === '/local-discovery') {
+        subView = <LocalDiscoveryPage onNavigate={travelerNavigate} />;
+      } else if (travelerPath === '/album') {
+        subView = <AlbumJelajahPage onNavigate={travelerNavigate} />;
+      } else if (travelerPath === '/profile') {
+        subView = <ProfilePage onNavigate={travelerNavigate} />;
       }
 
       return (
         <TravelerLayout
           currentTab={currentPath}
-          onSelectTab={navigate}
+          destinationSlug={scopedDestinationSlug || undefined}
+          onSelectTab={travelerNavigate}
           onOpenScanModal={() => handleOpenScan()}
         >
           {subView}
@@ -209,7 +245,7 @@ const AppContent: React.FC = () => {
               events={destinationDetails.events || []}
               localDiscoveries={destinationDetails.localDiscoveries || []}
               rewards={destinationDetails.rewards || []}
-              onNavigate={navigate}
+              onNavigate={path => destinationNavigate(destinationDetails.destination, path)}
               onOpenScanModal={() => handleOpenScan()}
             />
           ) : (
@@ -225,6 +261,7 @@ const AppContent: React.FC = () => {
       <div>
         <Navbar currentPath={currentPath} onNavigate={navigate} onOpenScanModal={() => handleOpenScan(undefined, true)} />
         <HomePage onOpenScanModal={() => handleOpenScan(undefined, true)} />
+        <Footer onNavigate={navigate} />
       </div>
     );
   };

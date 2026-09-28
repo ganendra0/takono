@@ -20,6 +20,8 @@ Route::middleware(['auth:sanctum','role:traveler,destination_manager,government,
         Route::get('me/points',[AuthController::class,'points']); Route::get('me/activities',[AuthController::class,'activities']); Route::get('me/album',[AuthController::class,'album']);
         Route::get('smart-guide/recommendations',[SmartGuideController::class,'recommendations']);
         Route::get('explore-points/{idOrSlug}',[ExplorePointController::class,'show']);
+        Route::post('scan/{code}/journey',[DestinationController::class,'startJourney']);
+        Route::post('journeys/{idOrSlug}/complete',[DestinationController::class,'completeJourney']);
         Route::post('scan/explore/{token}',[ExplorePointController::class,'scanExplorePointToken'])->middleware('throttle:60,1');
         Route::post('explore-points/{id}/quiz/submit',[ExplorePointController::class,'submitQuiz'])->middleware('throttle:30,1');
         Route::post('scan/event/{token}',[EventController::class,'scan'])->middleware('throttle:30,1');

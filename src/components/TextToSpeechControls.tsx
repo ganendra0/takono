@@ -1,14 +1,34 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pause, Play, Square } from 'lucide-react';
-import { useSpeech } from 'react-text-to-speech';
 
 export const TextToSpeechControls: React.FC<{ text: string }> = ({ text }) => {
-  const { speechStatus, start, pause, stop } = useSpeech({
-    text,
-    lang: 'id-ID',
-    stableText: true,
-  });
+  const [speechStatus, setSpeechStatus] = useState<'stopped' | 'started' | 'paused'>('stopped');
+  const utterance = useRef<SpeechSynthesisUtterance | null>(null);
   const supported = typeof window !== 'undefined' && 'speechSynthesis' in window;
+
+  useEffect(() => () => {
+    if (utterance.current && supported) window.speechSynthesis.cancel();
+  }, [supported]);
+
+  const start = () => {
+    if (!supported) return;
+    if (speechStatus === 'paused') {
+      window.speechSynthesis.resume();
+      setSpeechStatus('started');
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const next = new SpeechSynthesisUtterance(text);
+    next.lang = 'id-ID';
+    next.rate = 0.95;
+    next.onend = () => setSpeechStatus('stopped');
+    next.onerror = () => setSpeechStatus('stopped');
+    utterance.current = next;
+    window.speechSynthesis.speak(next);
+    setSpeechStatus('started');
+  };
+  const pause = () => { if (supported) { window.speechSynthesis.pause(); setSpeechStatus('paused'); } };
+  const stop = () => { if (supported) window.speechSynthesis.cancel(); utterance.current = null; setSpeechStatus('stopped'); };
 
   if (!text.trim()) return null;
 

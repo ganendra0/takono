@@ -2,8 +2,8 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\{AuthRequest,ProfileRequest};
-use App\Models\{User, RewardRedemption, PointTransaction, UserActivity, ExplorePoint};
-use App\Services\Catalog;
+use App\Models\{User, RewardRedemption, PointTransaction, UserActivity, ExplorePoint, UserDestinationJourney};
+use App\Services\{Catalog, JourneyService};
 use App\Support\Api;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -34,9 +34,17 @@ class AuthController extends Controller {
     public function points(Request $r) { return Api::ok(['balance'=>$r->user()->points_balance,'transactions'=>$r->user()->pointTransactions()->latest('id')->get()]); }
     public function activities(Request $r) { return Api::ok($r->user()->activities()->latest('id')->get()); }
     public function album(Request $r) {
-        $destination=Catalog::destination($r->query('destinationId'));
-        $progress=Catalog::progress($r->user()->id,$destination);
-        return Api::ok(['progress'=>$progress,'completedPoints'=>Catalog::points()->whereIn('id',$progress['completedPointIds'])->get()->map(fn($p)=>Api::point($p)),
+        $user = $r->user();
+        JourneyService::backfillLegacyCompletions($user);
+        $destinationId = $r->query('destinationId');
+        $destination = $destinationId ? Catalog::destination($destinationId) : null;
+        $progress = $destination ? Catalog::progress($user->id, $destination) : null;
+        $journeys = UserDestinationJourney::with('destination')->where('user_id', $user->id)->where('status', 'completed')
+            ->latest('completed_at')->get();
+        $activeJourney = $destination ? UserDestinationJourney::where('user_id', $user->id)->where('destination_id', $destination->id)
+            ->where('status', 'active')->first() : null;
+        return Api::ok(['progress'=>$progress,'activeJourney'=>$activeJourney,'journeys'=>$journeys,
+            'completedPoints'=>$progress ? Catalog::points()->whereIn('id',$progress['completedPointIds'])->get()->map(fn($p)=>Api::point($p)) : [],
             'redemptions'=>$r->user()->rewardRedemptions()->latest('id')->get(),
             'totalPointsEarned'=>$r->user()->pointTransactions()->where('type','credit')->sum('amount')]);
     }
