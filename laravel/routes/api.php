@@ -17,7 +17,7 @@ Route::get('local-discoveries',[LocalDiscoveryController::class,'index']);
 Route::middleware(['auth:sanctum','role:traveler,destination_manager,government,super_admin'])->group(function() {
     Route::get('auth/me',[AuthController::class,'me']); Route::patch('auth/me',[AuthController::class,'updateProfile']); Route::post('auth/logout',[AuthController::class,'logout']);
     Route::middleware('role:traveler')->group(function() {
-        Route::get('me/points',[AuthController::class,'points']); Route::get('me/activities',[AuthController::class,'activities']); Route::get('me/album',[AuthController::class,'album']);
+        Route::get('me/points',[AuthController::class,'points']); Route::get('me/activities',[AuthController::class,'activities']); Route::get('me/album',[AuthController::class,'album']); Route::get('me/album/{idOrSlug}',[AuthController::class,'albumDestination']);
         Route::get('smart-guide/recommendations',[SmartGuideController::class,'recommendations']);
         Route::get('explore-points/{idOrSlug}',[ExplorePointController::class,'show']);
         Route::post('scan/{code}/journey',[DestinationController::class,'startJourney']);
@@ -32,6 +32,7 @@ Route::middleware(['auth:sanctum','role:traveler,destination_manager,government,
         Route::get('dashboard',[ManagerController::class,'dashboard']);
         Route::get('destination',[ManagerController::class,'profile']);
         Route::put('destination',[ManagerController::class,'updateDestination']);
+        Route::put('explore-points/route-order',[ManagerController::class,'reorderExplorePoints']);
         Route::get('{kind}',[ManagerController::class,'index']);
         Route::post('{kind}',[ManagerController::class,'store']);
         Route::match(['put','patch'],'{kind}/{id}',[ManagerController::class,'update']);

@@ -32,6 +32,7 @@ class PlatformTest extends TestCase {
     public function test_manager_traveler_roundtrip_and_points(): void {
         $d=$this->destination();$manager=$this->user('destination_manager',$d);$mh=$this->token($manager);
         $p=$this->postJson('/api/manager/explore-points',$this->pointData(),$mh)->assertCreated()->json('data');
+        $this->putJson('/api/manager/explore-points/route-order',['pointIds'=>[$p['id']]],$mh)->assertOk()->assertJsonPath('data.0.routeOrder',1);
         $user=$this->user();$h=$this->token($user);
         $this->getJson('/api/destinations/'.$d->slug)->assertOk()->assertJsonPath('data.explorePoints.0.id',$p['id'])->assertJsonMissingPath('data.explorePoints.0.secureToken')->assertJsonMissingPath('data.explorePoints.0.quiz.questions.0.correctOptionId');
         $this->getJson('/api/scan/'.$d->code)->assertOk();
@@ -49,6 +50,8 @@ class PlatformTest extends TestCase {
         $this->getJson('/api/me/album?destinationId='.$d->id,$h)->assertOk()->assertJsonPath('data.progress.completedExplorePoints',1);
         $this->postJson('/api/journeys/'.$d->id.'/complete',[],$h)->assertOk()->assertJsonPath('data.journey.status','completed')
             ->assertJsonPath('data.summary.explorePointsVisited',1)->assertJsonPath('data.summary.quizzesCompleted',1)->assertJsonPath('data.summary.pointsEarned',50);
+        $this->getJson('/api/me/album/'.$d->id,$h)->assertOk()->assertJsonPath('data.explorePoints.0.visited',true)
+            ->assertJsonPath('data.activities.0.type','destination_completed');
         $this->getJson('/api/me/album?destinationId='.$d->id,$h)->assertOk()->assertJsonCount(1,'data.journeys');
         $this->getJson('/api/smart-guide/recommendations?destinationId='.$d->id,$h)->assertOk()->assertJsonPath('data.nextRecommendation.point',null);
         $event=['title'=>'Event','description'=>'Test','startDate'=>today()->toDateString(),'endDate'=>today()->addDay()->toDateString(),'time'=>'10:00','location'=>'Gate','pointsReward'=>10,'status'=>'published'];

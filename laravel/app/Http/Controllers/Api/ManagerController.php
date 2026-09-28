@@ -25,7 +25,7 @@ class ManagerController extends Controller {
     public function index(Request $r,string $kind) {
         $d=$this->destination($r); $q=$this->model($kind)::where('destination_id',$d->id);
         if($kind==='explore-points') $q->with('quiz');
-        $items=$q->latest('id')->get(); if($kind==='events') $items->each->makeVisible('qr_token');
+        $items=$kind==='explore-points' ? $q->orderBy('route_order')->orderBy('id')->get() : $q->latest('id')->get(); if($kind==='events') $items->each->makeVisible('qr_token');
         return Api::ok($items);
     }
     public function store(ContentRequest $r,string $kind) {
@@ -34,11 +34,23 @@ class ManagerController extends Controller {
             $v['destination_id']=$d->id;
             if(in_array($kind,['events','explore-points'])) $v['slug']=Str::slug($v['name']??$v['title']).'-'.Str::lower(Str::random(8));
             if($kind==='events') $v['qr_token']=Str::random(48);
-            if($kind==='explore-points') $v['secure_token']=Str::random(48);
+            if($kind==='explore-points') { $v['secure_token']=Str::random(48); $v['route_order']=(int) ExplorePoint::where('destination_id',$d->id)->max('route_order')+1; }
             if($kind==='rewards') { $v['claimed_count']=0; $v['stock']=$v['quota']; }
             $m=$this->model($kind)::create($v);
             if($kind==='explore-points' && $quiz) $m->quiz()->create($quiz);
             $this->audit($r,'create',$m); if($kind==='events')$m->makeVisible('qr_token'); return Api::ok($kind==='explore-points'?$m->load('quiz'):$m,201);
+        });
+    }
+    public function reorderExplorePoints(Request $r) {
+        $r->validate(['pointIds'=>'required|array|min:1','pointIds.*'=>'required|integer|distinct']);
+        return DB::transaction(function () use ($r) {
+            $destination=$this->destination($r);
+            $ids=array_map('intval',$r->input('pointIds'));
+            $points=ExplorePoint::where('destination_id',$destination->id)->whereIn('id',$ids)->lockForUpdate()->get();
+            abort_unless($points->count()===count($ids),422,'Urutan harus berisi seluruh Explore Point milik destinasi ini.');
+            foreach ($ids as $index=>$id) ExplorePoint::whereKey($id)->update(['route_order'=>$index+1]);
+            $this->audit($r,'reorder',$destination);
+            return Api::ok(ExplorePoint::where('destination_id',$destination->id)->with('quiz')->orderBy('route_order')->orderBy('id')->get());
         });
     }
     public function update(ContentRequest $r,string $kind,string $id) {

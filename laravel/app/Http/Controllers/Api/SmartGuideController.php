@@ -14,8 +14,9 @@ class SmartGuideController extends Controller {
         $d=Catalog::destination($r->query('destinationId')); $progress=Catalog::progress($r->user()->id,$d);
         $prefs=array_filter(explode(',',$r->query('preferences',''))); $located=$r->filled('lat')&&$r->filled('lng');
         $points=Catalog::points()->where('destination_id',$d->id)->whereNotIn('id',$progress['completedPointIds'])->get()->sortBy(fn($p)=>[
+            $p->route_order,
             in_array($p->category,$prefs)||!count($prefs)?0:1,
-            $located?$this->distance($r->lat,$r->lng,$p->latitude,$p->longitude):$p->id,
+            $located?$this->distance($r->lat,$r->lng,$p->latitude,$p->longitude):0,
         ])->values();
         $next=$points->first(); $distance=$next&&$located?$this->distance($r->lat,$r->lng,$next->latitude,$next->longitude):null;
         return Api::ok(['nextRecommendation'=>['point'=>$next?Api::point($next):null,'distanceMeters'=>$distance,'reason'=>$next?'Sesuai preferensi dan titik yang belum dijelajahi.':'Tidak ada titik tersedia yang belum dijelajahi.'],
