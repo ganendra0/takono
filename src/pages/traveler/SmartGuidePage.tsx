@@ -8,14 +8,12 @@ import {
   DestinationEvent,
   LocalDiscovery
 } from '../../types/index.js';
-import { useAuth } from '../../context/AuthContext.js';
 import { 
   Compass, 
   MapPin, 
   Navigation, 
   SlidersHorizontal, 
   CheckCircle2, 
-  QrCode, 
   Clock, 
   Sparkles, 
   ChevronRight, 
@@ -30,14 +28,12 @@ const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, c
 
 interface SmartGuidePageProps {
   onNavigate: (path: string) => void;
-  onOpenScanModal: (point?: ExplorePoint) => void;
 }
 
-export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOpenScanModal }) => {
-  const { user } = useAuth();
+export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
-  const userMarkerRef = useRef<L.Marker | null>(null);
+  const pointMarkersRef = useRef<Record<string, L.Marker>>({});
   const routePolylineRef = useRef<L.Polyline | null>(null);
 
   const [destination, setDestination] = useState<Destination | null>(null);
@@ -65,9 +61,6 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
     const id = navigator.geolocation.watchPosition(p => { setUserLocation([p.coords.latitude,p.coords.longitude]); setHasLocation(true); }, () => setError('Lokasi tidak tersedia. Rekomendasi tetap dapat digunakan tanpa jarak.'), {enableHighAccuracy:true});
     return () => navigator.geolocation.clearWatch(id);
   }, []);
-
-  // Arrived popup alert
-  const [arrivedPoint, setArrivedPoint] = useState<ExplorePoint | null>(null);
 
   // Active layer filters on map
   const [showFacilities, setShowFacilities] = useState(true);
@@ -169,6 +162,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
         map.removeLayer(layer);
       }
     });
+    pointMarkersRef.current = {};
 
     // Draw Destination Boundary
     if (destination.boundaryCoordinates && destination.boundaryCoordinates.length > 0) {
@@ -240,7 +234,6 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
     if (hasLocation) {
       const userMarker = L.marker(userLocation, { icon: userIcon }).addTo(map);
       userMarker.bindTooltip('Lokasi perangkat', { direction: 'top' });
-      userMarkerRef.current = userMarker;
     }
 
     // Explore Points Markers
@@ -255,6 +248,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
           isCompleted
         )
       }).addTo(map);
+      pointMarkersRef.current[point.id] = pointMarker;
 
       const popupHtml = `
         <div style="width: 220px; padding: 12px; font-family: 'Plus Jakarta Sans', sans-serif;">
@@ -267,20 +261,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
           <div style="font-size: 11px; color: #64748b; margin-bottom: 8px;">
             Kategori: ${escapeHtml(point.category)} · ${escapeHtml(point.estimatedDuration)}
           </div>
-          <div style="display: flex; gap: 4px;">
-            <a href="#/app/explore/${encodeURIComponent(point.slug)}" style="
-              display: block;
-              text-align: center;
-              background: #2563eb;
-              color: white;
-              padding: 6px 10px;
-              border-radius: 8px;
-              font-size: 11px;
-              font-weight: 600;
-              text-decoration: none;
-              flex: 1;
-            ">Buka Cerita</a>
-          </div>
+          <div style="font-size: 10px; color: #475569;">Pindai QR fisik di titik ini untuk membuka cerita.</div>
         </div>
       `;
 
@@ -364,11 +345,11 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
     });
   }, [destination, explorePoints, facilities, events, completedPointIds, nextPoint, walkingRoute, showFacilities, showEvents, userLocation, hasLocation, showLocal, localDiscoveries]);
 
-  // Handle Arrival Simulation
+  // Center the map on the selected Explore Point and show its map marker.
   const focusPoint = (point: ExplorePoint) => {
-    setArrivedPoint(point);
     if (mapInstanceRef.current) {
       mapInstanceRef.current.setView([point.latitude, point.longitude], 18);
+      pointMarkersRef.current[point.id]?.openPopup();
     }
   };
 
@@ -492,15 +473,9 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
               className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-98"
             >
               <Footprints className="w-4 h-4" />
-              <span>Lihat Titik & Scan QR</span>
+              <span>Lihat di Peta</span>
             </button>
 
-            <button
-              onClick={() => onNavigate(`/app/explore/${nextPoint.slug}`)}
-              className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-            >
-              Detail Titik
-            </button>
           </div>
         </div>
       ) : (
@@ -562,73 +537,12 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOp
                     <Navigation className="w-4 h-4" />
                   </button>
 
-                  <button
-                    onClick={() => onNavigate(`/app/explore/${point.slug}`)}
-                    className="px-2.5 py-1.5 bg-slate-100 hover:bg-blue-600 hover:text-white rounded-lg text-xs font-semibold text-slate-700 transition-colors cursor-pointer"
-                  >
-                    Buka
-                  </button>
                 </div>
               </div>
             );
           })}
         </div>
       </div>
-
-      {/* ARRIVAL POPUP (Section 11 requirement: User tiba -> Popup: "Kamu sudah sampai!" -> Scan QR Explore Point) */}
-      {arrivedPoint && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-end sm:items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl text-center animate-in fade-in zoom-in duration-200">
-            <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
-              <CheckCircle2 className="w-8 h-8" />
-            </div>
-
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold text-emerald-600 uppercase tracking-wider">
-                Titik Pilihan
-              </span>
-              <h3 className="text-lg font-extrabold text-slate-900 leading-tight">
-                {arrivedPoint.name}
-              </h3>
-              <p className="text-xs text-slate-600">
-                Pindai papan QR fisik titik ini untuk membuka cerita tersembunyi, kuis interaktif, dan Jejak Points.
-              </p>
-            </div>
-
-            <div className="space-y-2 pt-2">
-              <button
-                onClick={() => {
-                  const pt = arrivedPoint;
-                  setArrivedPoint(null);
-                  onOpenScanModal(pt);
-                }}
-                className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md"
-              >
-                <QrCode className="w-4 h-4" />
-                <span>Scan QR Explore Point</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  const slug = arrivedPoint.slug;
-                  setArrivedPoint(null);
-                  onNavigate(`/app/explore/${slug}`);
-                }}
-                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-semibold transition-colors cursor-pointer"
-              >
-                Buka Halaman Cerita Titik
-              </button>
-
-              <button
-                onClick={() => setArrivedPoint(null)}
-                className="text-xs text-slate-400 hover:text-slate-600 pt-1 cursor-pointer"
-              >
-                Tutup Notifikasi
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* PREFERENCE SELECTOR MODAL */}
       {isPrefModalOpen && (

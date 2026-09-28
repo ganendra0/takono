@@ -118,6 +118,22 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
     );
   }
 
+  if (!alreadyCompleted) {
+    return (
+      <div className="p-6 text-center space-y-4">
+        <AlertCircle className="w-10 h-10 text-blue-600 mx-auto" />
+        <h2 className="text-base font-bold text-slate-900">Scan QR untuk Membuka Cerita</h2>
+        <p className="text-sm text-slate-600">Cerita Explore Point hanya tersedia setelah kamu memindai QR fisik di titik tersebut.</p>
+        <button
+          onClick={() => onNavigate('/app/smart-guide')}
+          className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold"
+        >
+          Kembali ke Smart Guide
+        </button>
+      </div>
+    );
+  }
+
   const quiz = point.quiz;
 
   return (

@@ -12,6 +12,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenScanModal }) => {
   const { user, role, pointsBalance } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const isHome = currentPath === '/';
 
   const handleNav = (path: string) => {
     onNavigate(path);
@@ -32,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
         </button>
 
         {/* Zone 2: Primary Navigation Links */}
-        <nav className="hidden xl:flex items-center gap-7 text-sm font-medium text-slate-600">
+        {!isHome && <nav className="hidden xl:flex items-center gap-7 text-sm font-medium text-slate-600">
           <button
             onClick={() => handleNav('/')}
             className={`transition-colors py-1 cursor-pointer relative ${
@@ -84,11 +85,20 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
             <Compass className="w-3.5 h-3.5 text-blue-600" />
             <span>Smart Guide</span>
           </button>
-        </nav>
+        </nav>}
 
         {/* Zone 3: Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {onOpenScanModal && (
+          {isHome ? (
+            <button
+              onClick={onOpenScanModal}
+              className="flex items-center gap-1.5 rounded-xl border border-blue-700 bg-blue-700 px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-blue-800 sm:px-4 sm:py-2.5"
+              aria-label="Scan QR dan mulai menggunakan TAKONO"
+            >
+              <QrCode className="w-4 h-4" />
+              <span>Scan QR</span>
+            </button>
+          ) : onOpenScanModal && (
             <button
               onClick={onOpenScanModal}
               className="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-700 bg-slate-100/90 hover:bg-slate-200/90 rounded-xl transition-colors cursor-pointer border border-slate-200/60"
@@ -100,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
             </button>
           )}
 
-          {!user ? <button onClick={()=>handleNav('/app')} className="hidden sm:block px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl">Masuk</button> : role === 'traveler' ? (
+          {!isHome && (!user ? <button onClick={()=>handleNav('/app')} className="hidden sm:block px-4 py-2.5 text-sm font-semibold text-white bg-blue-600 rounded-xl">Masuk</button> : role === 'traveler' ? (
             <button
               onClick={() => handleNav('/app')}
               className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-xl hover:bg-blue-700 transition-all shadow-sm active:scale-98 whitespace-nowrap cursor-pointer"
@@ -131,17 +141,17 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
             >
               <span>Admin Platform</span>
             </button>
-          )}
+          ))}
 
           {/* Mobile Menu Toggle */}
-          <button
+          {!isHome && <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="xl:hidden p-3 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 cursor-pointer"
             aria-expanded={mobileMenuOpen}
             aria-label="Toggle navigation"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
+          </button>}
         </div>
 
       </div>

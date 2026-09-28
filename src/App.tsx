@@ -50,6 +50,7 @@ const AppContent: React.FC = () => {
   const [destinationError, setDestinationError] = useState('');
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [preselectedScanPoint, setPreselectedScanPoint] = useState<ExplorePoint | null>(null);
+  const [autoStartScanCamera, setAutoStartScanCamera] = useState(false);
 
   // Sync hash routing
   useEffect(() => {
@@ -91,8 +92,9 @@ const AppContent: React.FC = () => {
     fetchGlobalData();
   }, [currentPath, user?.id]);
 
-  const handleOpenScan = (point?: ExplorePoint) => {
+  const handleOpenScan = (point?: ExplorePoint, autoStartCamera = false) => {
     setPreselectedScanPoint(point || null);
+    setAutoStartScanCamera(autoStartCamera);
     setIsScanModalOpen(true);
   };
 
@@ -102,7 +104,8 @@ const AppContent: React.FC = () => {
   const renderRoute = () => {
     const privatePath = /^\/(app|manager|government|admin)(\/|$)/.test(currentPath);
     if (isLoading && privatePath) return <p className="p-12 text-center">Memuat sesi…</p>;
-    if ((!user && privatePath) || currentPath === '/login') return <AuthPage onNavigate={navigate} returnTo={currentPath === '/login' ? '/app' : currentPath}/>;
+    // Let guests view the traveler landing page and available destination; protected traveler actions still require login.
+    if ((!user && privatePath && currentPath !== '/app') || currentPath === '/login') return <AuthPage onNavigate={navigate} returnTo={currentPath === '/login' ? '/app' : currentPath}/>;
     const home = role === 'destination_manager' ? '/manager' : role === 'government' ? '/government' : role === 'super_admin' ? '/admin' : '/app';
     if (privatePath && ((currentPath.startsWith('/manager') && !['destination_manager','super_admin'].includes(role)) || (currentPath.startsWith('/government') && !['government','super_admin'].includes(role)) || (currentPath.startsWith('/admin') && role !== 'super_admin') || (currentPath.startsWith('/app') && role !== 'traveler'))) {
       return <div className="p-12 text-center space-y-4"><p>Halaman ini tidak tersedia untuk peran akun Anda.</p><button className="text-blue-600" onClick={()=>navigate(home)}>Buka dashboard saya</button></div>;
@@ -122,7 +125,7 @@ const AppContent: React.FC = () => {
       } else if (currentPath.startsWith('/app/scan/')) {
         subView = <ScanPointPage token={decodeURIComponent(currentPath.slice('/app/scan/'.length))} onNavigate={navigate}/>;
       } else if (currentPath === '/app/smart-guide') {
-        subView = <SmartGuidePage onNavigate={navigate} onOpenScanModal={(pt) => handleOpenScan(pt)} />;
+        subView = <SmartGuidePage onNavigate={navigate} />;
       } else if (currentPath.startsWith('/app/explore/')) {
         const slug = currentPath.replace('/app/explore/', '');
         subView = <ExplorePointDetailPage slug={slug} onNavigate={navigate} />;
@@ -220,15 +223,8 @@ const AppContent: React.FC = () => {
     // Default: Home Page
     return (
       <div>
-        <Navbar currentPath={currentPath} onNavigate={navigate} onOpenScanModal={() => handleOpenScan()} />
-        <HomePage
-          explorePoints={destinationDetails?.explorePoints || []}
-          destination={destinationDetails?.destination || null}
-          localDiscoveries={destinationDetails?.localDiscoveries || []}
-          onNavigate={navigate}
-          onOpenScanModal={() => handleOpenScan()}
-        />
-        <Footer onNavigate={navigate} />
+        <Navbar currentPath={currentPath} onNavigate={navigate} onOpenScanModal={() => handleOpenScan(undefined, true)} />
+        <HomePage onOpenScanModal={() => handleOpenScan(undefined, true)} />
       </div>
     );
   };
@@ -246,6 +242,7 @@ const AppContent: React.FC = () => {
         onClose={() => setIsScanModalOpen(false)}
         onNavigate={navigate}
         preselectedPoint={preselectedScanPoint}
+        autoStartCamera={autoStartScanCamera}
       />
     </div>
   );
