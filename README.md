@@ -2,7 +2,7 @@
 
 TAKONO adalah aplikasi digital tourism untuk pengalaman destinasi berbasis React, TypeScript, Tailwind CSS, Laravel REST API, Sanctum bearer token, dan MySQL.
 
-Demo utama menggunakan **Taman Bungkul, Surabaya**. Backend aktif berada di folder `laravel/`; Express dan database in-memory tidak digunakan.
+Demo mencakup **Taman Bungkul** dan **Tugu Pahlawan, Surabaya**. Backend aktif berada di folder `laravel/`; Express dan database in-memory tidak digunakan.
 
 ## Kebutuhan lokal
 
@@ -40,7 +40,7 @@ php artisan migrate
 php artisan db:seed
 ```
 
-Seeder utama mengisi katalog Taman Bungkul tanpa membuat akun atau password otomatis.
+Seeder utama mengisi katalog Taman Bungkul dan Tugu Pahlawan tanpa membuat akun atau password otomatis.
 
 ### 2. Frontend React
 
@@ -129,7 +129,7 @@ Setelah login, Admin dapat membuat akun Pemerintah atau Pengelola dan menetapkan
 
 Ownership dan role diperiksa oleh Laravel API, bukan hanya disembunyikan dari UI.
 
-## Seeder Taman Bungkul
+## Seeder katalog destinasi
 
 Data katalog berada di:
 
@@ -144,7 +144,7 @@ cd laravel
 php artisan db:seed
 ```
 
-Seeder memperbarui katalog berdasarkan slug/nama dan mempertahankan ID serta histori aktivitas yang sudah terkait.
+Seeder memperbarui katalog berdasarkan code/slug dan mempertahankan ID, QR token, serta histori aktivitas yang sudah terkait. Tugu Pahlawan mencakup empat Explore Point dengan kuis, empat UMKM/Local Discovery, dan tiga event demo.
 
 ## CORS dan akses melalui jaringan lokal
 
@@ -226,7 +226,7 @@ src/pages/admin/             UI Admin
 src/lib/api.ts               Client Laravel API
 laravel/app/                 Backend Laravel
 laravel/routes/api.php       Route REST API
-laravel/database/data/       Katalog Taman Bungkul
+laravel/database/data/       Katalog destinasi demo
 laravel/database/seeders/    Seeder katalog dan akun demo opsional
 scripts/browser-audit.mjs    Audit UI responsif
 ```
