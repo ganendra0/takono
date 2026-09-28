@@ -19,7 +19,7 @@ export function ScanModal({isOpen,onClose,onNavigate,autoStartCamera=false}:{isO
    if(!user){onClose();onNavigate('/login');return;}
    if(parsed.kind==='event'){
     const result=await ApiClient.scanEventToken(parsed.code);if(!result.success||!result.data)throw new Error(result.message||'QR Event tidak valid.');
-    const destination=result.data.destination;ApiClient.selectDestination(destination.id,destination.slug);await refreshUserData();onClose();onNavigate(`/app/${destination.slug}/events`);return;
+    const destination=result.data.destination;ApiClient.selectDestination(destination.id,destination.slug);await refreshUserData();onClose();onNavigate(`/app/destination/${destination.slug}/events`);return;
    }
    if(parsed.kind!=='point'){
     const welcome=await ApiClient.scanDestinationQR(parsed.code);
@@ -28,7 +28,7 @@ export function ScanModal({isOpen,onClose,onNavigate,autoStartCamera=false}:{isO
    }
    const result=await ApiClient.scanExplorePointToken(parsed.code);
    if(!result.success||!result.data)throw new Error(result.message||'Kode tidak valid.');
-   ApiClient.selectDestination(result.data.destination.id,result.data.destination.slug);await refreshUserData();onClose();onNavigate(`/app/${result.data.destination.slug}/explore/${result.data.explorePoint.slug}`);
+   ApiClient.selectDestination(result.data.destination.id,result.data.destination.slug);await refreshUserData();onClose();onNavigate(`/app/destination/${result.data.destination.slug}/explore/${result.data.explorePoint.slug}`);
   }catch(e){setMessage(e instanceof Error?e.message:'Tidak dapat membaca QR.');}finally{locked.current=false;setBusy(false);}
  }
  async function decode(source:CanvasImageSource,width:number,height:number){

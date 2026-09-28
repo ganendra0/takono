@@ -157,7 +157,7 @@ export class ApiClient {
   }
 
   static async completeDestinationJourney(idOrSlug: string) {
-    return this.request<{ journey: any; progress: any; message: string }>(
+    return this.request<{ journey: any; progress: any; summary: any; message: string }>(
       `/journeys/${encodeURIComponent(idOrSlug)}/complete`, { method: 'POST' }
     );
   }
@@ -181,7 +181,7 @@ export class ApiClient {
     return this.request<UserActivity[]>('/me/activities');
   }
 
-  static async getMyAlbum() {
+  static async getMyAlbum(withDestinationContext = true) {
     return this.request<{
       progress: any;
       activeJourney: any;
@@ -189,7 +189,7 @@ export class ApiClient {
       completedPoints: ExplorePoint[];
       redemptions: RewardRedemption[];
       totalPointsEarned: number;
-    }>(`/me/album?destinationId=${encodeURIComponent(await this.destinationKey())}`);
+    }>(withDestinationContext ? `/me/album?destinationId=${encodeURIComponent(await this.destinationKey())}` : '/me/album');
   }
 
   static async getSmartGuideRecommendations(params?: {

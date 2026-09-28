@@ -1,0 +1,13 @@
+import React, { useEffect, useState } from 'react';
+import { ArrowDownLeft, ArrowUpRight, Coins } from 'lucide-react';
+import { ApiClient } from '../../lib/api.js';
+import { useAuth } from '../../context/AuthContext.js';
+import { PointTransaction } from '../../types/index.js';
+
+export const PointsPage: React.FC = () => {
+  const { pointsBalance } = useAuth();
+  const [transactions, setTransactions] = useState<PointTransaction[]>([]);
+  const [error, setError] = useState('');
+  useEffect(() => { ApiClient.getMyPoints().then(result => { if (result.success) setTransactions(result.data?.transactions || []); else setError(result.message || 'Riwayat poin tidak dapat dimuat.'); }); }, []);
+  return <div className="mx-auto max-w-3xl space-y-6 pb-10"><header><p className="text-xs font-semibold tracking-wide text-blue-700">JEJAK POINTS</p><h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Poin perjalananmu</h1></header><section className="rounded-2xl bg-blue-700 p-6 text-white"><span className="text-xs font-semibold tracking-wide text-blue-100">SALDO SAAT INI</span><strong className="mt-3 block text-4xl tracking-tight">{pointsBalance} <span className="text-base font-medium text-blue-100">poin</span></strong><p className="mt-3 text-sm text-blue-100">Poin didapat dari aktivitas yang tervalidasi selama kunjungan.</p></section><section><h2 className="mb-3 flex items-center gap-2 text-base font-semibold text-slate-950"><Coins size={18} className="text-blue-600" />Riwayat aktivitas</h2>{error ? <p className="text-sm text-rose-700">{error}</p> : transactions.length ? <div className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">{transactions.map(tx => { const credit = tx.type === 'credit'; return <div key={tx.id} className="flex items-center justify-between gap-4 p-4"><div className="flex min-w-0 items-center gap-3"><span className={`grid h-9 w-9 place-items-center rounded-lg ${credit ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>{credit ? <ArrowDownLeft size={17} /> : <ArrowUpRight size={17} />}</span><div className="min-w-0"><p className="truncate text-sm font-medium text-slate-900">{tx.description}</p><p className="mt-1 text-xs text-slate-500">{new Date(tx.createdAt).toLocaleDateString('id-ID')} · Saldo {tx.balanceAfter}</p></div></div><strong className={credit ? 'text-emerald-700' : 'text-rose-700'}>{credit ? '+' : '-'}{tx.amount}</strong></div>; })}</div> : <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">Belum ada aktivitas poin.</div>}</section></div>;
+};

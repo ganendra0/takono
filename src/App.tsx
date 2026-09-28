@@ -23,6 +23,9 @@ import { DestinationWelcomeScanPage } from './pages/public/DestinationWelcomeSca
 // Traveler Pages
 import { TravelerLayout } from './pages/traveler/TravelerLayout.js';
 import { TravelerHome } from './pages/traveler/TravelerHome.js';
+import { PersonalHomePage } from './pages/traveler/PersonalHomePage.js';
+import { PointsPage } from './pages/traveler/PointsPage.js';
+import { DestinationExplorePage } from './pages/traveler/DestinationExplorePage.js';
 const SmartGuidePage = lazy(() => import('./pages/traveler/SmartGuidePage.js').then(m=>({default:m.SmartGuidePage})));
 import { ExplorePointDetailPage } from './pages/traveler/ExplorePointDetailPage.js';
 import { EventsPage } from './pages/traveler/EventsPage.js';
@@ -97,7 +100,6 @@ const AppContent: React.FC = () => {
   }, [currentPath, user?.id]);
 
   useEffect(() => {
-    if (user && currentPath === '/app') navigate('/scan');
     if (user && currentPath === '/scan') {
       setPreselectedScanPoint(null);
       setAutoStartScanCamera(true);
@@ -115,13 +117,13 @@ const AppContent: React.FC = () => {
     setIsScanModalOpen(true);
   };
 
-  const travelerNavigate = (path: string) => {
+  const destinationNavigate = (path: string) => {
     if (!path.startsWith('/app')) { navigate(path); return; }
     const destinationSlug = travelerDestinationSlug(currentPath) || localStorage.getItem('takono_destination_slug');
     navigate(destinationSlug ? scopedTravelerPath(destinationSlug, path) : path);
   };
 
-  const destinationNavigate = (destination: Destination, path: string) => {
+  const publicDestinationNavigate = (destination: Destination, path: string) => {
     if (path.startsWith('/app')) {
       ApiClient.selectDestination(destination.id, destination.slug);
       navigate(scopedTravelerPath(destination.slug, path));
@@ -137,8 +139,8 @@ const AppContent: React.FC = () => {
     const privatePath = /^\/(app|manager|government|admin)(\/|$)/.test(currentPath);
     const scanPath = currentPath === '/scan' || currentPath.startsWith('/scan/');
     if (isLoading && privatePath) return <p className="p-12 text-center">Memuat sesi…</p>;
-    if ((!user && (privatePath || scanPath)) || currentPath === '/login') return <AuthPage onNavigate={navigate} returnTo={currentPath === '/login' ? '/scan' : currentPath}/>;
-    const home = role === 'destination_manager' ? '/manager' : role === 'government' ? '/government' : role === 'super_admin' ? '/admin' : '/scan';
+    if ((!user && (privatePath || scanPath)) || currentPath === '/login') return <AuthPage onNavigate={navigate} returnTo={currentPath === '/login' ? '/app' : currentPath}/>;
+    const home = role === 'destination_manager' ? '/manager' : role === 'government' ? '/government' : role === 'super_admin' ? '/admin' : '/app';
     if (privatePath && ((currentPath.startsWith('/manager') && !['destination_manager','super_admin'].includes(role)) || (currentPath.startsWith('/government') && !['government','super_admin'].includes(role)) || (currentPath.startsWith('/admin') && role !== 'super_admin') || (currentPath.startsWith('/app') && role !== 'traveler'))) {
       return <div className="p-12 text-center space-y-4"><p>Halaman ini tidak tersedia untuk peran akun Anda.</p><button className="text-blue-600" onClick={()=>navigate(home)}>Buka dashboard saya</button></div>;
     }
@@ -148,44 +150,30 @@ const AppContent: React.FC = () => {
       return <DestinationWelcomeScanPage destinationCode={code} onNavigate={navigate} />;
     }
 
-    // 2. Traveler Application Routes (/app/*)
+    // 2. Traveler Application Routes: personal area and QR-gated destination mode.
     if (currentPath.startsWith('/app')) {
-      if (scopedDestinationSlug && (!destinationDetails || destinationDetails.destination?.slug !== scopedDestinationSlug)) return <p className="p-12 text-center text-sm text-slate-500">Memuat destinasi…</p>;
-      const prefix = scopedDestinationSlug ? `/app/${encodeURIComponent(scopedDestinationSlug)}` : '/app';
-      const travelerPath = currentPath.slice(prefix.length) || '/';
-      let subView = <TravelerHome onNavigate={travelerNavigate} onOpenScanModal={() => handleOpenScan()} />;
+      const directPointScan = currentPath.match(/^\/app\/scan\/(event\/)?(.+)$/);
+      if (directPointScan) return <ScanPointPage mode={directPointScan[1] ? 'event' : 'point'} token={decodeURIComponent(directPointScan[2])} onNavigate={navigate}/>;
 
-      if (travelerPath.startsWith('/scan/event/')) {
-        subView = <ScanPointPage mode="event" token={decodeURIComponent(travelerPath.slice('/scan/event/'.length))} onNavigate={travelerNavigate}/>;
-      } else if (travelerPath.startsWith('/scan/')) {
-        subView = <ScanPointPage token={decodeURIComponent(travelerPath.slice('/scan/'.length))} onNavigate={travelerNavigate}/>;
-      } else if (travelerPath === '/smart-guide') {
-        subView = <SmartGuidePage onNavigate={travelerNavigate} />;
-      } else if (travelerPath.startsWith('/explore/')) {
-        const slug = travelerPath.slice('/explore/'.length);
-        subView = <ExplorePointDetailPage slug={slug} onNavigate={travelerNavigate} />;
-      } else if (travelerPath === '/events') {
-        subView = <EventsPage onNavigate={travelerNavigate} onOpenScanModal={() => handleOpenScan()} />;
-      } else if (travelerPath === '/rewards') {
-        subView = <RewardsCatalogPage onNavigate={travelerNavigate} />;
-      } else if (travelerPath === '/local-discovery') {
-        subView = <LocalDiscoveryPage onNavigate={travelerNavigate} />;
-      } else if (travelerPath === '/album') {
-        subView = <AlbumJelajahPage onNavigate={travelerNavigate} />;
-      } else if (travelerPath === '/profile') {
-        subView = <ProfilePage onNavigate={travelerNavigate} />;
+      if (!scopedDestinationSlug) {
+        let personalView: React.ReactNode = <PersonalHomePage onNavigate={navigate} onOpenScanModal={() => handleOpenScan(undefined, true)} />;
+        if (currentPath === '/app/album') personalView = <AlbumJelajahPage onNavigate={navigate} />;
+        else if (currentPath === '/app/points') personalView = <PointsPage />;
+        else if (currentPath === '/app/profile') personalView = <ProfilePage onNavigate={navigate} />;
+        return <TravelerLayout currentTab={currentPath} mode="personal" onSelectTab={navigate} onOpenScanModal={() => handleOpenScan(undefined, true)}>{personalView}</TravelerLayout>;
       }
 
-      return (
-        <TravelerLayout
-          currentTab={currentPath}
-          destinationSlug={scopedDestinationSlug || undefined}
-          onSelectTab={travelerNavigate}
-          onOpenScanModal={() => handleOpenScan()}
-        >
-          {subView}
-        </TravelerLayout>
-      );
+      if (!destinationDetails || destinationDetails.destination?.slug !== scopedDestinationSlug) return <p className="p-12 text-center text-sm text-slate-500">Memuat destinasi…</p>;
+      const prefix = `/app/destination/${encodeURIComponent(scopedDestinationSlug)}`;
+      const travelerPath = currentPath.slice(prefix.length) || '/';
+      let subView: React.ReactNode = <TravelerHome onNavigate={destinationNavigate} onOpenScanModal={() => handleOpenScan()} />;
+      if (travelerPath === '/smart-guide') subView = <SmartGuidePage onNavigate={destinationNavigate} />;
+      else if (travelerPath === '/explore') subView = <DestinationExplorePage onOpenScanModal={() => handleOpenScan()} />;
+      else if (travelerPath.startsWith('/explore/')) subView = <ExplorePointDetailPage slug={travelerPath.slice('/explore/'.length)} onNavigate={destinationNavigate} />;
+      else if (travelerPath === '/events') subView = <EventsPage onNavigate={destinationNavigate} onOpenScanModal={() => handleOpenScan()} />;
+      else if (travelerPath === '/rewards') subView = <RewardsCatalogPage onNavigate={destinationNavigate} />;
+      else if (travelerPath === '/local-discovery') subView = <LocalDiscoveryPage onNavigate={destinationNavigate} />;
+      return <TravelerLayout currentTab={currentPath} mode="destination" destinationSlug={scopedDestinationSlug} onSelectTab={destinationNavigate} onOpenScanModal={() => handleOpenScan()}>{subView}</TravelerLayout>;
     }
 
     // 3. Destination Manager Portal (/manager)
@@ -245,7 +233,7 @@ const AppContent: React.FC = () => {
               events={destinationDetails.events || []}
               localDiscoveries={destinationDetails.localDiscoveries || []}
               rewards={destinationDetails.rewards || []}
-              onNavigate={path => destinationNavigate(destinationDetails.destination, path)}
+              onNavigate={path => publicDestinationNavigate(destinationDetails.destination, path)}
               onOpenScanModal={() => handleOpenScan()}
             />
           ) : (

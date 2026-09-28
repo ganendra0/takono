@@ -7,13 +7,17 @@ import {
   BookMarked, 
   User,
   Sparkles,
-  QrCode
+  QrCode,
+  MapPinned,
+  Store,
+  Coins
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.js';
 import { TakonoLogo } from '../../components/TakonoLogo.js';
 
 interface TravelerLayoutProps {
   currentTab: string;
+  mode: 'personal' | 'destination';
   destinationSlug?: string;
   onSelectTab: (tab: string) => void;
   onOpenScanModal?: () => void;
@@ -22,6 +26,7 @@ interface TravelerLayoutProps {
 
 export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
   currentTab,
+  mode,
   destinationSlug,
   onSelectTab,
   onOpenScanModal,
@@ -29,15 +34,22 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
 }) => {
   const { user, pointsBalance } = useAuth();
 
-  const base = destinationSlug ? `/app/${encodeURIComponent(destinationSlug)}` : '/app';
-  const tabs = [
-    { id: base, label: 'Home', icon: Home },
-    { id: `${base}/smart-guide`, label: 'Jelajah', icon: Compass },
-    { id: `${base}/events`, label: 'Event', icon: Calendar },
-    { id: `${base}/rewards`, label: 'Reward', icon: Gift },
-    { id: `${base}/album`, label: 'Album', icon: BookMarked },
-    { id: `${base}/profile`, label: 'Profil', icon: User }
-  ];
+  const base = mode === 'destination' && destinationSlug ? `/app/destination/${encodeURIComponent(destinationSlug)}` : '/app';
+  const tabs = mode === 'personal'
+    ? [
+        { id: '/app', label: 'Beranda', icon: Home },
+        { id: '/app/album', label: 'Album', icon: BookMarked },
+        { id: '/app/points', label: 'Poin', icon: Coins },
+        { id: '/app/profile', label: 'Profil', icon: User }
+      ]
+    : [
+        { id: base, label: 'Destinasi', icon: Home },
+        { id: `${base}/smart-guide`, label: 'Smart Guide', icon: Compass },
+        { id: `${base}/explore`, label: 'Explore', icon: MapPinned },
+        { id: `${base}/local-discovery`, label: 'Lokal', icon: Store },
+        { id: `${base}/events`, label: 'Event', icon: Calendar },
+        { id: `${base}/rewards`, label: 'Reward', icon: Gift }
+      ];
 
   return (
     <div className="traveler-shell min-h-screen bg-[#f6f8fa] flex flex-col items-center">
@@ -60,7 +72,7 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
                 TAKONO
               </span>
               <span className="text-[10px] text-slate-500 font-medium leading-none">
-                Surabaya
+                {mode === 'destination' ? 'Mode kunjungan' : 'Ruang personal'}
               </span>
             </div>
           </div>
@@ -70,14 +82,14 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
               <button
                 onClick={onOpenScanModal}
                 className="p-2 bg-sky-50 hover:bg-sky-100 rounded-lg text-blue-700 transition-colors cursor-pointer"
-                title="Pindai QR Titik Jelajah"
+                title={mode === 'destination' ? 'Pindai QR Explore Point' : 'Pindai QR Destinasi'}
               >
                 <QrCode className="w-4 h-4 text-blue-600" />
               </button>
             )}
 
             <button
-              onClick={() => onSelectTab(`${base}/profile`)}
+              onClick={() => onSelectTab(mode === 'personal' ? '/app/points' : `${base}/rewards`)}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 rounded-lg text-white text-xs font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
             >
               <Sparkles className="w-3.5 h-3.5" />
@@ -94,11 +106,12 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
 
         {/* Fixed Bottom Tab Bar (Mobile Thumb Zone Anchor) */}
         <nav aria-label="Navigasi aplikasi traveler" style={{paddingBottom:'env(safe-area-inset-bottom)'}} className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-center shadow-[0_-4px_18px_rgba(15,23,42,.06)] lg:static lg:order-1 lg:shadow-none lg:border-t-0 lg:border-b lg:justify-start">
-          <div className="grid h-[68px] w-full max-w-3xl grid-cols-6 lg:max-w-none lg:px-10 xl:px-14 2xl:px-20">
+          <div className={`grid h-[68px] w-full max-w-3xl ${mode === 'personal' ? 'grid-cols-4' : 'grid-cols-6'} lg:max-w-none lg:px-10 xl:px-14 2xl:px-20`}>
             {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = currentTab === tab.id
                 || (tab.id === `${base}/smart-guide` && (currentTab.startsWith(`${base}/explore/`) || (currentTab.startsWith(`${base}/scan/`) && !currentTab.startsWith(`${base}/scan/event/`))))
+                || (tab.id === `${base}/explore` && currentTab === `${base}/explore`)
                 || (tab.id === `${base}/events` && currentTab.startsWith(`${base}/scan/event/`));
               return (
                 <button

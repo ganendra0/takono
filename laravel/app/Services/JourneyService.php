@@ -55,6 +55,21 @@ class JourneyService
         });
     }
 
+    /** A factual trip recap, derived only from this traveler's TAKONO activities. */
+    public static function summary(User $user, Destination $destination): array
+    {
+        $activities = UserActivity::where('user_id', $user->id)
+            ->where('destination_id', $destination->id);
+
+        return [
+            'destination' => $destination->name,
+            'explorePointsVisited' => (clone $activities)->where('type', 'explore_point_discovered')->distinct('reference_id')->count('reference_id'),
+            'quizzesCompleted' => (clone $activities)->where('type', 'quiz_completed')->distinct('reference_id')->count('reference_id'),
+            'localDiscoveriesVisited' => (clone $activities)->where('type', 'local_discovery_visited')->distinct('reference_id')->count('reference_id'),
+            'pointsEarned' => (int) (clone $activities)->where('points_earned', '>', 0)->sum('points_earned'),
+        ];
+    }
+
     /** Preserve a completed album for travelers who finished all points before journeys existed. */
     public static function backfillLegacyCompletions(User $user): void
     {

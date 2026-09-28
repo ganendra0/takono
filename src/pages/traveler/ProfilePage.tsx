@@ -31,7 +31,7 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
       setIsLoading(true);
       const [ptRes, albRes] = await Promise.all([
         ApiClient.getMyPoints(),
-        ApiClient.getMyAlbum()
+        ApiClient.getMyAlbum(false)
       ]);
 
       if (ptRes.success && ptRes.data) {

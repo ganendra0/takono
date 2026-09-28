@@ -87,9 +87,9 @@ export const DestinationWelcomeScanPage: React.FC<DestinationWelcomeScanPageProp
     const result = await ApiClient.startDestinationJourney(destinationCode);
     setIsStarting(false);
     if (!result.success || !result.data) { setError(result.message || 'Perjalanan tidak dapat dimulai.'); return; }
-    const base = `/app/${encodeURIComponent(result.data.destination.slug)}`;
+    const base = `/app/destination/${encodeURIComponent(result.data.destination.slug)}`;
     ApiClient.selectDestination(result.data.destination.id, result.data.destination.slug);
-    onNavigate(result.data.journey.status === 'completed' ? `${base}/album` : base);
+    onNavigate(result.data.journey.status === 'completed' ? '/app/album' : base);
   };
 
   return (

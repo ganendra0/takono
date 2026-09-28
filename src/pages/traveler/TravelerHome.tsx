@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CalendarDays, Compass, Gift, Map, MapPin, QrCode, Store, ArrowRight } from 'lucide-react';
+import { CalendarDays, Compass, Gift, Map, MapPin, QrCode, Store, ArrowRight, CheckCircle2, CircleHelp, Coins } from 'lucide-react';
 import { ApiClient } from '../../lib/api';
 import { Destination, DestinationEvent, ExplorePoint, LocalDiscovery, Reward } from '../../types';
 import { useAuth } from '../../context/AuthContext';
@@ -16,6 +16,7 @@ export function TravelerHome({ onNavigate, onOpenScanModal }: { onNavigate: (pat
   const [hasActiveJourney, setHasActiveJourney] = useState(false);
   const [isEndingJourney, setIsEndingJourney] = useState(false);
   const [journeyError, setJourneyError] = useState('');
+  const [tripSummary, setTripSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -51,7 +52,10 @@ export function TravelerHome({ onNavigate, onOpenScanModal }: { onNavigate: (pat
     setIsEndingJourney(true); setJourneyError('');
     const result = await ApiClient.completeDestinationJourney(destination.id);
     setIsEndingJourney(false);
-    if (result.success) onNavigate('/app/album');
+    if (result.success) {
+      setHasActiveJourney(false);
+      setTripSummary(result.data?.summary || { destination: destination.name, explorePointsVisited: completed, quizzesCompleted: 0, pointsEarned: 0, localDiscoveriesVisited: 0 });
+    }
     else setJourneyError(result.message || 'Perjalanan belum dapat diakhiri.');
   };
   const menu = [
@@ -75,7 +79,7 @@ export function TravelerHome({ onNavigate, onOpenScanModal }: { onNavigate: (pat
     <section className="home-intro traveler-card p-5 lg:p-7">
       <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
         <div><p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Hai, {user?.name.split(' ')[0]}</p><p className="mt-1 text-sm font-semibold text-slate-900">Siap menjelajah hari ini?</p></div>
-        <button onClick={() => onNavigate('/app/profile')} className="text-right"><strong className="block text-lg text-blue-700">{pointsBalance}</strong><span className="text-[10px] text-slate-500">Jejak Points</span></button>
+        <button onClick={() => onNavigate('/app/rewards')} className="text-right"><strong className="block text-lg text-blue-700">{pointsBalance}</strong><span className="text-[10px] text-slate-500">Jejak Points</span></button>
       </div>
       <div className="mt-4 space-y-2">
         <TextToSpeechControls text={destination?.description || ''} />
@@ -118,5 +122,6 @@ export function TravelerHome({ onNavigate, onOpenScanModal }: { onNavigate: (pat
       <button onClick={() => onNavigate('/app/local-discovery')} className="traveler-card p-4 text-left"><Store size={18} className="text-teal-600" /><strong className="mt-3 block text-lg">{local.length}</strong><span className="text-[11px] text-slate-500">Usaha lokal dekatmu</span></button>
       <button onClick={() => onNavigate('/app/rewards')} className="traveler-card p-4 text-left"><Gift size={18} className="text-blue-600" /><strong className="mt-3 block text-lg">{rewards.length}</strong><span className="text-[11px] text-slate-500">Reward tersedia</span></button>
     </section>
+    {tripSummary && <div className="fixed inset-0 z-[100] flex items-end bg-slate-950/45 p-0 sm:items-center sm:justify-center sm:p-5" role="dialog" aria-modal="true" aria-label="Ringkasan perjalanan"><section className="w-full max-w-lg rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-2xl"><span className="grid h-11 w-11 place-items-center rounded-full bg-emerald-50 text-emerald-700"><CheckCircle2 size={23} /></span><p className="mt-4 text-xs font-semibold tracking-wide text-emerald-700">PERJALANAN TERSIMPAN</p><h2 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950">Terima kasih sudah menjelajah.</h2><p className="mt-2 text-sm leading-6 text-slate-500">Ringkasan kunjunganmu di {destination?.name} sudah masuk ke Album Jelajah.</p><div className="mt-5 grid grid-cols-2 gap-3"><div className="rounded-xl bg-slate-50 p-4"><Compass size={17} className="text-blue-600" /><strong className="mt-2 block text-xl text-slate-950">{tripSummary.explorePointsVisited || 0}</strong><span className="text-xs text-slate-500">Explore Point</span></div><div className="rounded-xl bg-slate-50 p-4"><CircleHelp size={17} className="text-blue-600" /><strong className="mt-2 block text-xl text-slate-950">{tripSummary.quizzesCompleted || 0}</strong><span className="text-xs text-slate-500">Kuis selesai</span></div><div className="rounded-xl bg-slate-50 p-4"><Coins size={17} className="text-blue-600" /><strong className="mt-2 block text-xl text-slate-950">{tripSummary.pointsEarned || 0}</strong><span className="text-xs text-slate-500">Poin didapat</span></div><div className="rounded-xl bg-slate-50 p-4"><Store size={17} className="text-blue-600" /><strong className="mt-2 block text-xl text-slate-950">{tripSummary.localDiscoveriesVisited || 0}</strong><span className="text-xs text-slate-500">Usaha lokal</span></div></div><button onClick={() => onNavigate('/app')} className="primary-button mt-6 w-full !py-3">Kembali ke ruang personal</button></section></div>}
   </div>;
 }

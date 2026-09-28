@@ -27,6 +27,6 @@ class DestinationController extends Controller {
     public function completeJourney(Request $request, string $idOrSlug) {
         $destination = Catalog::destination($idOrSlug);
         [$journey, $progress] = JourneyService::complete($request->user(), $destination);
-        return Api::ok(['journey' => $journey, 'progress' => $progress, 'message' => "Perjalanan {$destination->name} tersimpan di Album Jelajah."]);
+        return Api::ok(['journey' => $journey, 'progress' => $progress, 'summary' => JourneyService::summary($request->user(), $destination), 'message' => "Perjalanan {$destination->name} tersimpan di Album Jelajah."]);
     }
 }

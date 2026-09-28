@@ -47,7 +47,8 @@ class PlatformTest extends TestCase {
         $this->postJson('/api/explore-points/'.$p['id'].'/quiz/submit',$answer,$h)->assertOk()->assertJsonPath('data.pointsAwarded',0);
         $this->getJson('/api/me/points',$h)->assertOk()->assertJsonPath('data.balance',50);
         $this->getJson('/api/me/album?destinationId='.$d->id,$h)->assertOk()->assertJsonPath('data.progress.completedExplorePoints',1);
-        $this->postJson('/api/journeys/'.$d->id.'/complete',[],$h)->assertOk()->assertJsonPath('data.journey.status','completed');
+        $this->postJson('/api/journeys/'.$d->id.'/complete',[],$h)->assertOk()->assertJsonPath('data.journey.status','completed')
+            ->assertJsonPath('data.summary.explorePointsVisited',1)->assertJsonPath('data.summary.quizzesCompleted',1)->assertJsonPath('data.summary.pointsEarned',50);
         $this->getJson('/api/me/album?destinationId='.$d->id,$h)->assertOk()->assertJsonCount(1,'data.journeys');
         $this->getJson('/api/smart-guide/recommendations?destinationId='.$d->id,$h)->assertOk()->assertJsonPath('data.nextRecommendation.point',null);
         $event=['title'=>'Event','description'=>'Test','startDate'=>today()->toDateString(),'endDate'=>today()->addDay()->toDateString(),'time'=>'10:00','location'=>'Gate','pointsReward'=>10,'status'=>'published'];
