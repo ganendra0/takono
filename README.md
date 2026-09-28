@@ -81,7 +81,10 @@ TakonoDemo#2026
 | Role | Email |
 | --- | --- |
 | Traveler | `traveler@takono.id` |
+| Traveler | `sari.traveler@takono.id` |
+| Traveler | `raka.traveler@takono.id` |
 | Pengelola Taman Bungkul | `manager@bungkul.id` |
+| Pengelola Tugu Pahlawan | `manager@tugupahlawan.id` |
 | Pemerintah | `dinas@surabaya.go.id` |
 | Super Admin | `admin@takono.id` |
 
