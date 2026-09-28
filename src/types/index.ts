@@ -87,6 +87,7 @@ export interface Quiz {
 export interface ExplorePoint {
   id: string;
   destinationId: string;
+  routeOrder?: number;
   name: string;
   slug: string;
   category: ExploreCategory;

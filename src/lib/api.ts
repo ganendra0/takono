@@ -192,6 +192,10 @@ export class ApiClient {
     }>(withDestinationContext ? `/me/album?destinationId=${encodeURIComponent(await this.destinationKey())}` : '/me/album');
   }
 
+  static async getAlbumDestination(idOrSlug: string) {
+    return this.request<{ journey: any; destination: Destination; explorePoints: (ExplorePoint & { visited: boolean })[]; activities: UserActivity[]; summary: any }>(`/me/album/${encodeURIComponent(idOrSlug)}`);
+  }
+
   static async getSmartGuideRecommendations(params?: {
     destinationId?: string;
     preferences?: string[];

@@ -48,4 +48,17 @@ class AuthController extends Controller {
             'redemptions'=>$r->user()->rewardRedemptions()->latest('id')->get(),
             'totalPointsEarned'=>$r->user()->pointTransactions()->where('type','credit')->sum('amount')]);
     }
+    public function albumDestination(Request $r, string $idOrSlug) {
+        $user=$r->user();
+        $destination=Catalog::destination($idOrSlug);
+        $journey=UserDestinationJourney::with('destination')->where('user_id',$user->id)->where('destination_id',$destination->id)->where('status','completed')->firstOrFail();
+        $visitedIds=UserActivity::where('user_id',$user->id)->where('destination_id',$destination->id)
+            ->where('type','explore_point_discovered')->distinct()->pluck('reference_id')->map(fn($id)=>(string)$id)->all();
+        $points=Catalog::points()->where('destination_id',$destination->id)->get()->map(function($point) use($visitedIds) {
+            $item=Api::point($point); $item['visited']=in_array((string)$point->id,$visitedIds,true); return $item;
+        });
+        $activities=UserActivity::where('user_id',$user->id)->where('destination_id',$destination->id)->latest('id')->get();
+        return Api::ok(['journey'=>$journey,'destination'=>$destination,'explorePoints'=>$points,'activities'=>$activities,
+            'summary'=>JourneyService::summary($user,$destination)]);
+    }
 }

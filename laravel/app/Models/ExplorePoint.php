@@ -11,6 +11,7 @@ class ExplorePoint extends Model
 
     protected $fillable = [
         'destination_id',
+        'route_order',
         'name',
         'slug',
         'category',
@@ -34,6 +35,7 @@ class ExplorePoint extends Model
         'latitude' => 'float',
         'longitude' => 'float',
         'points_reward' => 'integer',
+        'route_order' => 'integer',
     ];
 
     public function destination()
