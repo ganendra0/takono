@@ -18,12 +18,16 @@ class DemoAccountSeeder extends Seeder
             throw new RuntimeException('DEMO_ACCOUNT_PASSWORD wajib diisi dan minimal 10 karakter.');
         }
 
-        $destination = Destination::where('code', 'BUNGKUL')->firstOrFail();
+        $bungkul = Destination::where('code', 'BUNGKUL')->firstOrFail();
+        $tuguPahlawan = Destination::where('code', 'TUGUPAHLAWAN')->firstOrFail();
 
-        DB::transaction(function () use ($destination, $password): void {
+        DB::transaction(function () use ($bungkul, $tuguPahlawan, $password): void {
             $accounts = [
                 ['name' => 'Budi Santoso', 'email' => 'traveler@takono.id', 'role' => 'traveler', 'destination_id' => null, 'institution' => null],
-                ['name' => 'Maya Indah (Pengelola Taman Bungkul)', 'email' => 'manager@bungkul.id', 'role' => 'destination_manager', 'destination_id' => $destination->id, 'institution' => 'Pengelola Taman Bungkul'],
+                ['name' => 'Sari Wulandari', 'email' => 'sari.traveler@takono.id', 'role' => 'traveler', 'destination_id' => null, 'institution' => null],
+                ['name' => 'Raka Pratama', 'email' => 'raka.traveler@takono.id', 'role' => 'traveler', 'destination_id' => null, 'institution' => null],
+                ['name' => 'Maya Indah (Pengelola Taman Bungkul)', 'email' => 'manager@bungkul.id', 'role' => 'destination_manager', 'destination_id' => $bungkul->id, 'institution' => 'Pengelola Taman Bungkul'],
+                ['name' => 'Dimas Prabowo (Pengelola Tugu Pahlawan)', 'email' => 'manager@tugupahlawan.id', 'role' => 'destination_manager', 'destination_id' => $tuguPahlawan->id, 'institution' => 'Pengelola Tugu Pahlawan Surabaya'],
                 ['name' => 'Drs. Hendra W. (Dinas Pariwisata)', 'email' => 'dinas@surabaya.go.id', 'role' => 'government', 'destination_id' => null, 'institution' => 'Dinas Kebudayaan, Kepemudaan dan Olahraga serta Pariwisata Kota Surabaya'],
                 ['name' => 'Admin Platform TAKONO', 'email' => 'admin@takono.id', 'role' => 'super_admin', 'destination_id' => null, 'institution' => 'TAKONO'],
             ];
@@ -40,6 +44,6 @@ class DemoAccountSeeder extends Seeder
             }
         });
 
-        $this->command?->info('Empat akun demo TAKONO berhasil dibuat atau diperbarui.');
+        $this->command?->info('Tujuh akun demo TAKONO berhasil dibuat atau diperbarui.');
     }
 }
