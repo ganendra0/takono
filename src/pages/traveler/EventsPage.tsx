@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ApiClient } from '../../lib/api.js';
 import { DestinationEvent } from '../../types/index.js';
-import { 
-  Calendar, 
-  Clock, 
-  MapPin, 
-  CheckCircle2, 
-  QrCode
-} from 'lucide-react';
+import { CalendarDays, CheckCircle2, Clock3, MapPin, QrCode } from 'lucide-react';
 
 export const EventsPage: React.FC<{ onNavigate: (path: string) => void; onOpenScanModal: () => void }> = ({ onNavigate, onOpenScanModal }) => {
   const [events, setEvents] = useState<DestinationEvent[]>([]);
@@ -33,106 +27,85 @@ export const EventsPage: React.FC<{ onNavigate: (path: string) => void; onOpenSc
   }, []);
 
   return (
-    <div className="space-y-5 pb-8">
-      
-      <div>
-        <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-blue-600" />
-          <span>Agenda di destinasi</span>
-        </h1>
-        <p className="text-xs text-slate-500">
-          Lihat jadwal, lalu scan QR di lokasi Event untuk mencatat partisipasi.
-        </p>
-      </div>
+    <div className="mx-auto w-full max-w-7xl space-y-7 px-4 pb-12 sm:px-6 lg:px-8">
+      <header className="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">Agenda destinasi</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Kegiatan dan acara</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Lihat jadwal acara di destinasi. Pindai QR di lokasi untuk mencatat partisipasi dan mengumpulkan poin.</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-3 text-sm text-slate-500">
+          <CalendarDays size={17} className="text-blue-700" />
+          <span><strong className="font-semibold text-slate-900">{events.length}</strong> agenda</span>
+        </div>
+      </header>
 
       {activeMessage && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center justify-between">
-          <span className="font-medium">{activeMessage}</span>
-          <button 
-            onClick={() => setActiveMessage(null)}
-            className="text-emerald-700 hover:text-emerald-950 font-bold ml-2"
-          >
-            ✕
-          </button>
+        <div role="alert" className="flex items-start justify-between gap-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-900">
+          <span>{activeMessage}</span>
+          <button onClick={() => setActiveMessage(null)} aria-label="Tutup pesan" className="shrink-0 rounded-md px-2 text-lg leading-5 text-rose-700 transition-colors hover:bg-rose-100">×</button>
         </div>
       )}
 
       {isLoading ? (
-        <div className="py-12 text-center text-xs text-slate-500">Memuat agenda event...</div>
-      ) : (
-        <div className="travel-catalog grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {!events.length && <p className="text-slate-500">Belum ada event tersedia.</p>}
+        <section aria-label="Memuat agenda" className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {[0, 1, 2].map(item => (
+            <div key={item} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <div className="aspect-[16/10] animate-pulse bg-slate-100" />
+              <div className="space-y-3 p-5"><div className="h-4 w-1/3 animate-pulse rounded bg-slate-100" /><div className="h-5 w-2/3 animate-pulse rounded bg-slate-100" /><div className="h-3 w-full animate-pulse rounded bg-slate-100" /></div>
+            </div>
+          ))}
+        </section>
+      ) : events.length ? (
+        <section aria-label="Daftar agenda destinasi" className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {events.map(event => {
             const isRegistered = participatedIds.includes(event.id);
             return (
-              <div 
-                key={event.id}
-                className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:border-blue-300 transition-colors"
-              >
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="w-full h-40 object-cover"
-                />
-
-                <div className="p-4 space-y-3">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="px-2 py-0.5 bg-blue-50 text-blue-700 font-semibold rounded-md border border-blue-100">
-                      +{event.pointsReward} Jejak Points
-                    </span>
-                    <span className="text-slate-500 font-mono text-[11px]">{event.startDate}</span>
-                  </div>
-
-                  <h3 className="text-base font-bold text-slate-900 leading-snug">
-                    {event.title}
-                  </h3>
-
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    {event.description}
-                  </p>
-
-                  <div className="space-y-1.5 pt-2 border-t border-slate-100 text-xs text-slate-500">
-                    <div className="flex items-center gap-2">
-                      <Clock className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{event.time}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                      <span>{event.location}</span>
-                    </div>
-                  </div>
-
-                  <div className="pt-2">
-                    <button
-                      type="button"
-                      disabled={isRegistered}
-                      onClick={onOpenScanModal}
-                      className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                        isRegistered
-                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
-                          : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-98'
-                      }`}
-                    >
-                      {isRegistered ? (
-                        <>
-                          <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                          <span>Sudah Berpartisipasi</span>
-                        </>
-                      ) : (
-                        <>
-                          <QrCode className="w-4 h-4" />
-                          <span>Scan QR di lokasi untuk klaim +{event.pointsReward} poin</span>
-                        </>
-                      )}
-                    </button>
-                  </div>
+              <article key={event.id} className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-colors hover:border-slate-300">
+                <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+                  <img src={event.image} alt={event.title} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                  <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full border border-white/70 bg-white/95 px-3 py-1.5 text-xs font-semibold text-blue-800">
+                    <CalendarDays size={14} />{event.startDate}
+                  </span>
                 </div>
-              </div>
+
+                <div className="flex flex-1 flex-col p-5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="text-xs font-semibold uppercase tracking-[0.12em] text-blue-700">Agenda destinasi</span>
+                    <span className="shrink-0 rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold tabular-nums text-blue-800">+{event.pointsReward} poin</span>
+                  </div>
+                  <h2 className="mt-3 text-lg font-semibold leading-snug tracking-tight text-slate-950">{event.title}</h2>
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{event.description}</p>
+
+                  <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-sm text-slate-600">
+                    <div className="flex items-start gap-2.5"><Clock3 size={16} className="mt-0.5 shrink-0 text-slate-400" /><span>{event.time}</span></div>
+                    <div className="flex items-start gap-2.5"><MapPin size={16} className="mt-0.5 shrink-0 text-slate-400" /><span>{event.location}</span></div>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={isRegistered}
+                    onClick={onOpenScanModal}
+                    className={`mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
+                      isRegistered
+                        ? 'cursor-default border border-emerald-200 bg-emerald-50 text-emerald-800'
+                        : 'cursor-pointer bg-blue-700 text-white hover:bg-blue-800 active:bg-blue-900'
+                    }`}
+                  >
+                    {isRegistered ? <><CheckCircle2 size={17} /><span>Sudah berpartisipasi</span></> : <><QrCode size={17} /><span>Scan QR untuk klaim poin</span></>}
+                  </button>
+                </div>
+              </article>
             );
           })}
-        </div>
+        </section>
+      ) : (
+        <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+          <CalendarDays className="mx-auto h-7 w-7 text-slate-400" strokeWidth={1.6} />
+          <h2 className="mt-4 text-base font-semibold text-slate-900">Belum ada agenda tersedia</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">Agenda yang diterbitkan untuk destinasi ini akan muncul di sini.</p>
+        </section>
       )}
-
     </div>
   );
 };

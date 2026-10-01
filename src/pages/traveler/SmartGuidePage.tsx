@@ -14,8 +14,7 @@ import {
   Navigation, 
   SlidersHorizontal, 
   CheckCircle2, 
-  Clock, 
-  Sparkles, 
+  Clock,
   ChevronRight, 
   Info,
   Footprints,
@@ -364,23 +363,23 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
   };
 
   return (
-    <div className="space-y-3 pb-8">
+    <div className="smart-guide-page mx-auto w-full max-w-7xl space-y-6 px-4 pb-12 sm:px-6 lg:px-8">
       
       {/* 1. Header Bar: Title & Preference Trigger */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-1.5">
-            <Compass className="w-5 h-5 text-blue-600" />
+          <h1 className="flex items-center gap-3 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">
+            <Compass className="h-9 w-9 rounded-xl bg-blue-50 p-2 text-blue-700" />
             <span>Smart Guide</span>
           </h1>
-          <p className="text-[11px] text-slate-500">
+          <p className="mt-1 max-w-xl text-sm leading-6 text-slate-500">
             Temukan tempat berikutnya sesuai minatmu.
           </p>
         </div>
 
         <button
           onClick={() => setIsPrefModalOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 hover:border-blue-300 transition-colors shadow-xs cursor-pointer"
+          className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition-colors hover:border-blue-300 hover:bg-blue-50/50 cursor-pointer"
         >
           <SlidersHorizontal className="w-3.5 h-3.5 text-blue-600" />
           <span>Preferensi ({preferences.length})</span>
@@ -390,27 +389,28 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
       {/* 2. Active Preferences Horizontal Chips */}
       {error && <p role="status" className="text-xs text-amber-800">{error}</p>}
       <p className="text-xs text-slate-500">{destination?.name} · Garis peta menunjukkan arah langsung; ikuti jalur resmi destinasi.</p>
-      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
-        <span className="text-[11px] text-slate-400 font-medium whitespace-nowrap">Fokus Minat:</span>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-xs font-semibold uppercase tracking-wide text-slate-500">Fokus Minat:</span>
         {preferences.map(p => (
-          <span key={p} className="px-2.5 py-0.5 bg-blue-50 text-blue-700 font-medium rounded-md border border-blue-100 whitespace-nowrap text-[11px]">
+          <span key={p} className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-800">
             {p}
           </span>
         ))}
         <button 
           onClick={() => setIsPrefModalOpen(true)}
-          className="text-blue-600 text-[11px] font-semibold hover:underline whitespace-nowrap ml-1 cursor-pointer"
+          className="ml-1 rounded-full px-2 py-1 text-xs font-semibold text-blue-700 transition-colors hover:bg-blue-50 cursor-pointer"
         >
           Ubah
         </button>
       </div>
 
       {/* 3. Real Leaflet Map Container */}
-      <div className="relative rounded-2xl overflow-hidden border border-slate-200 shadow-sm h-[380px] sm:h-[450px] bg-slate-100">
-        <div ref={mapContainerRef} className="w-full h-full" />
+      <div className="smart-guide-layout">
+        <div className="smart-guide-map relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
+          <div ref={mapContainerRef} className="h-full w-full" />
 
         {/* Floating Quick Layer Toggles */}
-        <div className="absolute top-3 right-3 z-20 flex flex-col gap-1.5 bg-white/95 backdrop-blur-md p-1.5 rounded-xl border border-slate-200 shadow-xs text-[11px]">
+        <div className="absolute right-4 top-4 z-20 flex flex-col gap-1 rounded-xl border border-slate-200 bg-white/95 p-1.5 text-xs shadow-lg backdrop-blur">
           <button
             onClick={() => setShowFacilities(!showFacilities)}
             className={`px-2 py-1 rounded text-left font-medium flex items-center gap-1.5 transition-colors cursor-pointer ${
@@ -432,18 +432,17 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
         </div>
 
         {/* Floating Location Helper Tooltip */}
-        <div className="absolute bottom-3 left-3 z-20 bg-slate-900/90 backdrop-blur-md text-white px-3 py-1.5 rounded-lg text-[10px] flex items-center gap-2 border border-slate-700">
+        <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2 rounded-lg border border-white/20 bg-slate-950/85 px-3 py-2 text-xs text-white shadow-lg backdrop-blur">
           <Navigation className="w-3 h-3 text-blue-400 animate-pulse" />
           <span>{hasLocation ? 'Pin biru: lokasi perangkat.' : 'Aktifkan lokasi untuk melihat jarak.'}</span>
         </div>
       </div>
-
-      {/* 4. RECOMMENDATION CARD (The Smart Guide core!) */}
+      <aside className="smart-guide-details">
       {nextPoint ? (
-        <div className="p-4 bg-white rounded-2xl border border-blue-200 shadow-xs space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="smart-guide-recommendation rounded-2xl border border-blue-200 bg-white p-5 shadow-sm">
+          <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-blue-700">
-              <Sparkles className="w-4 h-4 text-blue-600" />
+              <MapPin className="h-4 w-4 text-blue-700" />
               <span>Titik Rekomendasi Berikutnya</span>
             </div>
             <span className="text-[11px] font-mono text-slate-500">
@@ -461,7 +460,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
               <h3 className="text-sm font-bold text-slate-900 leading-snug">
                 {nextPoint.name}
               </h3>
-              <p className="text-[11px] text-slate-500">
+              <p className="mt-1 max-w-xl text-sm leading-6 text-slate-500">
                 {recommendationReason || nextPoint.description}
               </p>
             </div>
@@ -479,7 +478,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
           </div>
         </div>
       ) : (
-        <div className="p-4 bg-emerald-50 rounded-2xl border border-emerald-200 text-center space-y-2">
+        <div className="space-y-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center">
           <CheckCircle2 className="w-8 h-8 text-emerald-600 mx-auto" />
           <h3 className="text-sm font-bold text-emerald-900">Tidak Ada Rekomendasi Baru</h3>
           <p className="text-xs text-emerald-700">
@@ -494,9 +493,12 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
         </div>
       )}
 
+      </aside>
+      </div>
+
       {/* 5. ALL EXPLORE POINTS LIST IN THIS DESTINATION */}
-      <div className="space-y-3 pt-2">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+      <div className="smart-guide-point-list space-y-3">
+        <h3 className="flex items-center justify-between border-b border-slate-200 pb-3 text-sm font-semibold text-slate-900">
           Daftar Seluruh Titik Jelajah ({explorePoints.length})
         </h3>
 
@@ -506,7 +508,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
             return (
               <div
                 key={point.id}
-                className="p-3.5 bg-white rounded-2xl border border-slate-200 shadow-xs flex items-center justify-between gap-3 hover:border-blue-300 transition-colors"
+                className="smart-guide-point-row flex items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-colors hover:border-blue-300 hover:shadow-md"
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${
@@ -544,10 +546,9 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
         </div>
       </div>
 
-      {/* PREFERENCE SELECTOR MODAL */}
       {isPrefModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-sm w-full p-6 space-y-4 shadow-xl">
+          <div className="w-full max-w-md space-y-5 rounded-2xl bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
                 <SlidersHorizontal className="w-4 h-4 text-blue-600" />
