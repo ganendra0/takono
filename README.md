@@ -4,6 +4,8 @@ TAKONO adalah aplikasi digital tourism untuk pengalaman destinasi berbasis React
 
 Demo mencakup **Taman Bungkul** dan **Tugu Pahlawan, Surabaya**. Backend aktif berada di folder `laravel/`; Express dan database in-memory tidak digunakan.
 
+Untuk memahami arsitektur, semua peran, alur QR dan perjalanan traveler, data, keamanan, serta endpoint utama, baca [Dokumentasi TAKONO](docs/TAKONO_OVERVIEW.md).
+
 ## Kebutuhan lokal
 
 - Node.js dan npm
@@ -11,14 +13,27 @@ Demo mencakup **Taman Bungkul** dan **Tugu Pahlawan, Surabaya**. Backend aktif b
 - Composer
 - MySQL
 
-## Instalasi
+## Instalasi cepat
+
+Ikuti langkah ini dari folder utama proyek. Perintah di bawah dibagi berdasarkan terminal agar tidak tertukar antara macOS/Linux dan Windows PowerShell.
 
 ### 1. Backend Laravel
+
+macOS / Linux:
 
 ```bash
 cd laravel
 composer install
 cp .env.example .env
+php artisan key:generate
+```
+
+Windows PowerShell:
+
+```powershell
+cd laravel
+composer install
+Copy-Item .env.example .env
 php artisan key:generate
 ```
 
@@ -41,6 +56,8 @@ php artisan db:seed
 ```
 
 Seeder utama mengisi katalog Taman Bungkul dan Tugu Pahlawan tanpa membuat akun atau password otomatis.
+
+> Jangan gunakan `php artisan migrate:fresh` kecuali memang ingin menghapus seluruh data database lokal. Untuk penggunaan biasa gunakan `php artisan migrate`.
 
 ### 2. Frontend React
 
@@ -95,18 +112,31 @@ Email: manager@bungkul.id
 Password: TakonoDemo#2026
 ```
 
-Untuk membuat atau mereset empat akun demo pada database lokal lain:
+Untuk membuat atau mereset **tujuh akun demo** pada database lokal lain, jalankan salah satu perintah berikut dari folder `laravel/`.
+
+macOS / Linux:
 
 ```bash
 cd laravel
 DEMO_ACCOUNT_PASSWORD='TakonoDemo#2026' php artisan db:seed --class=DemoAccountSeeder
 ```
 
+Windows PowerShell:
+
+```powershell
+cd laravel
+$env:DEMO_ACCOUNT_PASSWORD = 'TakonoDemo#2026'
+php artisan db:seed --class=DemoAccountSeeder
+Remove-Item Env:DEMO_ACCOUNT_PASSWORD
+```
+
+PowerShell tidak mendukung format `NAMA_VARIABEL=nilai perintah`, sehingga gunakan `$env:...` seperti contoh di atas.
+
 Perintah tersebut:
 
 - membuat akun jika belum ada;
 - memperbarui role dan password akun demo jika sudah ada;
-- menetapkan Manager ke Taman Bungkul;
+- menetapkan Manager ke Taman Bungkul dan Tugu Pahlawan;
 - mempertahankan saldo dan histori aktivitas akun yang sudah ada;
 - mencabut token login lama setelah password direset.
 
@@ -148,6 +178,14 @@ php artisan db:seed
 ```
 
 Seeder memperbarui katalog berdasarkan code/slug dan mempertahankan ID, QR token, serta histori aktivitas yang sudah terkait. Tugu Pahlawan mencakup empat Explore Point dengan kuis, empat UMKM/Local Discovery, dan tiga event demo.
+
+Untuk database demo baru, urutan aman yang direkomendasikan:
+
+```text
+1. php artisan migrate
+2. php artisan db:seed
+3. Jalankan DemoAccountSeeder sesuai sistem operasi di atas
+```
 
 ## CORS dan akses melalui jaringan lokal
 
