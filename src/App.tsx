@@ -171,7 +171,7 @@ const AppContent: React.FC = () => {
       if (!destinationDetails || destinationDetails.destination?.slug !== scopedDestinationSlug) return <p className="p-12 text-center text-sm text-slate-500">Memuat destinasi…</p>;
       const prefix = `/app/destination/${encodeURIComponent(scopedDestinationSlug)}`;
       const travelerPath = currentPath.slice(prefix.length) || '/';
-      let subView: React.ReactNode = <TravelerHome onNavigate={destinationNavigate} onOpenScanModal={() => handleOpenScan()} />;
+      let subView: React.ReactNode = <TravelerHome destinationSlug={scopedDestinationSlug} onNavigate={destinationNavigate} onOpenScanModal={() => handleOpenScan()} />;
       if (travelerPath === '/smart-guide') subView = <SmartGuidePage onNavigate={destinationNavigate} />;
       else if (travelerPath === '/explore') subView = <DestinationExplorePage onOpenScanModal={() => handleOpenScan()} />;
       else if (travelerPath.startsWith('/explore/')) subView = <ExplorePointDetailPage slug={travelerPath.slice('/explore/'.length)} onNavigate={destinationNavigate} />;

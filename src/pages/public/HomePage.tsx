@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowRight, BookOpen, Compass, QrCode, Sparkles } from 'lucide-react';
+import { ArrowRight, BookOpen, Compass, QrCode } from 'lucide-react';
 
 export function HomePage({ onOpenScanModal }: { onOpenScanModal: () => void }) {
   return (
@@ -28,7 +28,7 @@ export function HomePage({ onOpenScanModal }: { onOpenScanModal: () => void }) {
           <div className="absolute -inset-5 rounded-[2rem] bg-blue-50" />
           <div className="relative space-y-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm sm:p-7">
             <div className="mb-5 flex items-center gap-3 border-b border-slate-100 pb-5">
-              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-700 text-white"><Sparkles size={23} /></span>
+              <span className="grid h-12 w-12 place-items-center rounded-2xl bg-blue-700 text-white"><Compass size={23} /></span>
               <div><p className="text-xs font-medium uppercase tracking-wider text-blue-700">TAKONO</p><p className="mt-1 text-lg font-semibold">Jelajah lebih bermakna</p></div>
             </div>
             {[

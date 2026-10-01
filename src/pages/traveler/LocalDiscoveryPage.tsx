@@ -2,16 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ApiClient } from '../../lib/api.js';
 import { LocalDiscovery } from '../../types/index.js';
 import { useAuth } from '../../context/AuthContext.js';
-import { 
-  Store, 
-  MapPin, 
-  Clock, 
-  Sparkles, 
-  CheckCircle2, 
-  Phone, 
-  ExternalLink,
-  Tag
-} from 'lucide-react';
+import { CheckCircle2, Clock3, MapPin, Phone, Store, Tag } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
@@ -57,121 +48,108 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
     : partners.filter(p => p.category === selectedCategory);
 
   return (
-    <div className="space-y-5 pb-8">
-      
-      <div>
-        <h1 className="text-xl font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
-          <Store className="w-5 h-5 text-amber-600" />
-          <span>Singgah di sekitar</span>
-        </h1>
-        <p className="text-xs text-slate-500">
-          Temukan kuliner, oleh-oleh, dan usaha lokal di sekitar destinasi.
-        </p>
-      </div>
+    <div className="mx-auto w-full max-w-7xl space-y-7 px-4 pb-12 sm:px-6 lg:px-8">
+      <header className="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">Mitra sekitar</p>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">Singgah di sekitar destinasi</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Temukan kuliner, oleh-oleh, dan usaha lokal untuk melengkapi perjalananmu.</p>
+        </div>
+        <div className="flex shrink-0 items-center gap-3 text-sm text-slate-500">
+          <Store size={17} className="text-blue-700" />
+          <span><strong className="font-semibold text-slate-900">{filtered.length}</strong> mitra</span>
+        </div>
+      </header>
 
       {message && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-xs text-emerald-900 flex items-center justify-between">
+        <div role="status" className="flex items-start justify-between gap-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
           <span>{message}</span>
-          <button onClick={() => setMessage(null)} className="font-bold text-emerald-700">✕</button>
+          <button onClick={() => setMessage(null)} aria-label="Tutup pesan" className="shrink-0 rounded-md px-2 text-lg leading-5 text-emerald-700 transition-colors hover:bg-emerald-100">×</button>
         </div>
       )}
 
-      {/* Category Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-        {categories.map(cat => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-3 py-1.5 rounded-xl font-medium transition-colors whitespace-nowrap cursor-pointer ${
-              selectedCategory === cat
-                ? 'bg-slate-900 text-white font-semibold'
-                : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
-
-      {/* Partners List */}
-      <div className="travel-catalog grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-        {isLoading ? <p>Memuat mitra…</p> : !filtered.length && <p>Belum ada mitra untuk kategori ini.</p>}
-        {filtered.map(partner => {
-          const isVisited = visitedIds.includes(partner.id);
-          return (
-            <div
-              key={partner.id}
-              className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:border-blue-300 transition-colors flex flex-col justify-between"
+      <section aria-label="Kategori usaha lokal" className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 gap-2 overflow-x-auto pb-1">
+          {categories.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              aria-pressed={selectedCategory === cat}
+              className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                selectedCategory === cat
+                  ? 'bg-blue-700 text-white'
+                  : 'border border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50'
+              }`}
             >
-              <img
-                src={partner.image}
-                alt={partner.name}
-                className="w-full h-44 object-cover"
-                loading="lazy"
-              />
+              {cat}
+            </button>
+          ))}
+        </div>
+        <p className="shrink-0 text-xs text-slate-500">{selectedCategory === 'Semua' ? 'Semua kategori' : selectedCategory}</p>
+      </section>
 
-              <div className="p-4 space-y-3">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-semibold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-100">
-                    {partner.category}
-                  </span>
-                  <span className="text-slate-500">{partner.operatingHours}</span>
+      {isLoading ? (
+        <section aria-label="Memuat mitra lokal" className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {[0, 1, 2].map(item => (
+            <div key={item} className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <div className="aspect-[16/10] animate-pulse bg-slate-100" />
+              <div className="space-y-3 p-5"><div className="h-4 w-1/3 animate-pulse rounded bg-slate-100" /><div className="h-5 w-2/3 animate-pulse rounded bg-slate-100" /><div className="h-3 w-full animate-pulse rounded bg-slate-100" /></div>
+            </div>
+          ))}
+        </section>
+      ) : filtered.length ? (
+        <section aria-label="Daftar usaha lokal" className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map(partner => {
+            const isVisited = visitedIds.includes(partner.id);
+            return (
+              <article key={partner.id} className="group flex min-w-0 flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-colors hover:border-slate-300">
+                <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+                  <img src={partner.image} alt={partner.name} className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" />
+                  <span className="absolute left-4 top-4 rounded-full border border-white/70 bg-white/95 px-3 py-1 text-xs font-semibold text-slate-800">{partner.category}</span>
                 </div>
 
-                <h3 className="text-base font-bold text-slate-900">
-                  {partner.name}
-                </h3>
-
-                <p className="text-xs text-slate-600 leading-relaxed">
-                  {partner.description}
-                </p>
-
-                {/* Promo Card */}
-                <div className="p-3 bg-amber-50/80 border border-amber-200/80 rounded-xl text-xs text-amber-950 flex items-center gap-2">
-                  <Tag className="w-4 h-4 text-amber-600 shrink-0" />
-                  <span className="font-medium">{partner.promotion}</span>
-                </div>
-
-                <div className="space-y-1 text-xs text-slate-500 pt-1">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
-                    <span>{partner.address}</span>
+                <div className="flex flex-1 flex-col p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <h2 className="min-w-0 text-lg font-semibold leading-snug tracking-tight text-slate-950">{partner.name}</h2>
+                    <span className="inline-flex shrink-0 items-center gap-1.5 pt-1 text-xs text-slate-500"><Clock3 size={14} />{partner.operatingHours}</span>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                    <span>{partner.contact || partner.phone}</span>
-                  </div>
-                </div>
+                  <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{partner.description}</p>
 
-                <div className="pt-2 flex items-center gap-2">
+                  {partner.promotion && (
+                    <div className="mt-4 flex items-start gap-2 rounded-xl bg-blue-50 px-3 py-3 text-sm text-blue-950">
+                      <Tag size={16} className="mt-0.5 shrink-0 text-blue-700" />
+                      <span className="leading-5">{partner.promotion}</span>
+                    </div>
+                  )}
+
+                  <div className="mt-4 space-y-2 border-t border-slate-100 pt-4 text-xs leading-5 text-slate-500">
+                    <div className="flex items-start gap-2"><MapPin size={15} className="mt-0.5 shrink-0 text-slate-400" /><span>{partner.address}</span></div>
+                    {(partner.contact || partner.phone) && <div className="flex items-center gap-2"><Phone size={14} className="shrink-0 text-slate-400" /><span>{partner.contact || partner.phone}</span></div>}
+                  </div>
+
                   <button
                     onClick={() => handleRecordVisit(partner)}
                     disabled={isVisited}
-                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                    className={`mt-5 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors ${
                       isVisited
-                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200 cursor-default'
-                        : 'bg-blue-600 hover:bg-blue-700 text-white shadow-xs active:scale-98'
+                        ? 'cursor-default border border-emerald-200 bg-emerald-50 text-emerald-800'
+                        : 'cursor-pointer bg-blue-700 text-white hover:bg-blue-800 active:bg-blue-900'
                     }`}
                   >
-                    {isVisited ? (
-                      <>
-                        <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                        <span>Kunjungan Tercatat</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="w-4 h-4" />
-                        <span>Catat Kunjungan (+{partner.pointsReward ?? 0} Pts)</span>
-                      </>
-                    )}
+                    {isVisited ? <><CheckCircle2 size={17} /><span>Kunjungan tercatat</span></> : <><Store size={16} /><span>Catat kunjungan · +{partner.pointsReward ?? 0} poin</span></>}
                   </button>
                 </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
+              </article>
+            );
+          })}
+        </section>
+      ) : (
+        <section className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
+          <Store className="mx-auto h-7 w-7 text-slate-400" strokeWidth={1.6} />
+          <h2 className="mt-4 text-base font-semibold text-slate-900">Belum ada mitra di kategori ini</h2>
+          <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">Mitra lokal yang tersedia akan muncul di bagian ini.</p>
+        </section>
+      )}
     </div>
   );
 };

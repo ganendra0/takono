@@ -6,7 +6,6 @@ import {
   Gift, 
   BookMarked, 
   User,
-  Sparkles,
   QrCode,
   MapPinned,
   Store,
@@ -32,7 +31,7 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
   onOpenScanModal,
   children
 }) => {
-  const { user, pointsBalance } = useAuth();
+  const { pointsBalance } = useAuth();
 
   const base = mode === 'destination' && destinationSlug ? `/app/destination/${encodeURIComponent(destinationSlug)}` : '/app';
   const tabs = mode === 'personal'
@@ -52,77 +51,98 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
       ];
 
   return (
-    <div className="traveler-shell min-h-screen bg-[#f6f8fa] flex flex-col items-center">
-      
-      {/* Full canvas on desktop; compact, thumb-friendly frame on mobile. */}
-      <div className="traveler-frame relative flex min-h-screen w-full flex-col pb-24 lg:max-w-none">
+    <div className="traveler-shell min-h-screen bg-[#f8fafc] text-slate-800 font-sans flex flex-col items-center">
+      {/* Container utama disamakan lebarnya untuk seluruh halaman */}
+      <div className="traveler-frame relative mx-auto flex min-h-screen w-full max-w-none flex-col px-4 sm:px-6 pb-24 lg:pb-12">
         
-        {/* Top App Bar */}
-        <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200/80 bg-white/95 px-3.5 py-2.5 backdrop-blur-md lg:px-10 xl:px-14 2xl:px-20">
-          <div className="flex items-center gap-2">
-            <button 
-              onClick={() => onSelectTab('/')} 
-              className="flex items-center cursor-pointer hover:opacity-90 transition-opacity"
+        {/* Simple brand header */}
+        <header className="sticky top-0 z-50 -ml-4 w-screen border-b border-slate-100 bg-white shadow-[0_1px_8px_rgba(15,23,42,0.04)] sm:-ml-6">
+          <div className="mx-auto flex min-h-20 w-full max-w-6xl items-center justify-between gap-5 px-4 lg:h-20">
+            <button
+              onClick={() => onSelectTab('/')}
+              className="inline-flex shrink-0 cursor-pointer items-center rounded-sm focus-visible:outline-offset-4"
               aria-label="Kembali ke Beranda"
             >
-              <TakonoLogo variant="icon" size="sm" />
+              <TakonoLogo variant="full" size="md" />
             </button>
-            <div className="leading-none">
-              <span className="font-black text-sm tracking-tight text-blue-600 block leading-tight">
-                TAKONO
-              </span>
-              <span className="text-[10px] text-slate-500 font-medium leading-none">
-                {mode === 'destination' ? 'Mode kunjungan' : 'Ruang personal'}
-              </span>
-            </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            {onOpenScanModal && (
+            <nav aria-label="Navigasi utama traveler" className="hidden flex-1 items-center justify-center gap-1 lg:flex">
+              {tabs.map(tab => {
+                const Icon = tab.icon;
+                const isActive = currentTab === tab.id
+                  || (tab.id === `${base}/smart-guide` && (currentTab.startsWith(`${base}/explore/`) || (currentTab.startsWith(`${base}/scan/`) && !currentTab.startsWith(`${base}/scan/event/`))))
+                  || (tab.id === `${base}/explore` && currentTab === `${base}/explore`)
+                  || (tab.id === `${base}/events` && currentTab.startsWith(`${base}/scan/event/`));
+
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => onSelectTab(tab.id)}
+                    aria-current={isActive ? 'page' : undefined}
+                    className={`inline-flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-semibold transition-colors ${
+                      isActive ? 'bg-blue-50 text-blue-700' : 'text-slate-600 hover:bg-slate-50 hover:text-slate-950'
+                    }`}
+                  >
+                    <Icon className="h-4 w-4" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </nav>
+
+            <div className="hidden shrink-0 items-center gap-2 sm:flex">
               <button
-                onClick={onOpenScanModal}
-                className="p-2 bg-sky-50 hover:bg-sky-100 rounded-lg text-blue-700 transition-colors cursor-pointer"
-                title={mode === 'destination' ? 'Pindai QR Explore Point' : 'Pindai QR Destinasi'}
+                onClick={() => onSelectTab(mode === 'personal' ? '/app/points' : `${base}/rewards`)}
+                className="inline-flex min-h-10 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
               >
-                <QrCode className="w-4 h-4 text-blue-600" />
+                <span className="tabular-nums">{pointsBalance}</span>
+                <span className="text-xs text-slate-500">PTS</span>
               </button>
-            )}
-
-            <button
-              onClick={() => onSelectTab(mode === 'personal' ? '/app/points' : `${base}/rewards`)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 rounded-lg text-white text-xs font-semibold hover:bg-blue-700 transition-colors cursor-pointer"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span className="font-mono font-bold tabular-nums">{pointsBalance}</span>
-              <span className="text-[10px] text-blue-100">Pts</span>
-            </button>
+              {onOpenScanModal && (
+                <button
+                  onClick={onOpenScanModal}
+                  title={mode === 'destination' ? 'Pindai QR Explore Point' : 'Pindai QR Destinasi'}
+                  className="inline-flex min-h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+                >
+                  <QrCode className="h-4 w-4" />
+                  Scan QR
+                </button>
+              )}
+            </div>
           </div>
         </header>
 
         {/* Dynamic Content Frame */}
-        <main className="traveler-content flex-1 p-4 sm:p-6 lg:order-2 lg:px-10 lg:py-9 xl:px-14 2xl:px-20">
+        <main className="traveler-content w-full flex-1 pt-6 sm:pt-8">
           {children}
         </main>
 
-        {/* Fixed Bottom Tab Bar (Mobile Thumb Zone Anchor) */}
-        <nav aria-label="Navigasi aplikasi traveler" style={{paddingBottom:'env(safe-area-inset-bottom)'}} className="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200 flex justify-center shadow-[0_-4px_18px_rgba(15,23,42,.06)] lg:static lg:order-1 lg:shadow-none lg:border-t-0 lg:border-b lg:justify-start">
-          <div className={`grid h-[68px] w-full max-w-3xl ${mode === 'personal' ? 'grid-cols-4' : 'grid-cols-6'} lg:max-w-none lg:px-10 xl:px-14 2xl:px-20`}>
+        {/* Mobile Navigation */}
+        <nav 
+          aria-label="Navigasi aplikasi traveler" 
+          style={{ paddingBottom: 'env(safe-area-inset-bottom)' }} 
+          className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-lg border-t border-slate-200/80 shadow-lg lg:hidden"
+        >
+          <div className={`grid h-16 w-full ${mode === 'personal' ? 'grid-cols-4' : 'grid-cols-6'}`}>
             {tabs.map(tab => {
               const Icon = tab.icon;
               const isActive = currentTab === tab.id
                 || (tab.id === `${base}/smart-guide` && (currentTab.startsWith(`${base}/explore/`) || (currentTab.startsWith(`${base}/scan/`) && !currentTab.startsWith(`${base}/scan/event/`))))
                 || (tab.id === `${base}/explore` && currentTab === `${base}/explore`)
                 || (tab.id === `${base}/events` && currentTab.startsWith(`${base}/scan/event/`));
+
               return (
                 <button
                   key={tab.id}
                   onClick={() => onSelectTab(tab.id)}
-                  className={`flex flex-col items-center justify-center cursor-pointer transition-colors ${
-                    isActive ? 'text-blue-700' : 'text-slate-500 hover:text-slate-900'
+                  className={`flex flex-col items-center justify-center gap-1 cursor-pointer transition-colors ${
+                    isActive ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'
                   }`}
                 >
-                  <span className={`grid h-8 w-10 place-items-center rounded-lg ${isActive ? 'bg-blue-50' : ''}`}><Icon className={`w-[18px] h-[18px] ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} /></span>
-                  <span className={`text-[11px] tracking-tight ${isActive ? 'font-bold' : 'font-medium'}`}>
+                  <div className={`grid h-7 w-9 place-items-center rounded-full transition-all ${isActive ? 'bg-blue-50 text-blue-600' : ''}`}>
+                    <Icon className={`h-4 w-4 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
+                  </div>
+                  <span className={`text-[10px] tracking-tight ${isActive ? 'font-bold' : 'font-medium'}`}>
                     {tab.label}
                   </span>
                 </button>
