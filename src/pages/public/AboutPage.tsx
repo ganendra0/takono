@@ -1,3 +1,31 @@
 import React from 'react';
-import {ArrowLeft} from 'lucide-react';
-export function AboutPage({onNavigate}:{onNavigate:(p:string)=>void}) {return <main className="max-w-5xl mx-auto px-4 sm:px-6 py-10 sm:py-16"><button onClick={()=>onNavigate('/')} className="text-sm text-slate-500 flex gap-2 items-center"><ArrowLeft size={16}/>Beranda</button><div className="mt-12 grid lg:grid-cols-[1.2fr_.8fr] gap-12"><section><p className="text-sm text-blue-700 font-medium">TENTANG TAKONO</p><h1 className="text-4xl sm:text-5xl font-semibold tracking-tight mt-3">Malu bertanya?<br/>Takono.</h1><p className="text-lg text-slate-600 mt-6 leading-relaxed">Nama TAKONO berangkat dari ungkapan Jawa “takon o”—bertanyalah. Produk ini membantu pengunjung memahami tempat yang sedang didatangi, bukan sekadar menemukan lokasinya.</p></section><aside className="border-t-2 border-slate-900 pt-5"><h2 className="font-semibold">Yang kami bantu</h2><ul className="mt-4 divide-y text-sm text-slate-600"><li className="py-4">Menemukan titik penting di dalam destinasi.</li><li className="py-4">Membaca cerita yang terkait langsung dengan tempat.</li><li className="py-4">Mengenal aktivitas dan usaha lokal di sekitar.</li><li className="py-4">Mencatat perjalanan tanpa membuat pengalaman terasa rumit.</li></ul></aside></div><section className="mt-16 bg-slate-950 text-white p-7 sm:p-10"><p className="text-sm text-blue-300">PRINSIP PRODUK</p><div className="grid sm:grid-cols-3 gap-8 mt-6"><div><h3 className="font-semibold">Berguna di lokasi</h3><p className="text-sm text-slate-400 mt-2">Informasi muncul ketika pengunjung membutuhkannya.</p></div><div><h3 className="font-semibold">Jujur terhadap data</h3><p className="text-sm text-slate-400 mt-2">Analitik hanya mewakili aktivitas pengguna TAKONO.</p></div><div><h3 className="font-semibold">Menghubungkan sekitar</h3><p className="text-sm text-slate-400 mt-2">Destinasi dan usaha lokal berada dalam pengalaman yang sama.</p></div></div></section></main>}
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+
+const highlights = [
+  'Menemukan titik penting di dalam destinasi.',
+  'Membaca cerita yang terkait langsung dengan tempat.',
+  'Mengenal aktivitas dan usaha lokal di sekitar.',
+  'Menyimpan perjalanan tanpa membuat pengalaman terasa rumit.',
+];
+
+export function AboutPage({ onNavigate }: { onNavigate: (p: string) => void }) {
+  return <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-16">
+    <button onClick={() => onNavigate('/')} className="flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-700"><ArrowLeft size={16} />Beranda</button>
+
+    <div className="mt-12 grid gap-12 lg:grid-cols-[1.2fr_.8fr] lg:gap-16">
+      <section>
+        <p className="text-sm font-medium text-blue-700">TENTANG TAKONO</p>
+        <h1 className="mt-3 text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">Malu bertanya?<br />Takono.</h1>
+        <p className="mt-6 max-w-2xl text-lg leading-relaxed text-slate-600">Nama TAKONO berangkat dari ungkapan Jawa “takon o”—bertanyalah. Kami membantu pengunjung memahami tempat yang sedang didatangi, bukan sekadar menemukan lokasinya.</p>
+        <button onClick={() => onNavigate('/destinations')} className="primary-button mt-8">Lihat destinasi <ArrowRight size={17} /></button>
+      </section>
+
+      <aside className="border-t border-slate-900 pt-5">
+        <h2 className="text-base font-semibold text-slate-950">Yang bisa dilakukan</h2>
+        <ul className="mt-4 divide-y divide-slate-200 text-sm leading-6 text-slate-600">
+          {highlights.map((item, index) => <li key={item} className="grid grid-cols-[2rem_1fr] gap-3 py-4"><span className="font-mono text-xs text-blue-700">0{index + 1}</span><span>{item}</span></li>)}
+        </ul>
+      </aside>
+    </div>
+  </main>;
+}

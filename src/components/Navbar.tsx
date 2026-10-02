@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext.js';
-import { Compass, QrCode, Sparkles, Menu, X, LogIn } from 'lucide-react';
+import { QrCode, Menu, X, LogIn } from 'lucide-react';
 import { TakonoLogo } from './TakonoLogo.js';
 
 interface NavbarProps {
@@ -78,13 +78,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
             Tentang
           </button>
 
-          <button
-            onClick={() => handleNav('/scan')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-blue-600 bg-blue-50/80 hover:bg-blue-100 font-semibold text-xs transition-colors cursor-pointer border border-blue-100"
-          >
-            <Compass className="w-3.5 h-3.5 text-blue-600" />
-            <span>Smart Guide</span>
-          </button>
         </nav>}
 
         {/* Zone 3: Actions */}
@@ -191,13 +184,6 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
             className="w-full text-left px-3 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 cursor-pointer"
           >
             Tentang Kami
-          </button>
-          <button
-            onClick={() => handleNav('/scan')}
-            className="w-full text-left px-3 py-2 text-sm font-semibold rounded-lg text-blue-600 bg-blue-50 cursor-pointer flex items-center justify-between"
-          >
-            <span>Smart Guide Interaktif</span>
-            <Compass className="w-4 h-4" />
           </button>
         </div>
       )}
