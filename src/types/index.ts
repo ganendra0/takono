@@ -1,6 +1,6 @@
 // TAKONO Domain Types & Data Contracts
 
-export type UserRole = 'traveler' | 'destination_manager' | 'government' | 'super_admin';
+export type UserRole = 'traveler' | 'destination_manager' | 'government' | 'super_admin' | 'tenant';
 
 export type ExploreCategory = 
   | 'Edukasi'
@@ -141,6 +141,8 @@ export interface LocalDiscovery {
   rewardText?: string;
   status: 'published' | 'draft';
   pointsReward?: number;
+  averageRating?: number;
+  ratingsCount?: number;
 }
 
 export interface Reward {
@@ -150,6 +152,7 @@ export interface Reward {
   name: string;
   category?: string;
   partner: string;
+  tenantUserId?: string;
   description: string;
   image: string;
   pointsRequired: number;

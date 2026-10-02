@@ -30,6 +30,7 @@
 .traveler-shell main h2,
 .traveler-shell main h3 { letter-spacing: -0.025em; }
 .traveler-shell main { color: #172033; }
+.traveler-shell, .traveler-frame { max-width: 100%; overflow-x: clip; }
 .footer-links > :first-child { grid-column: 1 / -1; }
 @media (min-width: 768px) { .footer-links > :first-child { grid-column: auto; } }
 .manager-shell h1,

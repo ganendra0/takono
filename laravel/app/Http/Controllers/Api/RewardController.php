@@ -25,6 +25,7 @@ class RewardController extends Controller {
                 && $reward->valid_until && $reward->valid_until >= $today
                 && (!$reward->valid_from || $reward->valid_from <= $today)
                 && $reward->destination?->status==='published',422,'Reward tidak aktif, kedaluwarsa, atau habis.');
+            abort_unless($reward->tenant_user_id,422,'Reward belum ditugaskan ke tenant.');
             abort_if($reward->points_required<0 || $u->points_balance<$reward->points_required,422,'Poin tidak mencukupi.');
             $u->decrement('points_balance',$reward->points_required);
             $reward->increment('claimed_count');

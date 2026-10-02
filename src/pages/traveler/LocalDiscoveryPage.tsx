@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ApiClient } from '../../lib/api.js';
 import { LocalDiscovery } from '../../types/index.js';
 import { useAuth } from '../../context/AuthContext.js';
-import { CheckCircle2, Clock3, MapPin, Phone, Store, Tag } from 'lucide-react';
+import { CheckCircle2, Clock3, MapPin, Phone, Star, Store, Tag } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
 export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
@@ -10,6 +10,8 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
   const [partners, setPartners] = useState<LocalDiscovery[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('Semua');
   const [visitedIds, setVisitedIds] = useState<string[]>([]);
+  const [ratings, setRatings] = useState<Record<string, number>>({});
+  const [ratingBusyId, setRatingBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -21,6 +23,8 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
       const res = await ApiClient.getDestinationBySlug();
       if (res.success && res.data) {
         setPartners(res.data.localDiscoveries || []);
+        const ratings = await ApiClient.getMyLocalDiscoveryRatings(res.data.destination.id);
+        if (ratings.success) setRatings(Object.fromEntries((ratings.data || []).map(item => [item.localDiscoveryId, item.rating])));
       }
       const activities = await ApiClient.getMyActivities();
       if (activities.success) setVisitedIds((activities.data || []).filter(a=>a.type==='local_discovery_visited').map(a=>a.referenceId));
@@ -34,7 +38,7 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
   const handleRecordVisit = async (partner: LocalDiscovery) => {
     const res = await ApiClient.visitLocalDiscovery(partner.id);
     if (res.success && res.data) {
-      setVisitedIds([...visitedIds, partner.id]);
+      setVisitedIds(current => current.includes(partner.id) ? current : [...current, partner.id]);
       setMessage(res.data.message);
       if (res.data.pointsAwarded > 0) {
         confetti({ particleCount: 40, spread: 50 });
@@ -43,12 +47,23 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
     } else { setMessage(res.message || 'Gagal mencatat kunjungan.'); }
   };
 
+  const handleRating = async (partner: LocalDiscovery, rating: number) => {
+    setRatingBusyId(partner.id);
+    const res = await ApiClient.rateLocalDiscovery(partner.id, rating);
+    setRatingBusyId(null);
+    if (res.success && res.data) {
+      setRatings(current => ({ ...current, [partner.id]: rating }));
+      setPartners(current => current.map(item => item.id === partner.id ? { ...item, averageRating: res.data!.averageRating, ratingsCount: res.data!.ratingsCount } : item));
+      setMessage(res.data.message);
+    } else setMessage(res.message || 'Rating belum dapat disimpan.');
+  };
+
   const filtered = selectedCategory === 'Semua'
     ? partners
     : partners.filter(p => p.category === selectedCategory);
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-7 px-4 pb-12 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-7xl space-y-7 pb-12">
       <header className="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">Mitra sekitar</p>
@@ -109,9 +124,9 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
                 </div>
 
                 <div className="flex flex-1 flex-col p-5">
-                  <div className="flex items-start justify-between gap-3">
-                    <h2 className="min-w-0 text-lg font-semibold leading-snug tracking-tight text-slate-950">{partner.name}</h2>
-                    <span className="inline-flex shrink-0 items-center gap-1.5 pt-1 text-xs text-slate-500"><Clock3 size={14} />{partner.operatingHours}</span>
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 flex-1"><h2 className="text-lg font-semibold leading-snug tracking-tight text-slate-950">{partner.name}</h2>{partner.ratingsCount ? <span className="mt-1 inline-flex items-center gap-1 text-xs font-medium text-slate-600"><Star size={14} className="fill-amber-400 text-amber-400" />{Number(partner.averageRating || 0).toFixed(1)} <span className="font-normal text-slate-400">({partner.ratingsCount})</span></span> : <span className="mt-1 block text-xs text-slate-400">Belum ada rating</span>}</div>
+                    {partner.operatingHours && <span className="inline-flex w-fit items-center gap-1.5 rounded-md bg-slate-50 px-2 py-1 text-xs text-slate-500"><Clock3 size={14} />{partner.operatingHours}</span>}
                   </div>
                   <p className="mt-2 line-clamp-3 text-sm leading-6 text-slate-600">{partner.description}</p>
 
@@ -138,6 +153,8 @@ export const LocalDiscoveryPage: React.FC<{ onNavigate: (path: string) => void }
                   >
                     {isVisited ? <><CheckCircle2 size={17} /><span>Kunjungan tercatat</span></> : <><Store size={16} /><span>Catat kunjungan · +{partner.pointsReward ?? 0} poin</span></>}
                   </button>
+
+                  {isVisited && <div className="mt-3 border-t border-slate-100 pt-4"><p className="text-sm font-semibold text-slate-800">Bagaimana pengalamanmu?</p><div className="mt-2 flex items-center justify-between gap-2"><div className="flex items-center gap-1" role="radiogroup" aria-label={`Rating untuk ${partner.name}`}>{[1,2,3,4,5].map(star => <button key={star} type="button" disabled={ratingBusyId === partner.id} onClick={() => void handleRating(partner, star)} aria-label={`${star} bintang`} aria-pressed={(ratings[partner.id] || 0) === star} className="grid h-9 w-9 place-items-center rounded-lg text-slate-300 transition hover:bg-amber-50 hover:text-amber-400 disabled:opacity-50"><Star size={21} className={star <= (ratings[partner.id] || 0) ? 'fill-amber-400 text-amber-400' : ''} /></button>)}</div><span className="text-xs text-slate-500">{ratings[partner.id] ? `${ratings[partner.id]} dari 5` : 'Beri rating'}</span></div></div>}
                 </div>
               </article>
             );

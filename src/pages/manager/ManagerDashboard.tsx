@@ -35,6 +35,7 @@ export function ManagerDashboard({ onNavigate: _onNavigate }: { onNavigate: (p: 
   const [error, setError] = useState('');
   const [editor, setEditor] = useState<any>(undefined);
   const [destinations, setDestinations] = useState<any[]>([]);
+  const [tenants, setTenants] = useState<any[]>([]);
   const [selected, setSelected] = useState(user?.destinationId || '');
   const suffix = user?.role === 'super_admin' ? '?destinationId=' + encodeURIComponent(selected) : '';
   const resource = kind === 'overview' ? 'destination' : kind;
@@ -42,14 +43,16 @@ export function ManagerDashboard({ onNavigate: _onNavigate }: { onNavigate: (p: 
   const load = async () => {
     if (user?.role === 'super_admin' && !selected) { setLoading(false); return; }
     setLoading(true); setError('');
-    const [dashboardResult, contentResult] = await Promise.all([
+    const [dashboardResult, contentResult, tenantResult] = await Promise.all([
       ApiClient.request<any>('/manager/dashboard' + suffix),
-      ApiClient.request<any>('/manager/' + resource + suffix)
+      ApiClient.request<any>('/manager/' + resource + suffix),
+      resource === 'rewards' ? ApiClient.request<any>('/manager/tenants' + suffix) : Promise.resolve({ success: true, data: [] })
     ]);
     if (dashboardResult.success) setDashboard(dashboardResult.data);
     if (contentResult.success) {
       setData(resource === 'destination' ? [contentResult.data] : contentResult.data || []);
     } else { setError(contentResult.message || 'Gagal memuat.'); setData([]); }
+    if (tenantResult.success) setTenants(tenantResult.data || []);
     setLoading(false);
   };
 
@@ -90,7 +93,7 @@ export function ManagerDashboard({ onNavigate: _onNavigate }: { onNavigate: (p: 
       </div>
     </div>
 
-    {editor !== undefined && <ContentEditor key={kind + (editor.id || 'new')} kind={kind} record={editor} onClose={() => setEditor(undefined)} onSave={async payload => {
+    {editor !== undefined && <ContentEditor key={kind + (editor.id || 'new')} kind={kind} record={editor} tenants={tenants} onClose={() => setEditor(undefined)} onSave={async payload => {
       const endpoint = '/manager/' + kind + (kind !== 'destination' && editor.id ? '/' + editor.id : '') + suffix;
       const result = await ApiClient.request(endpoint, { method: kind === 'destination' || editor.id ? 'PUT' : 'POST', body: JSON.stringify(payload) });
       if (result.success) { setEditor(undefined); setMessage('Perubahan tersimpan.'); await load(); }

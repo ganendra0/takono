@@ -19,7 +19,8 @@ import {
   Info,
   Footprints,
   Layers,
-  X
+  X,
+  QrCode
 } from 'lucide-react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -27,9 +28,10 @@ const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, c
 
 interface SmartGuidePageProps {
   onNavigate: (path: string) => void;
+  onOpenScanModal: () => void;
 }
 
-export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) => {
+export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate, onOpenScanModal }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const pointMarkersRef = useRef<Record<string, L.Marker>>({});
@@ -363,7 +365,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
   };
 
   return (
-    <div className="smart-guide-page mx-auto w-full max-w-7xl space-y-6 px-4 pb-12 sm:px-6 lg:px-8">
+    <div className="smart-guide-page mx-auto w-full max-w-7xl space-y-6 pb-12">
       
       {/* 1. Header Bar: Title & Preference Trigger */}
       <div className="flex flex-col gap-4 border-b border-slate-200 pb-5 sm:flex-row sm:items-end sm:justify-between">
@@ -408,6 +410,15 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
       <div className="smart-guide-layout">
         <div className="smart-guide-map relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-100 shadow-sm">
           <div ref={mapContainerRef} className="h-full w-full" />
+
+        {/* QR is deliberately available from the guide itself on small screens. */}
+        <button
+          onClick={onOpenScanModal}
+          className="absolute left-4 top-4 z-20 inline-flex min-h-10 items-center gap-2 rounded-xl bg-blue-600 px-3 text-xs font-bold text-white shadow-lg transition-colors hover:bg-blue-700 sm:hidden"
+        >
+          <QrCode size={16} />
+          Scan QR Titik
+        </button>
 
         {/* Floating Quick Layer Toggles */}
         <div className="absolute right-4 top-4 z-20 flex flex-col gap-1 rounded-xl border border-slate-200 bg-white/95 p-1.5 text-xs shadow-lg backdrop-blur">
@@ -466,7 +477,7 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
+          <div className="pt-2 border-t border-slate-100 flex flex-col gap-2 sm:flex-row">
             <button
               onClick={() => focusPoint(nextPoint)}
               className="flex-1 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-98"
@@ -474,7 +485,12 @@ export const SmartGuidePage: React.FC<SmartGuidePageProps> = ({ onNavigate }) =>
               <Footprints className="w-4 h-4" />
               <span>Lihat di Peta</span>
             </button>
-
+            <button
+              onClick={onOpenScanModal}
+              className="flex-1 rounded-xl border border-blue-200 px-3 py-2.5 text-xs font-bold text-blue-700 transition-colors hover:bg-blue-50 sm:hidden"
+            >
+              <span className="inline-flex items-center justify-center gap-1.5"><QrCode size={15} />Scan QR Titik Ini</span>
+            </button>
           </div>
         </div>
       ) : (

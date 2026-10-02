@@ -37,4 +37,9 @@ class LocalDiscovery extends Model
     {
         return $this->belongsTo(Destination::class);
     }
+
+    public function ratings()
+    {
+        return $this->hasMany(LocalDiscoveryRating::class);
+    }
 }

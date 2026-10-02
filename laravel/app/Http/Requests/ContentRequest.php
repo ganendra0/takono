@@ -23,7 +23,7 @@ class ContentRequest extends FormRequest {
             'time'=>'required|string|max:255','location'=>'required|string|max:255','organizer'=>'nullable|string|max:255','points_reward'=>'required|integer|min:0|max:1000',
             'status'=>['required',Rule::in(['draft','published','upcoming','completed'])],
         ] : ($kind==='rewards' ? [
-            'name'=>$name,'description'=>$text,'image'=>$image,'partner'=>$name,'points_required'=>'required|integer|min:0|max:1000000',
+            'name'=>$name,'description'=>$text,'image'=>$image,'partner'=>$name,'tenant_user_id'=>'nullable|integer|exists:users,id','points_required'=>'required|integer|min:0|max:1000000',
             'quota'=>'required|integer|min:0|max:1000000','valid_from'=>'nullable|date_format:Y-m-d','valid_until'=>'required|date_format:Y-m-d|after_or_equal:valid_from',
             'status'=>['required',Rule::in(['active','inactive','expired','out_of_stock'])],'terms'=>'nullable|array','terms.*'=>'string|max:2000',
         ] : ($kind==='local-discoveries' ? [

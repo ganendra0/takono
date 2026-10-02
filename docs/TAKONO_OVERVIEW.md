@@ -19,6 +19,7 @@ Demo saat ini menggunakan dua destinasi Surabaya:
 | --- | --- | --- |
 | Traveler | Menjelajah destinasi | QR, Smart Guide, Explore Point, kuis, poin, reward, event, UMKM, Album Jelajah |
 | Destination Manager | Mengelola satu destinasi yang ditugaskan | Profil destinasi, Explore Point, urutan rute, event, reward, Local Discovery, QR konten |
+| Tenant | Menerima penukaran reward | Portal validasi QR voucher untuk reward tenant sendiri |
 | Government | Melihat intelligence aktivitas TAKONO | Dashboard agregat, tren, insight, report; tanpa perubahan konten |
 | Super Admin | Mengelola platform | Pengguna, role, status akun, assignment pengelola, destinasi, audit log |
 
@@ -33,6 +34,7 @@ Browser
   │   ├─ Halaman publik
   │   ├─ Aplikasi Traveler
   │   ├─ Portal Pengelola
+  │   ├─ Portal Tenant
   │   ├─ Portal Pemerintah
   │   └─ Portal Admin
   │
@@ -119,6 +121,7 @@ Mode ini dibuka setelah QR pintu masuk dipindai, bukan hanya karena traveler mem
 | `#/manager` | Destination Manager dan Super Admin |
 | `#/government` | Government dan Super Admin |
 | `#/admin` | Super Admin |
+| `#/tenant` | Tenant |
 
 ## 5. Alur traveler
 
@@ -152,7 +155,7 @@ Satu traveler dapat mempunyai perjalanan aktif/selesai untuk banyak destinasi. A
 
 - **Event**: Manager membuat event dan QR partisipasi. Traveler memindainya di lokasi event untuk merekam keikutsertaan satu kali.
 - **Local Discovery**: Traveler mengunjungi UMKM/tenant lokal; aktivitas dan poin hanya diberikan oleh backend.
-- **Reward**: Traveler menukar poin dengan voucher jika reward aktif, belum kedaluwarsa, kuota tersedia, dan saldo cukup.
+- **Reward**: Traveler menukar poin dengan voucher jika reward aktif, belum kedaluwarsa, kuota tersedia, saldo cukup, dan sudah ditugaskan ke tenant. Voucher tampil sebagai QR di profil traveler; tenant memindainya di `#/tenant`. Backend mengunci redemption lalu memastikan voucher masih aktif, belum kedaluwarsa, milik tenant tersebut, dan belum pernah digunakan sebelum menandainya `used`.
 
 ### E. Mengakhiri perjalanan dan Album Jelajah
 
@@ -186,7 +189,7 @@ Garis di peta adalah estimasi arah langsung, bukan navigasi jalan yang dijamin a
    - membuat/edit/hapus Explore Point beserta mini kuis dan QR;
    - mengatur urutan rute Explore Point;
    - membuat/edit/hapus event dan QR partisipasi;
-   - membuat/edit/hapus reward;
+   - membuat/edit/hapus reward serta menugaskannya ke akun tenant pada destinasi yang sama;
    - membuat/edit/hapus Local Discovery/UMKM.
 5. Konten published/active tampil pada traveler dari API yang sama.
 
@@ -206,14 +209,14 @@ Admin dapat melihat dan mengelola pengguna, status aktif/nonaktif, peran, assign
 
 | Tabel | Isi | Hubungan penting |
 | --- | --- | --- |
-| `users` | Akun, role, assignment manager, saldo poin | Manager dapat memiliki `destination_id` |
+| `users` | Akun, role, assignment Manager/Tenant, saldo poin | Manager dan Tenant dapat memiliki `destination_id` |
 | `destinations` | Identitas dan informasi destinasi | Memiliki banyak konten |
 | `explore_points` | Titik cerita fisik, QR token, materi, koordinat, urutan | Milik satu destinasi; dapat punya satu kuis |
 | `quizzes` | Pertanyaan dan jawaban kuis | Milik satu Explore Point |
 | `destination_events` | Agenda/event dan QR partisipasi | Milik satu destinasi |
 | `local_discoveries` | UMKM, kuliner, oleh-oleh, produk lokal | Milik satu destinasi |
-| `rewards` | Reward, poin syarat, kuota, masa berlaku | Milik satu destinasi |
-| `reward_redemptions` | Snapshot voucher yang ditukar traveler | Mengunci nilai reward saat redemption |
+| `rewards` | Reward, poin syarat, kuota, masa berlaku, tenant penerima | Milik satu destinasi dan satu tenant opsional |
+| `reward_redemptions` | Snapshot voucher yang ditukar traveler | Mengunci nilai reward; mencatat waktu dan tenant yang memvalidasi |
 | `point_transactions` | Buku kas kredit/debit poin | Sumber saldo poin traveler |
 | `user_activities` | Jejak aktivitas TAKONO | Dasar insight dan ringkasan perjalanan |
 | `user_destination_journeys` | Perjalanan per traveler per destinasi | `active` atau `completed`, tampil di Album |
@@ -262,7 +265,7 @@ cd laravel
 php artisan db:seed
 ```
 
-Seeder akun demo menggunakan `DemoAccountSeeder`; instruksi macOS/Linux dan Windows PowerShell ada di README utama. Seeder akun demo untuk lokal mengatur traveler, dua manager, government, dan super admin.
+Seeder akun demo menggunakan `DemoAccountSeeder`; instruksi macOS/Linux dan Windows PowerShell ada di README utama. Seeder akun demo untuk lokal mengatur traveler, dua manager, dua tenant, government, dan super admin.
 
 ## 13. Menjalankan dan memverifikasi
 
@@ -292,4 +295,3 @@ Frontend development tersedia pada `http://localhost:3000`; API Laravel pada `ht
 - Kamera browser biasanya memerlukan HTTPS saat dibuka dari perangkat lain melalui alamat IP; formulir tempel kode/link QR tetap tersedia sebagai fallback.
 - Google Sign-In harus dikonfigurasi dengan `GOOGLE_CLIENT_ID` dan origin yang benar.
 - Akun dan password demo hanya untuk lingkungan lokal/demo, bukan production.
-

@@ -8,13 +8,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 class AdminController extends Controller {
-    public function index() { return Api::ok(['users'=>User::all(),'destinations'=>Destination::all(),'roles'=>['traveler','destination_manager','government','super_admin'],'auditLogs'=>AuditLog::latest('id')->limit(200)->get(),'activityCount'=>UserActivity::count()]); }
+    public function index() { return Api::ok(['users'=>User::all(),'destinations'=>Destination::all(),'roles'=>['traveler','destination_manager','government','super_admin','tenant'],'auditLogs'=>AuditLog::latest('id')->limit(200)->get(),'activityCount'=>UserActivity::count()]); }
     public function save(AdminUserRequest $r,?string $id=null) {
         return DB::transaction(function()use($r,$id) {
             $v=$r->validated();
             abort_if($id===(string)$r->user()->id && ($v['role']!=='super_admin'||!$v['active']),422,'Admin tidak dapat menonaktifkan atau menurunkan akses akun sendiri.');
-            abort_if($v['role']==='destination_manager' && empty($v['destinationId']),422,'Pilih destinasi manager.');
-            $v['destination_id']=$v['role']==='destination_manager'?$v['destinationId']:null; unset($v['destinationId']);
+            abort_if(in_array($v['role'],['destination_manager','tenant'],true) && empty($v['destinationId']),422,'Pilih destinasi untuk akun ini.');
+            $v['destination_id']=in_array($v['role'],['destination_manager','tenant'],true)?$v['destinationId']:null; unset($v['destinationId']);
             if(empty($v['password'])) unset($v['password']);
             $u=$id?User::lockForUpdate()->findOrFail($id):new User;
             $u->fill($v);

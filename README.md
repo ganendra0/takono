@@ -6,6 +6,8 @@ Demo mencakup **Taman Bungkul** dan **Tugu Pahlawan, Surabaya**. Backend aktif b
 
 Untuk memahami arsitektur, semua peran, alur QR dan perjalanan traveler, data, keamanan, serta endpoint utama, baca [Dokumentasi TAKONO](docs/TAKONO_OVERVIEW.md).
 
+Untuk men-deploy ke VPS dengan Nginx, MySQL, HTTPS, backup, dan checklist go-live, baca [Panduan Deployment VPS](docs/DEPLOYMENT_VPS.md).
+
 ## Kebutuhan lokal
 
 - Node.js dan npm
@@ -102,6 +104,8 @@ TakonoDemo#2026
 | Traveler | `raka.traveler@takono.id` |
 | Pengelola Taman Bungkul | `manager@bungkul.id` |
 | Pengelola Tugu Pahlawan | `manager@tugupahlawan.id` |
+| Tenant Taman Bungkul | `tenant@bungkul.id` |
+| Tenant Tugu Pahlawan | `tenant@tugupahlawan.id` |
 | Pemerintah | `dinas@surabaya.go.id` |
 | Super Admin | `admin@takono.id` |
 
@@ -112,7 +116,7 @@ Email: manager@bungkul.id
 Password: TakonoDemo#2026
 ```
 
-Untuk membuat atau mereset **tujuh akun demo** pada database lokal lain, jalankan salah satu perintah berikut dari folder `laravel/`.
+Untuk membuat atau mereset **sembilan akun demo** pada database lokal lain, jalankan salah satu perintah berikut dari folder `laravel/`.
 
 macOS / Linux:
 
@@ -136,7 +140,8 @@ Perintah tersebut:
 
 - membuat akun jika belum ada;
 - memperbarui role dan password akun demo jika sudah ada;
-- menetapkan Manager ke Taman Bungkul dan Tugu Pahlawan;
+- menetapkan Manager dan Tenant ke Taman Bungkul dan Tugu Pahlawan;
+- menugaskan reward demo pada tenant destinasi yang sesuai;
 - mempertahankan saldo dan histori aktivitas akun yang sudah ada;
 - mencabut token login lama setelah password direset.
 
@@ -151,12 +156,13 @@ cd laravel
 php artisan takono:admin admin@example.com --name="Admin TAKONO"
 ```
 
-Setelah login, Admin dapat membuat akun Pemerintah atau Pengelola dan menetapkan destinasi Manager.
+Setelah login, Admin dapat membuat akun Pemerintah, Pengelola, atau Tenant dan menetapkan destinasi untuk Pengelola/Tenant.
 
 ## Role dan akses
 
 - **Traveler:** destinasi, Smart Guide, Explore Point, QR, Quiz, Points, Reward, Event, Local Discovery, dan Album.
 - **Manager:** hanya mengelola destinasi yang ditugaskan kepadanya beserta Explore Point, Event, Reward, dan Local Discovery.
+- **Tenant:** memindai QR voucher traveler dan memvalidasi penukaran satu kali untuk reward yang ditugaskan kepadanya.
 - **Government:** dashboard aktivitas pengguna TAKONO dan laporan agregat, tanpa akses mengubah konten.
 - **Super Admin:** pengguna, role, assignment Manager, destinasi, dan audit log.
 

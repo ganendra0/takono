@@ -65,7 +65,7 @@ export const RewardsCatalogPage: React.FC<{ onNavigate: (path: string) => void }
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-7 px-4 pb-12 sm:px-6 lg:px-8">
+    <div className="mx-auto w-full max-w-7xl space-y-7 pb-12">
       <header className="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-end sm:justify-between">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">Apresiasi perjalanan</p>

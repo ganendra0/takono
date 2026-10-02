@@ -1,6 +1,6 @@
 <?php
 use Illuminate\Support\Facades\{Route,Gate};
-use App\Http\Controllers\Api\{AuthController,DestinationController,ExplorePointController,SmartGuideController,EventController,LocalDiscoveryController,RewardController,ManagerController,GovernmentController,AdminController};
+use App\Http\Controllers\Api\{AuthController,DestinationController,ExplorePointController,SmartGuideController,EventController,LocalDiscoveryController,RewardController,ManagerController,GovernmentController,AdminController,TenantController};
 Gate::define('manage-destination',[\App\Policies\DestinationPolicy::class,'manage']);
 Route::middleware('throttle:10,1')->group(function() {
     Route::get('auth/google/config',[\App\Http\Controllers\Api\GoogleAuthController::class,'configuration']);
@@ -14,10 +14,11 @@ Route::get('scan/{code}',[DestinationController::class,'scanDestinationQR']);
 Route::get('events',[EventController::class,'index']);
 Route::get('rewards',[RewardController::class,'index']);
 Route::get('local-discoveries',[LocalDiscoveryController::class,'index']);
-Route::middleware(['auth:sanctum','role:traveler,destination_manager,government,super_admin'])->group(function() {
+Route::middleware(['auth:sanctum','role:traveler,destination_manager,government,super_admin,tenant'])->group(function() {
     Route::get('auth/me',[AuthController::class,'me']); Route::patch('auth/me',[AuthController::class,'updateProfile']); Route::post('auth/logout',[AuthController::class,'logout']);
     Route::middleware('role:traveler')->group(function() {
         Route::get('me/points',[AuthController::class,'points']); Route::get('me/activities',[AuthController::class,'activities']); Route::get('me/album',[AuthController::class,'album']); Route::get('me/album/{idOrSlug}',[AuthController::class,'albumDestination']);
+        Route::get('me/local-discovery-ratings',[LocalDiscoveryController::class,'myRatings']);
         Route::get('smart-guide/recommendations',[SmartGuideController::class,'recommendations']);
         Route::get('explore-points/{idOrSlug}',[ExplorePointController::class,'show']);
         Route::post('scan/{code}/journey',[DestinationController::class,'startJourney']);
@@ -26,12 +27,14 @@ Route::middleware(['auth:sanctum','role:traveler,destination_manager,government,
         Route::post('explore-points/{id}/quiz/submit',[ExplorePointController::class,'submitQuiz'])->middleware('throttle:30,1');
         Route::post('scan/event/{token}',[EventController::class,'scan'])->middleware('throttle:30,1');
         Route::post('local-discoveries/{id}/visit',[LocalDiscoveryController::class,'visit']);
+        Route::post('local-discoveries/{id}/rating',[LocalDiscoveryController::class,'rate']);
         Route::post('rewards/{id}/redeem',[RewardController::class,'redeem'])->middleware('throttle:30,1');
     });
     Route::prefix('manager')->middleware('role:destination_manager,super_admin')->group(function() {
         Route::get('dashboard',[ManagerController::class,'dashboard']);
         Route::get('destination',[ManagerController::class,'profile']);
         Route::put('destination',[ManagerController::class,'updateDestination']);
+        Route::get('tenants',[ManagerController::class,'tenants']);
         Route::put('explore-points/route-order',[ManagerController::class,'reorderExplorePoints']);
         Route::get('{kind}',[ManagerController::class,'index']);
         Route::post('{kind}',[ManagerController::class,'store']);
@@ -45,5 +48,9 @@ Route::middleware(['auth:sanctum','role:traveler,destination_manager,government,
         Route::get('dashboard',[AdminController::class,'index']);
         Route::post('users',[AdminController::class,'save']); Route::put('users/{id}',[AdminController::class,'save']);
         Route::post('destinations',[AdminController::class,'destination']);
+    });
+    Route::prefix('tenant')->middleware('role:tenant')->group(function() {
+        Route::get('dashboard',[TenantController::class,'dashboard']);
+        Route::post('vouchers/validate',[TenantController::class,'validateVoucher'])->middleware('throttle:30,1');
     });
 });

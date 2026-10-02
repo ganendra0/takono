@@ -38,6 +38,7 @@ import { ProfilePage } from './pages/traveler/ProfilePage.js';
 import { ManagerDashboard } from './pages/manager/ManagerDashboard.js';
 import { GovernmentDashboard } from './pages/government/GovernmentDashboard.js';
 import { AdminDashboard } from './pages/admin/AdminDashboard.js';
+import { TenantDashboard } from './pages/tenant/TenantDashboard.js';
 
 const AppContent: React.FC = () => {
   const { role, user, isLoading } = useAuth();
@@ -55,6 +56,8 @@ const AppContent: React.FC = () => {
   const [isScanModalOpen, setIsScanModalOpen] = useState(false);
   const [preselectedScanPoint, setPreselectedScanPoint] = useState<ExplorePoint | null>(null);
   const [autoStartScanCamera, setAutoStartScanCamera] = useState(false);
+  const [scanMode, setScanMode] = useState<'traveler' | 'voucher'>('traveler');
+  const [tenantVoucherCode, setTenantVoucherCode] = useState<string | null>(null);
   const scopedDestinationSlug = travelerDestinationSlug(currentPath);
 
   // Sync hash routing
@@ -114,6 +117,14 @@ const AppContent: React.FC = () => {
     }
     setPreselectedScanPoint(point || null);
     setAutoStartScanCamera(autoStartCamera);
+    setScanMode('traveler');
+    setIsScanModalOpen(true);
+  };
+
+  const handleOpenTenantVoucherScanner = () => {
+    setPreselectedScanPoint(null);
+    setAutoStartScanCamera(true);
+    setScanMode('voucher');
     setIsScanModalOpen(true);
   };
 
@@ -141,12 +152,12 @@ const AppContent: React.FC = () => {
   // ROUTE RESOLVER
   // ----------------------------------------------------
   const renderRoute = () => {
-    const privatePath = /^\/(app|manager|government|admin)(\/|$)/.test(currentPath);
+    const privatePath = /^\/(app|manager|government|admin|tenant)(\/|$)/.test(currentPath);
     const scanPath = currentPath === '/scan' || currentPath.startsWith('/scan/');
     if (isLoading && privatePath) return <p className="p-12 text-center">Memuat sesi…</p>;
     if ((!user && (privatePath || scanPath)) || currentPath === '/login') return <AuthPage onNavigate={navigate} returnTo={currentPath === '/login' ? '/app' : currentPath}/>;
-    const home = role === 'destination_manager' ? '/manager' : role === 'government' ? '/government' : role === 'super_admin' ? '/admin' : '/app';
-    if (privatePath && ((currentPath.startsWith('/manager') && !['destination_manager','super_admin'].includes(role)) || (currentPath.startsWith('/government') && !['government','super_admin'].includes(role)) || (currentPath.startsWith('/admin') && role !== 'super_admin') || (currentPath.startsWith('/app') && role !== 'traveler'))) {
+    const home = role === 'destination_manager' ? '/manager' : role === 'tenant' ? '/tenant' : role === 'government' ? '/government' : role === 'super_admin' ? '/admin' : '/app';
+    if (privatePath && ((currentPath.startsWith('/manager') && !['destination_manager','super_admin'].includes(role)) || (currentPath.startsWith('/tenant') && role !== 'tenant') || (currentPath.startsWith('/government') && !['government','super_admin'].includes(role)) || (currentPath.startsWith('/admin') && role !== 'super_admin') || (currentPath.startsWith('/app') && role !== 'traveler'))) {
       return <div className="p-12 text-center space-y-4"><p>Halaman ini tidak tersedia untuk peran akun Anda.</p><button className="text-blue-600" onClick={()=>navigate(home)}>Buka dashboard saya</button></div>;
     }
     // 1. Scan Destination Landing (/scan/:code)
@@ -172,7 +183,7 @@ const AppContent: React.FC = () => {
       const prefix = `/app/destination/${encodeURIComponent(scopedDestinationSlug)}`;
       const travelerPath = currentPath.slice(prefix.length) || '/';
       let subView: React.ReactNode = <TravelerHome destinationSlug={scopedDestinationSlug} onNavigate={destinationNavigate} onOpenScanModal={() => handleOpenScan()} />;
-      if (travelerPath === '/smart-guide') subView = <SmartGuidePage onNavigate={destinationNavigate} />;
+      if (travelerPath === '/smart-guide') subView = <SmartGuidePage onNavigate={destinationNavigate} onOpenScanModal={() => handleOpenScan()} />;
       else if (travelerPath === '/explore') subView = <DestinationExplorePage onOpenScanModal={() => handleOpenScan()} />;
       else if (travelerPath.startsWith('/explore/')) subView = <ExplorePointDetailPage slug={travelerPath.slice('/explore/'.length)} onNavigate={destinationNavigate} />;
       else if (travelerPath === '/events') subView = <EventsPage onNavigate={destinationNavigate} onOpenScanModal={() => handleOpenScan()} />;
@@ -186,12 +197,17 @@ const AppContent: React.FC = () => {
       return <Workspace onNavigate={navigate}><ManagerDashboard onNavigate={navigate} /></Workspace>;
     }
 
-    // 4. Government Intelligence Portal (/government)
+    // 4. Tenant voucher verification portal (/tenant)
+    if (currentPath.startsWith('/tenant')) {
+      return <Workspace onNavigate={navigate}><TenantDashboard onOpenVoucherScanner={handleOpenTenantVoucherScanner} scannedCode={tenantVoucherCode} onScannedCodeHandled={() => setTenantVoucherCode(null)} /></Workspace>;
+    }
+
+    // 5. Government Intelligence Portal (/government)
     if (currentPath.startsWith('/government')) {
       return <Workspace onNavigate={navigate}><GovernmentDashboard onNavigate={navigate} /></Workspace>;
     }
 
-    // 5. Super Admin Platform (/admin)
+    // 6. Super Admin Platform (/admin)
     if (currentPath.startsWith('/admin')) {
       return <Workspace onNavigate={navigate}><AdminDashboard onNavigate={navigate} /></Workspace>;
     }
@@ -269,10 +285,12 @@ const AppContent: React.FC = () => {
       {/* Global QR Code Scan Modal */}
       <ScanModal
         isOpen={isScanModalOpen}
-        onClose={() => setIsScanModalOpen(false)}
+        onClose={() => { setIsScanModalOpen(false); setScanMode('traveler'); }}
         onNavigate={navigate}
         preselectedPoint={preselectedScanPoint}
         autoStartCamera={autoStartScanCamera}
+        mode={scanMode}
+        onVoucherScanned={code => setTenantVoucherCode(code)}
       />
     </div>
   );

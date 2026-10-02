@@ -2,6 +2,7 @@ import {copyText} from '../../lib/clipboard';
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext.js';
 import { ApiClient } from '../../lib/api.js';
+import { QRCode } from '../../components/QRCode.js';
 import { PointTransaction, RewardRedemption } from '../../types/index.js';
 import { 
   Clock, 
@@ -9,8 +10,10 @@ import {
   ArrowDownLeft, 
   Ticket, 
   Copy, 
-  Check, 
-  LogOut
+  Check,
+  LogOut,
+  QrCode,
+  X
 } from 'lucide-react';
 
 export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ onNavigate }) => {
@@ -20,6 +23,7 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const [voucherQr, setVoucherQr] = useState<RewardRedemption | null>(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -122,10 +126,7 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
                   <div className="mt-1 text-xs text-slate-400">Berlaku s/d: {r.expiresAt?.substring(0,10) || 'Lihat ketentuan voucher'}</div>
                 </div>
 
-                <button
-                  onClick={() => handleCopy(r.voucherCode || r.redemptionCode)}
-                  className="inline-flex min-h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50"
-                >
+                <div className="flex shrink-0 flex-col gap-2"><button disabled={r.status !== 'active'} onClick={() => setVoucherQr(r)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-blue-700 px-3 text-xs font-semibold text-white transition-colors hover:bg-blue-800 disabled:cursor-not-allowed disabled:bg-slate-200"><QrCode className="h-3.5 w-3.5" /><span>QR</span></button><button onClick={() => handleCopy(r.voucherCode || r.redemptionCode)} className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-50">
                   {copiedCode === (r.voucherCode || r.redemptionCode) ? (
                     <>
                       <Check className="w-3.5 h-3.5 text-blue-600" />
@@ -137,7 +138,7 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
                       <span>Salin</span>
                     </>
                   )}
-                </button>
+                </button></div>
               </div>
             ))}
           </div>
@@ -203,6 +204,8 @@ export const ProfilePage: React.FC<{ onNavigate: (path: string) => void }> = ({ 
           <span>Keluar Sesi</span>
         </button>
       </div>
+
+      {voucherQr && <div className="fixed inset-0 z-[1000] flex items-end bg-slate-950/55 p-0 sm:items-center sm:justify-center sm:p-4" role="dialog" aria-modal="true" aria-label="QR voucher"><section className="w-full max-w-sm rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-3xl"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-semibold tracking-wide text-blue-700">VOUCHER TAKONO</p><h2 className="mt-1 text-lg font-semibold text-slate-950">{voucherQr.rewardTitle || voucherQr.rewardName}</h2><p className="mt-1 text-sm text-slate-500">Tunjukkan QR ini kepada tenant untuk dipindai.</p></div><button onClick={() => setVoucherQr(null)} aria-label="Tutup" className="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-slate-600"><X size={17} /></button></div><div className="mt-5 flex justify-center"><QRCode value={`TAKONO:VOUCHER:${voucherQr.voucherCode || voucherQr.redemptionCode}`} label={voucherQr.rewardTitle || voucherQr.rewardName} /></div><p className="mt-4 text-center text-xs text-slate-500">Berlaku hingga {voucherQr.expiresAt?.substring(0,10) || 'sesuai ketentuan voucher'}.</p></section></div>}
 
     </div>
   );

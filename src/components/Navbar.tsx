@@ -134,6 +134,13 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
             >
               <span>Tourism Intelligence</span>
             </button>
+          ) : role === 'tenant' ? (
+            <button
+              onClick={() => handleNav('/tenant')}
+              className="hidden sm:flex items-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-700 rounded-xl hover:bg-blue-800 transition-all shadow-sm whitespace-nowrap cursor-pointer"
+            >
+              <span>Portal Tenant</span>
+            </button>
           ) : (
             <button
               onClick={() => handleNav('/admin')}
@@ -160,7 +167,7 @@ export const Navbar: React.FC<NavbarProps> = ({ currentPath, onNavigate, onOpenS
       {/* Mobile Menu Dropdown */}
       {mobileMenuOpen && (
         <div className="xl:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-2 shadow-lg animate-in slide-in-from-top-2">
-          <button onClick={()=>handleNav(!user?'/login':role==='traveler'?'/app':role==='destination_manager'?'/manager':role==='government'?'/government':'/admin')} className="w-full p-3 text-left rounded-xl bg-blue-600 text-white font-semibold">{user?'Buka aplikasi':'Masuk Portal'}</button>
+          <button onClick={()=>handleNav(!user?'/login':role==='traveler'?'/app':role==='destination_manager'?'/manager':role==='tenant'?'/tenant':role==='government'?'/government':'/admin')} className="w-full p-3 text-left rounded-xl bg-blue-600 text-white font-semibold">{user?'Buka aplikasi':'Masuk Portal'}</button>
           <button
             onClick={() => handleNav('/')}
             className="w-full text-left px-3 py-2 text-sm font-medium rounded-lg text-slate-700 hover:bg-slate-50 cursor-pointer"

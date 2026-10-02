@@ -13,12 +13,14 @@ class RewardRedemption extends Model
         'request_id',
         'terms',
         'user_id',
+        'verified_by_user_id',
         'reward_id',
         'reward_name',
         'partner',
         'redemption_code',
         'points_spent',
         'claimed_at',
+        'used_at',
         'expires_at',
         'status',
     ];
@@ -27,6 +29,7 @@ class RewardRedemption extends Model
         'terms' => 'array',
         'points_spent' => 'integer',
         'claimed_at' => 'datetime',
+        'used_at' => 'datetime',
         'expires_at' => 'datetime',
     ];
 
@@ -38,5 +41,10 @@ class RewardRedemption extends Model
     public function reward()
     {
         return $this->belongsTo(Reward::class);
+    }
+
+    public function verifier()
+    {
+        return $this->belongsTo(User::class, 'verified_by_user_id');
     }
 }

@@ -11,6 +11,7 @@ class Reward extends Model
 
     protected $fillable = [
         'destination_id',
+        'tenant_user_id',
         'name',
         'category',
         'partner',
@@ -42,5 +43,10 @@ class Reward extends Model
     public function redemptions()
     {
         return $this->hasMany(RewardRedemption::class);
+    }
+
+    public function tenant()
+    {
+        return $this->belongsTo(User::class, 'tenant_user_id');
     }
 }

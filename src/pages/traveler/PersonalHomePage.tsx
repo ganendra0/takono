@@ -28,7 +28,7 @@ export const PersonalHomePage: React.FC<{
   const lastJourney = album?.journeys?.[0];
 
   return (
-    <div className="mx-auto max-w-7xl px-4 pb-16 pt-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-7xl pb-16 pt-4">
 
       {/* =========================================================
           INTRO

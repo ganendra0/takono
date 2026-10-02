@@ -269,6 +269,27 @@ export class ApiClient {
     );
   }
 
+  static async rateLocalDiscovery(partnerId: string, rating: number, comment?: string) {
+    return this.request<{ rating: number; averageRating: number; ratingsCount: number; message: string }>(
+      `/local-discoveries/${partnerId}/rating`, { method: 'POST', body: JSON.stringify({ rating, comment }) }
+    );
+  }
+
+  static async getMyLocalDiscoveryRatings(destinationId: string) {
+    return this.request<{ localDiscoveryId: string; rating: number }[]>(`/me/local-discovery-ratings?destinationId=${encodeURIComponent(destinationId)}`);
+  }
+
+  // --- Tenant ---
+  static async getTenantDashboard() {
+    return this.request<{ tenant: User; rewards: Reward[]; redemptions: RewardRedemption[] }>('/tenant/dashboard');
+  }
+
+  static async validateTenantVoucher(code: string) {
+    return this.request<{ redemption: RewardRedemption; message: string }>('/tenant/vouchers/validate', {
+      method: 'POST', body: JSON.stringify({ code })
+    });
+  }
+
   // --- Manager ---
   static async getManagerDashboard() {
     return this.request<{ destination: Destination; stats: TourismStats; terminologyDisclaimer: string }>(

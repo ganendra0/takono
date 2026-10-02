@@ -2,7 +2,7 @@
 namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ContentRequest;
-use App\Models\{Destination,ExplorePoint,DestinationEvent,Reward,LocalDiscovery,AuditLog};
+use App\Models\{Destination,ExplorePoint,DestinationEvent,Reward,LocalDiscovery,AuditLog,User};
 use App\Services\InsightService;
 use App\Support\Api;
 use Illuminate\Http\Request;
@@ -21,6 +21,7 @@ class ManagerController extends Controller {
     private function audit(Request $r,string $action,$model): void { AuditLog::create(['user_id'=>$r->user()->id,'action'=>$action,'resource'=>$model->getTable(),'resource_id'=>(string)$model->id,'changes'=>array_keys($model->getChanges())]); }
     public function dashboard(Request $r) { $d=$this->destination($r); return Api::ok(['destination'=>$d,'stats'=>InsightService::stats($d->id),'terminologyDisclaimer'=>'Aktivitas Pengguna TAKONO, bukan total pengunjung fisik destinasi.']); }
     public function profile(Request $r) { return Api::ok($this->destination($r)); }
+    public function tenants(Request $r) { $d=$this->destination($r); return Api::ok(User::where('role','tenant')->where('destination_id',$d->id)->where('active',true)->get(['id','name','email','institution'])); }
     public function updateDestination(ContentRequest $r) { return DB::transaction(function()use($r){ $d=$this->destination($r); $d->update($r->validated()); $this->audit($r,'update',$d); return Api::ok($d); }); }
     public function index(Request $r,string $kind) {
         $d=$this->destination($r); $q=$this->model($kind)::where('destination_id',$d->id);
@@ -30,7 +31,7 @@ class ManagerController extends Controller {
     }
     public function store(ContentRequest $r,string $kind) {
         return DB::transaction(function()use($r,$kind) {
-            $d=$this->destination($r); $v=$r->validated(); $quiz=$v['quiz']??null; unset($v['quiz']);
+            $d=$this->destination($r); $v=$r->validated(); $quiz=$v['quiz']??null; unset($v['quiz']); $this->validateRewardTenant($kind,$v,$d);
             $v['destination_id']=$d->id;
             if(in_array($kind,['events','explore-points'])) $v['slug']=Str::slug($v['name']??$v['title']).'-'.Str::lower(Str::random(8));
             if($kind==='events') $v['qr_token']=Str::random(48);
@@ -56,7 +57,7 @@ class ManagerController extends Controller {
     public function update(ContentRequest $r,string $kind,string $id) {
         return DB::transaction(function()use($r,$kind,$id) {
             $m=$this->model($kind)::lockForUpdate()->findOrFail($id); Gate::authorize('manage-destination',$m->destination);
-            $v=$r->validated(); $hasQuiz=array_key_exists('quiz',$v); $quiz=$v['quiz']??null; unset($v['quiz']);
+            $v=$r->validated(); $hasQuiz=array_key_exists('quiz',$v); $quiz=$v['quiz']??null; unset($v['quiz']); $this->validateRewardTenant($kind,$v,$m->destination);
             if($kind==='rewards') { abort_if($v['quota']<$m->claimed_count,422,'Kuota tidak boleh lebih kecil dari jumlah penukaran.'); $v['stock']=$v['quota']-$m->claimed_count; }
             $m->update($v);
             if($kind==='explore-points' && $hasQuiz) {
@@ -69,5 +70,9 @@ class ManagerController extends Controller {
     }
     public function destroy(Request $r,string $kind,string $id) {
         return DB::transaction(function()use($r,$kind,$id) { $m=$this->model($kind)::lockForUpdate()->findOrFail($id); Gate::authorize('manage-destination',$m->destination); $m->delete(); $this->audit($r,'delete',$m); return Api::ok(['message'=>'Konten dihapus. Riwayat aktivitas tetap tersimpan.']); });
+    }
+    private function validateRewardTenant(string $kind, array $values, Destination $destination): void {
+        if ($kind !== 'rewards' || empty($values['tenant_user_id'])) return;
+        abort_unless(User::whereKey($values['tenant_user_id'])->where('role','tenant')->where('destination_id',$destination->id)->where('active',true)->exists(),422,'Pilih akun tenant aktif dari destinasi ini.');
     }
 }

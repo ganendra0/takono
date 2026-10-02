@@ -53,10 +53,10 @@ export const TravelerLayout: React.FC<TravelerLayoutProps> = ({
   return (
     <div className="traveler-shell min-h-screen bg-[#f8fafc] text-slate-800 font-sans flex flex-col items-center">
       {/* Container utama disamakan lebarnya untuk seluruh halaman */}
-      <div className="traveler-frame relative mx-auto flex min-h-screen w-full max-w-none flex-col px-4 sm:px-6 pb-24 lg:pb-12">
+      <div className="traveler-frame relative mx-auto flex min-h-screen w-full max-w-none flex-col px-4 pb-24 sm:px-6 lg:pb-12">
         
         {/* Simple brand header */}
-        <header className="sticky top-0 z-50 -ml-4 w-screen border-b border-slate-100 bg-white shadow-[0_1px_8px_rgba(15,23,42,0.04)] sm:-ml-6">
+        <header className="sticky top-0 z-50 -mx-4 border-b border-slate-100 bg-white shadow-[0_1px_8px_rgba(15,23,42,0.04)] sm:-mx-6">
           <div className="mx-auto flex min-h-20 w-full max-w-6xl items-center justify-between gap-5 px-4 lg:h-20">
             <button
               onClick={() => onSelectTab('/')}

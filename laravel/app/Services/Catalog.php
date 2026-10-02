@@ -6,7 +6,7 @@ class Catalog {
     public static function points() { return ExplorePoint::with('quiz')->where('status','published')->whereHas('destination',fn($q)=>$q->where('status','published'))->orderBy('route_order')->orderBy('id'); }
     public static function events() { return DestinationEvent::whereIn('status',['published','upcoming'])->where('end_date','>=',today()->toDateString())->whereHas('destination',fn($q)=>$q->where('status','published')); }
     public static function rewards() { return Reward::where('status','active')->where('valid_until','>=',today()->toDateString())->where(fn($q)=>$q->whereNull('valid_from')->orWhere('valid_from','<=',today()))->whereColumn('claimed_count','<','quota')->whereHas('destination',fn($q)=>$q->where('status','published')); }
-    public static function local() { return LocalDiscovery::where('status','published')->whereHas('destination',fn($q)=>$q->where('status','published')); }
+    public static function local() { return LocalDiscovery::withAvg('ratings','rating')->withCount('ratings')->where('status','published')->whereHas('destination',fn($q)=>$q->where('status','published')); }
     public static function progress($userId,$destination) {
         $points = self::points()->where('destination_id',$destination->id)->pluck('id');
         $done = \App\Models\UserActivity::where('user_id',$userId)->where('destination_id',$destination->id)->where('type','explore_point_discovered')->whereIn('reference_id',$points)->distinct()->pluck('reference_id')->map(fn($v)=>(string)$v);

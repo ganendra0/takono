@@ -21,7 +21,7 @@ class PlatformTest extends TestCase {
         $this->getJson('/api/auth/me',$h)->assertOk()->assertJsonPath('data.role','traveler');
         $this->patchJson('/api/auth/me',['name'=>'Traveler Baru'], $h)->assertOk()->assertJsonPath('data.name','Traveler Baru');
         $this->patchJson('/api/auth/me',['name'=>'Traveler Baru','currentPassword'=>'salah','password'=>'Password-baru-123','password_confirmation'=>'Password-baru-123'], $h)->assertUnprocessable();
-        foreach(['/api/manager/dashboard','/api/government/dashboard','/api/admin/dashboard'] as $path) $this->getJson($path,$h)->assertForbidden();
+        foreach(['/api/manager/dashboard','/api/tenant/dashboard','/api/government/dashboard','/api/admin/dashboard'] as $path) $this->getJson($path,$h)->assertForbidden();
         $this->postJson('/api/auth/register',['name'=>'Fake admin','email'=>Str::uuid().'@example.test','password'=>'Password-test-123','role'=>'super_admin'])->assertUnprocessable();
         $this->postJson('/api/auth/logout',[],$h)->assertOk();
         // Clear cached guard user before validating a revoked bearer token.
@@ -30,7 +30,7 @@ class PlatformTest extends TestCase {
         $this->postJson('/api/auth/switch-demo-role',['role'=>'super_admin'])->assertNotFound();
     }
     public function test_manager_traveler_roundtrip_and_points(): void {
-        $d=$this->destination();$manager=$this->user('destination_manager',$d);$mh=$this->token($manager);
+        $d=$this->destination();$manager=$this->user('destination_manager',$d);$tenant=$this->user('tenant',$d);$otherTenant=$this->user('tenant',$d);$mh=$this->token($manager);
         $p=$this->postJson('/api/manager/explore-points',$this->pointData(),$mh)->assertCreated()->json('data');
         $this->putJson('/api/manager/explore-points/route-order',['pointIds'=>[$p['id']]],$mh)->assertOk()->assertJsonPath('data.0.routeOrder',1);
         $user=$this->user();$h=$this->token($user);
@@ -65,12 +65,22 @@ class PlatformTest extends TestCase {
         $local=['name'=>'Business','description'=>'Test','category'=>'Kuliner','address'=>'Street','latitude'=>-7.2,'longitude'=>112.7,'pointsReward'=>0,'status'=>'published'];
         $l=$this->postJson('/api/manager/local-discoveries',$local,$mh)->assertCreated()->json('data');
         $this->postJson('/api/local-discoveries/'.$l['id'].'/visit',[],$h)->assertOk()->assertJsonPath('data.pointsAwarded',0);
-        $reward=['name'=>'Voucher','description'=>'Test','partner'=>'Partner','pointsRequired'=>20,'quota'=>1,'validFrom'=>today()->toDateString(),'validUntil'=>today()->addDay()->toDateString(),'status'=>'active'];
+        $this->postJson('/api/local-discoveries/'.$l['id'].'/rating',['rating'=>5],$h)->assertOk()
+            ->assertJsonPath('data.averageRating',5)->assertJsonPath('data.ratingsCount',1);
+        $this->getJson('/api/me/local-discovery-ratings?destinationId='.$d->id,$h)->assertOk()
+            ->assertJsonPath('data.0.localDiscoveryId',(string)$l['id'])->assertJsonPath('data.0.rating',5);
+        $reward=['name'=>'Voucher','description'=>'Test','partner'=>'Partner','tenantUserId'=>$tenant->id,'pointsRequired'=>20,'quota'=>1,'validFrom'=>today()->toDateString(),'validUntil'=>today()->addDay()->toDateString(),'status'=>'active'];
         $rw=$this->postJson('/api/manager/rewards',$reward,$mh)->assertCreated()->json('data');
         $key=(string)Str::uuid();
         $redeem=$this->postJson('/api/rewards/'.$rw['id'].'/redeem',['requestId'=>$key],$h)->assertOk()->assertJsonPath('data.remainingBalance',40);
         $this->postJson('/api/rewards/'.$rw['id'].'/redeem',['requestId'=>$key],$h)->assertOk()->assertJsonPath('data.redemption.id',$redeem->json('data.redemption.id'));
         $this->postJson('/api/rewards/'.$rw['id'].'/redeem',['requestId'=>(string)Str::uuid()],$h)->assertUnprocessable();
+        $tenantHeader=$this->token($tenant);
+        $this->postJson('/api/tenant/vouchers/validate',['code'=>$redeem->json('data.redemption.redemptionCode')],$this->token($otherTenant))->assertForbidden();
+        $this->getJson('/api/tenant/dashboard',$tenantHeader)->assertOk()->assertJsonPath('data.redemptions.0.id',$redeem->json('data.redemption.id'));
+        $this->postJson('/api/tenant/vouchers/validate',['code'=>$redeem->json('data.redemption.redemptionCode')],$tenantHeader)->assertOk()
+            ->assertJsonPath('data.redemption.status','used');
+        $this->postJson('/api/tenant/vouchers/validate',['code'=>$redeem->json('data.redemption.redemptionCode')],$tenantHeader)->assertUnprocessable();
         $this->putJson('/api/manager/rewards/'.$rw['id'],array_merge($reward,['name'=>'Edited','status'=>'inactive']),$mh)->assertOk();
         $this->deleteJson('/api/manager/rewards/'.$rw['id'],[],$mh)->assertOk();
         $this->assertEquals('Voucher',RewardRedemption::find($redeem->json('data.redemption.id'))->reward_name);
@@ -103,11 +113,11 @@ class PlatformTest extends TestCase {
         $this->getJson('/api/auth/me',$h)->assertUnauthorized();
     }
     public function test_all_content_ownership_and_destination_publishing(): void {
-        $a=$this->destination();$b=$this->destination();
+        $a=$this->destination();$b=$this->destination();$tenantB=$this->user('tenant',$b);
         $ma=$this->token($this->user('destination_manager',$a));$mb=$this->token($this->user('destination_manager',$b));
         $cases=[
             'events'=>['title'=>'Test','description'=>'Test','startDate'=>today()->toDateString(),'endDate'=>today()->addDay()->toDateString(),'time'=>'10:00','location'=>'Gate','pointsReward'=>0,'status'=>'published'],
-            'rewards'=>['name'=>'Test','description'=>'Test','partner'=>'Test','quota'=>1,'pointsRequired'=>0,'validUntil'=>today()->addDay()->toDateString(),'status'=>'active'],
+            'rewards'=>['name'=>'Test','description'=>'Test','partner'=>'Test','tenantUserId'=>$tenantB->id,'quota'=>1,'pointsRequired'=>0,'validUntil'=>today()->addDay()->toDateString(),'status'=>'active'],
             'local-discoveries'=>['name'=>'Test','description'=>'Test','category'=>'Kuliner','address'=>'Gate','latitude'=>0,'longitude'=>0,'pointsReward'=>0,'status'=>'published'],
         ];
         foreach($cases as $kind=>$body) {
@@ -144,12 +154,12 @@ class PlatformTest extends TestCase {
         $this->postJson('/api/scan/explore/'.$firstPoint['secureToken'],[],$header)->assertUnprocessable();
     }
     public function test_reward_and_legacy_point_guards(): void {
-        $d=$this->destination();$mh=$this->token($this->user('destination_manager',$d));$u=$this->user();$h=$this->token($u);
+        $d=$this->destination();$mh=$this->token($this->user('destination_manager',$d));$tenant=$this->user('tenant',$d);$u=$this->user();$h=$this->token($u);
         $p=$this->postJson('/api/manager/explore-points',$this->pointData(),$mh)->assertCreated()->json('data');
         UserActivity::create(['user_id'=>$u->id,'destination_id'=>$d->id,'type'=>'explore_point_discovered','reference_id'=>$p['id'],'title'=>'Legacy visit','points_earned'=>30]);
         $this->postJson('/api/scan/'.$d->code.'/journey',[],$h)->assertOk();
         $this->postJson('/api/scan/explore/'.$p['secureToken'],[],$h)->assertOk()->assertJsonPath('data.awardResult.pointsAwarded',0);
-        $reward=['name'=>'Test','description'=>'Test','partner'=>'Test','quota'=>1,'pointsRequired'=>20,'validUntil'=>today()->addDay()->toDateString(),'status'=>'active'];
+        $reward=['name'=>'Test','description'=>'Test','partner'=>'Test','tenantUserId'=>$tenant->id,'quota'=>1,'pointsRequired'=>20,'validUntil'=>today()->addDay()->toDateString(),'status'=>'active'];
         $rw=$this->postJson('/api/manager/rewards',$reward,$mh)->assertCreated()->json('data');
         $this->postJson('/api/rewards/'.$rw['id'].'/redeem',['requestId'=>(string)Str::uuid()],$h)->assertUnprocessable();
         foreach([['status'=>'inactive'],['validUntil'=>today()->subDay()->toDateString()],['validFrom'=>today()->addDay()->toDateString(),'validUntil'=>today()->addDays(2)->toDateString()]] as $change) {

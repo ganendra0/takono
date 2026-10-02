@@ -16,7 +16,7 @@ export function AuthPage({ onNavigate, returnTo = '/app' }: { onNavigate: (path:
   const [destination, setDestination] = useState<Destination | null>(null);
   useEffect(() => { ApiClient.getDestinations().then(result => { if (result.success) setDestination(result.data?.[0] || null); }); }, []);
   const finish = (role?: string) => {
-    const roleHome = ({ destination_manager: '/manager', government: '/government', super_admin: '/admin' } as Record<string, string>)[role || ''];
+    const roleHome = ({ destination_manager: '/manager', tenant: '/tenant', government: '/government', super_admin: '/admin' } as Record<string, string>)[role || ''];
     onNavigate(roleHome || returnTo);
   };
   return <main className="min-h-screen bg-white font-sans">

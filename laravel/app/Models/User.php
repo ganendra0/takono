@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(UserDestinationJourney::class);
     }
+
+    public function tenantRewards()
+    {
+        return $this->hasMany(Reward::class, 'tenant_user_id');
+    }
 }

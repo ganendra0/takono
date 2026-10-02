@@ -5,7 +5,7 @@ import {parseTakonoQR} from '../lib/qr';
 import {ExplorePoint} from '../types';
 import {useAuth} from '../context/AuthContext';
 
-export function ScanModal({isOpen,onClose,onNavigate,autoStartCamera=false}:{isOpen:boolean;onClose:()=>void;onNavigate:(p:string)=>void;preselectedPoint?:ExplorePoint|null;autoStartCamera?:boolean}) {
+export function ScanModal({isOpen,onClose,onNavigate,autoStartCamera=false,mode='traveler',onVoucherScanned}:{isOpen:boolean;onClose:()=>void;onNavigate:(p:string)=>void;preselectedPoint?:ExplorePoint|null;autoStartCamera?:boolean;mode?:'traveler'|'voucher';onVoucherScanned?:(code:string)=>void}) {
  const {user,refreshUserData}=useAuth();
  const [code,setCode]=useState(''),[message,setMessage]=useState(''),[busy,setBusy]=useState(false),[camera,setCamera]=useState(false);
  const video=useRef<HTMLVideoElement>(null),stream=useRef<MediaStream|null>(null),timer=useRef<number|undefined>(undefined),locked=useRef(false),generation=useRef(0);
@@ -17,6 +17,10 @@ export function ScanModal({isOpen,onClose,onNavigate,autoStartCamera=false}:{isO
  try{
    const parsed=parseTakonoQR(raw);setCode(parsed.code);
    if(!user){onClose();onNavigate('/login');return;}
+   if(mode==='voucher'){
+    if(!['voucher','unknown'].includes(parsed.kind)) throw new Error('Pindai QR voucher TAKONO yang ditunjukkan traveler.');
+    onClose();onVoucherScanned?.(parsed.code);return;
+   }
    if(parsed.kind==='event'){
     const result=await ApiClient.scanEventToken(parsed.code);if(!result.success||!result.data)throw new Error(result.message||'QR Event tidak valid.');
     const destination=result.data.destination;ApiClient.selectDestination(destination.id,destination.slug);await refreshUserData();onClose();onNavigate(`/app/destination/${destination.slug}/events`);return;
@@ -46,8 +50,8 @@ export function ScanModal({isOpen,onClose,onNavigate,autoStartCamera=false}:{isO
  }
  if(!isOpen)return null;
  return <div className="fixed inset-0 z-[1000] bg-slate-950/60 backdrop-blur-sm p-3 sm:p-6 flex items-center justify-center" onClick={e=>{if(e.target===e.currentTarget)onClose();}}><section role="dialog" aria-modal="true" aria-label="Scan QR TAKONO" className="bg-white rounded-3xl p-5 sm:p-7 max-w-md w-full max-h-[90dvh] overflow-y-auto space-y-5 shadow-2xl">
- <div className="flex justify-between items-center"><div><p className="text-xs text-blue-600 font-semibold mb-1">MULAI JELAJAH</p><h2 className="text-xl font-bold text-slate-900">Scan QR TAKONO</h2></div><button autoFocus className="p-3 rounded-full bg-slate-100" aria-label="Tutup" onClick={onClose}><X size={18}/></button></div>
- <div className="rounded-2xl bg-blue-50 border border-blue-100 p-5 text-center">{camera?<video ref={video} muted playsInline className="w-full rounded-xl aspect-square object-cover"/>:<><QrCode className="mx-auto text-blue-600 mb-3" size={56}/><p className="text-sm text-slate-600">Pindai QR destinasi atau Explore Point untuk membuka informasi dan mulai menjelajah.</p></>}</div>
+ <div className="flex justify-between items-center"><div><p className="text-xs text-blue-600 font-semibold mb-1">{mode==='voucher'?'VALIDASI VOUCHER':'MULAI JELAJAH'}</p><h2 className="text-xl font-bold text-slate-900">{mode==='voucher'?'Scan QR Voucher':'Scan QR TAKONO'}</h2></div><button autoFocus className="p-3 rounded-full bg-slate-100" aria-label="Tutup" onClick={onClose}><X size={18}/></button></div>
+ <div className="rounded-2xl bg-blue-50 border border-blue-100 p-5 text-center">{camera?<video ref={video} muted playsInline className="w-full rounded-xl aspect-square object-cover"/>:<><QrCode className="mx-auto text-blue-600 mb-3" size={56}/><p className="text-sm text-slate-600">{mode==='voucher'?'Pindai QR voucher dari ponsel traveler untuk memvalidasi penukaran.':'Pindai QR destinasi atau Explore Point untuk membuka informasi dan mulai menjelajah.'}</p></>}</div>
  <div className="grid grid-cols-1 gap-3"><button disabled={busy} onClick={camera?stop:start} className="flex items-center justify-center gap-2 p-3 bg-blue-600 text-white rounded-xl text-sm font-semibold disabled:opacity-50"><Camera size={18}/>{camera?'Tutup kamera':'Kamera'}</button></div>
  <form className="space-y-3" onSubmit={e=>{e.preventDefault();void open(code);}}><label className="block text-sm font-medium text-slate-700">Atau masukkan kode / link QR<input required value={code} onChange={e=>setCode(e.target.value)} placeholder="Tempel link atau kode TAKONO" className="mt-2 block w-full p-3 border border-slate-200 rounded-xl text-base"/></label>{message&&<p role="alert" className="rounded-xl bg-amber-50 p-3 text-amber-900 text-sm">{message}</p>}<button disabled={busy} className="w-full py-3 bg-slate-900 text-white rounded-xl font-semibold disabled:opacity-50">{busy?'Memeriksa…':'Buka QR'}</button></form></section></div>;
 }
