@@ -103,7 +103,7 @@ export function TravelerHome({ destinationSlug, onNavigate, onOpenScanModal }: {
           <div className="mb-4 flex items-end justify-between gap-4"><div><p className="text-xs font-semibold uppercase tracking-[0.14em] text-blue-700">Di sekitar destinasi</p><h2 className="mt-1 text-lg font-semibold tracking-tight text-slate-950">Agenda berikutnya</h2></div><button onClick={() => onNavigate('/app/events')} className="shrink-0 text-sm font-semibold text-blue-700 hover:text-blue-800">Lihat semua</button></div>
           <div className="traveler-card divide-y divide-slate-100 overflow-hidden rounded-[2rem]">
             {events.length ? events.slice(0, 2).map(event => <button key={event.id} onClick={() => onNavigate('/app/events')} className="flex w-full items-center gap-4 p-4 text-left transition-colors hover:bg-slate-50 sm:p-5">
-              <img src={event.image} alt="" className="h-16 w-20 shrink-0 rounded-xl object-cover" />
+              <img src={event.image} alt="" width={80} height={64} loading="lazy" decoding="async" className="h-16 w-20 shrink-0 rounded-xl object-cover" />
               <span className="min-w-0 flex-1"><strong className="block truncate text-xs">{event.title}</strong><span className="mt-1 block text-[10px] text-slate-500">{event.startDate} · {event.time}</span></span><ArrowRight size={14} className="text-slate-400" />
             </button>) : <p className="p-4 text-xs text-slate-500">Belum ada event.</p>}
           </div>

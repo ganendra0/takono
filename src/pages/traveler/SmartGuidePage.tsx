@@ -23,6 +23,8 @@ import {
   QrCode
 } from 'lucide-react';
 import L from 'leaflet';
+// Preserve the original cascade: shared map styles preceded Leaflet's stylesheet.
+import './SmartGuidePage.css';
 import 'leaflet/dist/leaflet.css';
 const escapeHtml = (value: unknown) => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]!));
 

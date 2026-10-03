@@ -6,13 +6,11 @@ import { Destination, LocalDiscovery, ExplorePoint } from './types/index.js';
 
 // Top bars & Global UI
 import { Navbar } from './components/Navbar.js';
-import { Footer } from './components/Footer.js';
+// Keep navigation eager; public page content is not needed by traveler routes.
+const Footer = lazy(() => import('./components/Footer.js').then(m => ({ default: m.Footer })));
+const HomePage = lazy(() => import('./pages/public/HomePage.js').then(m => ({ default: m.HomePage })));
 
-// Public Pages
-import { HomePage } from './pages/public/HomePage.js';
-
-// Route modules are loaded only when that route is opened. Home, navigation,
-// and footer stay in the initial chunk to keep the public landing page fast.
+// Route modules are loaded only when that route is opened.
 const AuthPage = lazy(() => import('./pages/public/AuthPage.js').then(m => ({ default: m.AuthPage })));
 const ScanPointPage = lazy(() => import('./pages/traveler/ScanPointPage.js').then(m => ({ default: m.ScanPointPage })));
 const ScanModal = lazy(() => import('./components/ScanModal.js').then(m => ({ default: m.ScanModal })));
@@ -24,7 +22,8 @@ const DestinationDetailPage = lazy(() => import('./pages/public/DestinationDetai
 const DestinationWelcomeScanPage = lazy(() => import('./pages/public/DestinationWelcomeScanPage.js').then(m => ({ default: m.DestinationWelcomeScanPage })));
 const TravelerLayout = lazy(() => import('./pages/traveler/TravelerLayout.js').then(m => ({ default: m.TravelerLayout })));
 const TravelerHome = lazy(() => import('./pages/traveler/TravelerHome.js').then(m => ({ default: m.TravelerHome })));
-const PersonalHomePage = lazy(() => import('./pages/traveler/PersonalHomePage.js').then(m => ({ default: m.PersonalHomePage })));
+const loadPersonalHomePage = () => import('./pages/traveler/PersonalHomePage.js').then(m => ({ default: m.PersonalHomePage }));
+const PersonalHomePage = lazy(loadPersonalHomePage);
 const PointsPage = lazy(() => import('./pages/traveler/PointsPage.js').then(m => ({ default: m.PointsPage })));
 const DestinationExplorePage = lazy(() => import('./pages/traveler/DestinationExplorePage.js').then(m => ({ default: m.DestinationExplorePage })));
 const SmartGuidePage = lazy(() => import('./pages/traveler/SmartGuidePage.js').then(m => ({ default: m.SmartGuidePage })));
@@ -181,6 +180,11 @@ const AppContent: React.FC = () => {
       if (directPointScan) return <ScanPointPage mode={directPointScan[1] ? 'event' : 'point'} token={decodeURIComponent(directPointScan[2])} onNavigate={navigate}/>;
 
       if (!scopedDestinationSlug) {
+        // Start home alongside its layout, without remounting the shared navigation.
+        if (!['/app/album', '/app/points', '/app/profile'].includes(currentPath)) {
+          // React.lazy retains the existing error handling if this preload fails.
+          void loadPersonalHomePage().catch(() => {});
+        }
         let personalView: React.ReactNode = <PersonalHomePage onNavigate={navigate} onOpenScanModal={() => handleOpenScan(undefined, true)} />;
         if (currentPath === '/app/album') personalView = <AlbumJelajahPage onNavigate={navigate} />;
         else if (currentPath === '/app/points') personalView = <PointsPage />;
