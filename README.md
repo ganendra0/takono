@@ -8,6 +8,8 @@ Untuk memahami arsitektur, semua peran, alur QR dan perjalanan traveler, data, k
 
 Untuk men-deploy ke VPS dengan Nginx, MySQL, HTTPS, backup, dan checklist go-live, baca [Panduan Deployment VPS](docs/DEPLOYMENT_VPS.md).
 
+Hasil baseline API lokal dan cara menjalankan ulang load test Locust tersedia di [Baseline Performa Lokal](docs/PERFORMANCE_BASELINE_LOCAL.md).
+
 ## Kebutuhan lokal
 
 - Node.js dan npm

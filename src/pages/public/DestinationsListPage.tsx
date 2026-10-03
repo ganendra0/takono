@@ -68,6 +68,7 @@ export const DestinationsListPage: React.FC<DestinationsListPageProps> = ({ dest
                     alt={dest.name}
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-md rounded-md text-[10px] font-medium text-white flex items-center gap-1">
                     <MapPin className="w-3 h-3" />

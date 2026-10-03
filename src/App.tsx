@@ -5,40 +5,39 @@ import { scopedTravelerPath, travelerDestinationSlug } from './lib/travelerRoute
 import { Destination, LocalDiscovery, ExplorePoint } from './types/index.js';
 
 // Top bars & Global UI
-import { AuthPage } from './pages/public/AuthPage.js';
-import { ScanPointPage } from './pages/traveler/ScanPointPage.js';
 import { Navbar } from './components/Navbar.js';
 import { Footer } from './components/Footer.js';
-import { ScanModal } from './components/ScanModal.js';
-import { Workspace } from './components/Workspace.js';
 
 // Public Pages
 import { HomePage } from './pages/public/HomePage.js';
-import { AboutPage } from './pages/public/AboutPage.js';
-import { HowItWorksPage } from './pages/public/HowItWorksPage.js';
-import { DestinationsListPage } from './pages/public/DestinationsListPage.js';
-import { DestinationDetailPage } from './pages/public/DestinationDetailPage.js';
-import { DestinationWelcomeScanPage } from './pages/public/DestinationWelcomeScanPage.js';
 
-// Traveler Pages
-import { TravelerLayout } from './pages/traveler/TravelerLayout.js';
-import { TravelerHome } from './pages/traveler/TravelerHome.js';
-import { PersonalHomePage } from './pages/traveler/PersonalHomePage.js';
-import { PointsPage } from './pages/traveler/PointsPage.js';
-import { DestinationExplorePage } from './pages/traveler/DestinationExplorePage.js';
-const SmartGuidePage = lazy(() => import('./pages/traveler/SmartGuidePage.js').then(m=>({default:m.SmartGuidePage})));
-import { ExplorePointDetailPage } from './pages/traveler/ExplorePointDetailPage.js';
-import { EventsPage } from './pages/traveler/EventsPage.js';
-import { RewardsCatalogPage } from './pages/traveler/RewardsCatalogPage.js';
-import { LocalDiscoveryPage } from './pages/traveler/LocalDiscoveryPage.js';
-import { AlbumJelajahPage } from './pages/traveler/AlbumJelajahPage.js';
-import { ProfilePage } from './pages/traveler/ProfilePage.js';
-
-// Manager, Government, Admin Pages
-import { ManagerDashboard } from './pages/manager/ManagerDashboard.js';
-import { GovernmentDashboard } from './pages/government/GovernmentDashboard.js';
-import { AdminDashboard } from './pages/admin/AdminDashboard.js';
-import { TenantDashboard } from './pages/tenant/TenantDashboard.js';
+// Route modules are loaded only when that route is opened. Home, navigation,
+// and footer stay in the initial chunk to keep the public landing page fast.
+const AuthPage = lazy(() => import('./pages/public/AuthPage.js').then(m => ({ default: m.AuthPage })));
+const ScanPointPage = lazy(() => import('./pages/traveler/ScanPointPage.js').then(m => ({ default: m.ScanPointPage })));
+const ScanModal = lazy(() => import('./components/ScanModal.js').then(m => ({ default: m.ScanModal })));
+const Workspace = lazy(() => import('./components/Workspace.js').then(m => ({ default: m.Workspace })));
+const AboutPage = lazy(() => import('./pages/public/AboutPage.js').then(m => ({ default: m.AboutPage })));
+const HowItWorksPage = lazy(() => import('./pages/public/HowItWorksPage.js').then(m => ({ default: m.HowItWorksPage })));
+const DestinationsListPage = lazy(() => import('./pages/public/DestinationsListPage.js').then(m => ({ default: m.DestinationsListPage })));
+const DestinationDetailPage = lazy(() => import('./pages/public/DestinationDetailPage.js').then(m => ({ default: m.DestinationDetailPage })));
+const DestinationWelcomeScanPage = lazy(() => import('./pages/public/DestinationWelcomeScanPage.js').then(m => ({ default: m.DestinationWelcomeScanPage })));
+const TravelerLayout = lazy(() => import('./pages/traveler/TravelerLayout.js').then(m => ({ default: m.TravelerLayout })));
+const TravelerHome = lazy(() => import('./pages/traveler/TravelerHome.js').then(m => ({ default: m.TravelerHome })));
+const PersonalHomePage = lazy(() => import('./pages/traveler/PersonalHomePage.js').then(m => ({ default: m.PersonalHomePage })));
+const PointsPage = lazy(() => import('./pages/traveler/PointsPage.js').then(m => ({ default: m.PointsPage })));
+const DestinationExplorePage = lazy(() => import('./pages/traveler/DestinationExplorePage.js').then(m => ({ default: m.DestinationExplorePage })));
+const SmartGuidePage = lazy(() => import('./pages/traveler/SmartGuidePage.js').then(m => ({ default: m.SmartGuidePage })));
+const ExplorePointDetailPage = lazy(() => import('./pages/traveler/ExplorePointDetailPage.js').then(m => ({ default: m.ExplorePointDetailPage })));
+const EventsPage = lazy(() => import('./pages/traveler/EventsPage.js').then(m => ({ default: m.EventsPage })));
+const RewardsCatalogPage = lazy(() => import('./pages/traveler/RewardsCatalogPage.js').then(m => ({ default: m.RewardsCatalogPage })));
+const LocalDiscoveryPage = lazy(() => import('./pages/traveler/LocalDiscoveryPage.js').then(m => ({ default: m.LocalDiscoveryPage })));
+const AlbumJelajahPage = lazy(() => import('./pages/traveler/AlbumJelajahPage.js').then(m => ({ default: m.AlbumJelajahPage })));
+const ProfilePage = lazy(() => import('./pages/traveler/ProfilePage.js').then(m => ({ default: m.ProfilePage })));
+const ManagerDashboard = lazy(() => import('./pages/manager/ManagerDashboard.js').then(m => ({ default: m.ManagerDashboard })));
+const GovernmentDashboard = lazy(() => import('./pages/government/GovernmentDashboard.js').then(m => ({ default: m.GovernmentDashboard })));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard.js').then(m => ({ default: m.AdminDashboard })));
+const TenantDashboard = lazy(() => import('./pages/tenant/TenantDashboard.js').then(m => ({ default: m.TenantDashboard })));
 
 const AppContent: React.FC = () => {
   const { role, user, isLoading } = useAuth();
@@ -78,16 +77,26 @@ const AppContent: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
-  // Load the active destination catalog.
+  // Load only the destination data required by the active route. This avoids
+  // an unnecessary catalog + detail chain on the public landing page.
   useEffect(() => {
-    const fetchGlobalData = async () => {
-      const listRes = await ApiClient.getDestinations();
-      if (listRes.success && listRes.data) {
-        setDestinations(listRes.data);
+    const publicSlug = currentPath.startsWith('/destinations/') ? currentPath.slice('/destinations/'.length) : undefined;
+    const slug = publicSlug || travelerDestinationSlug(currentPath);
+    const needsCatalog = currentPath === '/destinations';
+
+    if (!needsCatalog && !slug) {
+      setDestinationDetails(null);
+      setDestinationError('');
+      return;
+    }
+
+    const loadDestinationData = async () => {
+      if (needsCatalog) {
+        const listRes = await ApiClient.getDestinations();
+        if (listRes.success && listRes.data) setDestinations(listRes.data);
       }
 
-      const publicSlug = currentPath.startsWith('/destinations/') ? currentPath.slice('/destinations/'.length) : undefined;
-      const slug = publicSlug || travelerDestinationSlug(currentPath) || undefined;
+      if (!slug) return;
       setDestinationDetails(null);
       const detailRes = await ApiClient.getDestinationBySlug(slug);
       if (detailRes.success && detailRes.data) {
@@ -99,7 +108,7 @@ const AppContent: React.FC = () => {
       }
     };
 
-    fetchGlobalData();
+    loadDestinationData();
   }, [currentPath, user?.id]);
 
   useEffect(() => {
@@ -283,15 +292,15 @@ const AppContent: React.FC = () => {
       </div>
 
       {/* Global QR Code Scan Modal */}
-      <ScanModal
-        isOpen={isScanModalOpen}
-        onClose={() => { setIsScanModalOpen(false); setScanMode('traveler'); }}
-        onNavigate={navigate}
-        preselectedPoint={preselectedScanPoint}
-        autoStartCamera={autoStartScanCamera}
-        mode={scanMode}
-        onVoucherScanned={code => setTenantVoucherCode(code)}
-      />
+      {isScanModalOpen && <Suspense fallback={null}><ScanModal
+          isOpen={isScanModalOpen}
+          onClose={() => { setIsScanModalOpen(false); setScanMode('traveler'); }}
+          onNavigate={navigate}
+          preselectedPoint={preselectedScanPoint}
+          autoStartCamera={autoStartScanCamera}
+          mode={scanMode}
+          onVoucherScanned={code => setTenantVoucherCode(code)}
+        /></Suspense>}
     </div>
   );
 };

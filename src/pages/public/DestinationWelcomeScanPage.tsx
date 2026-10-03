@@ -90,6 +90,9 @@ export const DestinationWelcomeScanPage: React.FC<DestinationWelcomeScanPageProp
         src={destination.heroImage}
         alt={destination.name}
         className="absolute inset-0 h-full w-full object-cover opacity-50"
+        loading="eager"
+        fetchPriority="high"
+        decoding="async"
       />
       <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-r from-[#071326]/95 via-[#071326]/75 to-[#071326]/45" />
       <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-[#071326]/80 via-transparent to-[#071326]/30" />

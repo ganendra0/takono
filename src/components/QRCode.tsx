@@ -20,7 +20,7 @@ async function createBrandedQR(value: string) {
     margin: 3,
     errorCorrectionLevel: 'H',
   });
-  const [qr, logo] = await Promise.all([loadImage(raw), loadImage('/brand/takono.png')]);
+  const [qr, logo] = await Promise.all([loadImage(raw), loadImage('/brand/takono.webp')]);
   const canvas = document.createElement('canvas');
   canvas.width = QR_SIZE;
   canvas.height = QR_SIZE;

@@ -67,7 +67,7 @@ export function TravelerHome({ destinationSlug, onNavigate, onOpenScanModal }: {
 
   return <div className="traveler-home space-y-7 pb-10">
     <section className="home-hero relative min-h-[340px] overflow-hidden rounded-[2rem] bg-slate-900 sm:min-h-[380px] lg:min-h-[420px]">
-      <img src={destination?.heroImage} alt={destination?.name} className="absolute inset-0 h-full w-full object-cover" />
+      <img src={destination?.heroImage} alt={destination?.name} className="absolute inset-0 h-full w-full object-cover" loading="eager" fetchPriority="high" decoding="async" />
       <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-slate-950/25 to-transparent" />
       <div className="absolute inset-0 bg-gradient-to-t from-slate-950/65 via-transparent to-transparent" />
       <div className="relative flex min-h-[340px] flex-col justify-end p-6 text-white sm:min-h-[380px] sm:p-9 lg:min-h-[420px] lg:p-12">

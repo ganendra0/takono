@@ -26,7 +26,7 @@ export function AuthPage({ onNavigate, returnTo = '/app' }: { onNavigate: (path:
     </div>
     <div className="mx-auto grid max-w-6xl gap-12 px-5 pb-12 pt-5 sm:px-8 lg:grid-cols-2 lg:items-center lg:gap-20 lg:py-10">
       <aside className="relative hidden min-h-[650px] overflow-hidden rounded-2xl bg-[#102542] lg:flex lg:flex-col lg:justify-end">
-        {destination?.heroImage && <img src={destination.heroImage} alt={destination.name} className="absolute inset-0 h-full w-full object-cover" />}
+        {destination?.heroImage && <img src={destination.heroImage} alt={destination.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" decoding="async" />}
         <div className="absolute inset-0 bg-gradient-to-t from-[#102542] via-[#102542]/30 to-transparent" />
         <div className="relative p-10 text-white"><Compass size={30} strokeWidth={1.5} /><h2 className="mt-6 text-4xl font-medium leading-tight tracking-tight">Tempat baru.<br />Cerita berikutnya.</h2><p className="mt-5 max-w-sm text-sm leading-7 text-slate-200">Simpan jejak perjalanan, temukan cerita di setiap titik, dan nikmati pengalaman lokal bersama TAKONO.</p>{destination && <p className="mt-8 flex items-center gap-2 border-t border-white/20 pt-5 text-xs text-white/80"><MapPin size={15} />{destination.name} · {destination.city}</p>}</div>
       </aside>

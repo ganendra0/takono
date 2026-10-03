@@ -62,6 +62,9 @@ export const DestinationDetailPage: React.FC<DestinationDetailPageProps> = ({
             src={destination.heroImage}
             alt={destination.name}
             className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-overlay"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/60 to-transparent"></div>
 

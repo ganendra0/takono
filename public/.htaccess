@@ -1,0 +1,22 @@
+# React/Vite SPA and cache policy for the frontend document root.
+# Requires Apache mod_rewrite and mod_headers (both are normally enabled by Webuzo).
+
+<IfModule mod_headers.c>
+  # Vite names every file in /assets with a content hash. It is safe to cache
+  # those URLs for a long time because a changed file receives a new filename.
+  <FilesMatch "\.(?:css|js|mjs|woff2?|svg|png|jpe?g|gif|webp|avif)$">
+    Header set Cache-Control "public, max-age=31536000, immutable" "expr=%{REQUEST_URI} =~ m#^/assets/#"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # Preserve real files (including /assets) and return index.html only for
+  # client-side SPA routes.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  RewriteRule ^ index.html [L]
+</IfModule>

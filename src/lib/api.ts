@@ -15,15 +15,23 @@ import {
 // All requests target Laravel, directly or through Vite's development proxy.
 // Development always uses Vite's same-origin proxy, including access over LAN.
 const API_BASE = (import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || '')).replace(/\/+$/, '') + '/api';
-const bundledImages = import.meta.glob('/src/assets/images/*', { eager: true, query: '?url', import: 'default' }) as Record<string,string>;
+const bundledImages = import.meta.glob('/src/assets/images/*.webp', { eager: true, query: '?url', import: 'default' }) as Record<string,string>;
 function resolveImages(value: any): any {
-  if (typeof value === 'string') return bundledImages[value] || value;
+  if (typeof value === 'string') {
+    // Existing destination data stores the original JPG path. Prefer the WebP
+    // build asset without requiring a database or API contract change.
+    const optimizedPath = value.replace(/\.(?:jpe?g|png)(?=($|[?#]))/i, '.webp');
+    return bundledImages[value] || bundledImages[optimizedPath] || value;
+  }
   if (Array.isArray(value)) return value.map(resolveImages);
   if (value && typeof value === 'object') return Object.fromEntries(Object.entries(value).map(([key,v])=>[key,resolveImages(v)]));
   return value;
 }
 
 export class ApiClient {
+  private static destinationsCache?: { value: { success: boolean; data?: Destination[]; message?: string }; expiresAt: number };
+  private static destinationsRequest?: Promise<{ success: boolean; data?: Destination[]; message?: string }>;
+
   private static getToken(): string | null {
     return localStorage.getItem('takono_token');
   }
@@ -129,7 +137,18 @@ export class ApiClient {
 
   // --- Destinations ---
   static async getDestinations() {
-    return this.request<Destination[]>('/destinations');
+    const now = Date.now();
+    if (this.destinationsCache && this.destinationsCache.expiresAt > now) return this.destinationsCache.value;
+    if (this.destinationsRequest) return this.destinationsRequest;
+
+    this.destinationsRequest = this.request<Destination[]>('/destinations')
+      .then(result => {
+        if (result.success) this.destinationsCache = { value: result, expiresAt: Date.now() + 60_000 };
+        return result;
+      })
+      .finally(() => { this.destinationsRequest = undefined; });
+
+    return this.destinationsRequest;
   }
 
   static async getDestinationBySlug(slug?: string) {

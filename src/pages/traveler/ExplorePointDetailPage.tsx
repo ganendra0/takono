@@ -161,6 +161,9 @@ export const ExplorePointDetailPage: React.FC<ExplorePointDetailPageProps> = ({ 
           src={point.image}
           alt={point.name}
           className="w-full h-64 sm:h-80 object-cover"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
 

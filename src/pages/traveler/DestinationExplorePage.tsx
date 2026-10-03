@@ -44,7 +44,7 @@ export const DestinationExplorePage: React.FC<{ onOpenScanModal: () => void }> =
           {points.map((point, index) => (
             <article key={point.id} className="group min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white transition-colors hover:border-slate-300">
               <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
-                <img src={point.image} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                <img src={point.image} alt="" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]" loading="lazy" decoding="async" />
                 <span className="absolute left-4 top-4 inline-flex h-8 min-w-8 items-center justify-center rounded-lg border border-white/70 bg-white/95 px-2 text-xs font-semibold text-slate-800 shadow-sm">
                   {String(index + 1).padStart(2, '0')}
                 </span>
